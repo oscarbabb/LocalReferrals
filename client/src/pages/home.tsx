@@ -46,12 +46,12 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-white py-12 md:py-20">
+      <section className="bg-gradient-to-br from-white via-orange-50 to-blue-50 py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Encuentra Servicios <br className="hidden sm:block" />
-              <span className="text-primary">de Confianza</span> en tu Comunidad
+              <span className="text-primary">de Confianza</span> <span className="text-accent">en tu Comunidad</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Conecta con vecinos que ofrecen servicios verificados. Desde limpieza hasta tutorías, 
@@ -59,7 +59,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/services">
-                <Button size="lg" className="bg-primary text-white hover:bg-blue-700 px-8 py-4 text-lg w-full sm:w-auto">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary px-8 py-4 text-lg w-full sm:w-auto shadow-lg">
                   Explorar Servicios
                 </Button>
               </Link>
@@ -67,7 +67,7 @@ export default function Home() {
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg w-full sm:w-auto"
+                  className="border-2 border-accent text-accent hover:bg-accent hover:text-white px-8 py-4 text-lg w-full sm:w-auto shadow-lg"
                 >
                   Ofrecer Servicios
                 </Button>
@@ -78,7 +78,7 @@ export default function Home() {
       </section>
 
       {/* Service Categories */}
-      <section id="servicios" className="py-16 bg-gray-50">
+      <section id="servicios" className="py-16 bg-gradient-to-b from-gray-50 to-orange-50 pattern-dots">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Categorías de Servicios</h2>
@@ -112,7 +112,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 text-lg"
+                className="border-2 border-accent text-accent hover:bg-gradient-to-r hover:from-accent hover:to-orange-500 hover:text-white px-8 py-3 text-lg shadow-md"
               >
                 Ver Todos los Proveedores
               </Button>
@@ -122,7 +122,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="como-funciona" className="py-16 bg-gray-50">
+      <section id="como-funciona" className="py-16 bg-gradient-to-b from-orange-50 to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">¿Cómo Funciona?</h2>
@@ -131,7 +131,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-primary to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-3xl font-bold text-white">1</span>
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">Busca y Filtra</h3>
@@ -139,7 +139,7 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-accent to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-3xl font-bold text-white">2</span>
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">Conecta Directamente</h3>
@@ -147,7 +147,7 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-3xl font-bold text-white">3</span>
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">Califica y Recomienda</h3>
@@ -158,7 +158,7 @@ export default function Home() {
       </section>
 
       {/* Trust Indicators */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white pattern-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Confianza y Seguridad</h2>
@@ -167,7 +167,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-blue-50 border-2 border-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Proveedores Verificados</h3>
@@ -175,24 +175,24 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-8 h-8 text-secondary" />
+              <div className="w-16 h-16 bg-orange-50 border-2 border-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-8 h-8 text-accent" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Sistema de Reseñas</h3>
               <p className="text-gray-600">Calificaciones y comentarios reales de vecinos como tú</p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Handshake className="w-8 h-8 text-accent" />
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Handshake className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Comunidad Local</h3>
               <p className="text-gray-600">Solo servicios dentro de tu edificio o complejo residencial</p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserCheck className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Perfiles Completos</h3>
               <p className="text-gray-600">Información detallada, experiencia y referencias de cada proveedor</p>
@@ -202,7 +202,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonios" className="py-16 bg-gray-50">
+      <section id="testimonios" className="py-16 bg-gradient-to-b from-gray-50 to-orange-50 pattern-dots">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Lo Que Dicen Nuestros Usuarios</h2>
@@ -218,7 +218,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary">
+      <section className="py-16 bg-gradient-to-r from-primary via-blue-600 to-accent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             ¿Listo para Conectar con tu Comunidad?
@@ -228,7 +228,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/auth">
-              <Button size="lg" className="bg-white text-primary hover:bg-gray-100 px-8 py-4 text-lg w-full sm:w-auto">
+              <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-lg px-8 py-4 text-lg w-full sm:w-auto">
                 Comenzar Ahora
               </Button>
             </Link>
@@ -236,7 +236,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 text-lg w-full sm:w-auto"
+                className="border-2 border-white text-white hover:bg-white hover:text-primary shadow-lg px-8 py-4 text-lg w-full sm:w-auto"
               >
                 Saber Más
               </Button>
@@ -250,8 +250,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <img src="/logo.png" alt="Referencias Locales" className="w-8 h-8" />
+              <div className="flex items-center space-x-3 mb-4">
+                <img src="/logo.png" alt="Referencias Locales" className="w-10 h-10" />
                 <span className="text-xl font-bold">Referencias Locales</span>
               </div>
               <p className="text-gray-300 mb-4">
