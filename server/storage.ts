@@ -10,9 +10,17 @@ import {
   type ServiceRequest, 
   type InsertServiceRequest, 
   type Message, 
-  type InsertMessage 
+  type InsertMessage,
+  users,
+  serviceCategories,
+  providers,
+  reviews,
+  serviceRequests,
+  messages
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -287,4 +295,189 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  constructor() {
+    this.seedDatabase();
+  }
+
+  private async seedDatabase() {
+    try {
+      // Check if data already exists
+      const existingCategories = await db.select().from(serviceCategories);
+      if (existingCategories.length > 0) {
+        return; // Data already seeded
+      }
+
+      // Seed service categories
+      const sampleCategories = [
+        { name: "Limpieza", description: "Servicios de limpieza para el hogar", icon: "🧹", color: "#3B82F6" },
+        { name: "Reparaciones", description: "Plomería, electricidad y reparaciones generales", icon: "🔧", color: "#10B981" },
+        { name: "Tutorías", description: "Clases particulares y apoyo académico", icon: "📚", color: "#F59E0B" },
+        { name: "Cuidado de Mascotas", description: "Paseo, cuidado y servicios veterinarios", icon: "🐕", color: "#EF4444" },
+        { name: "Jardinería", description: "Mantenimiento de plantas y jardines", icon: "🌱", color: "#22C55E" },
+        { name: "Cocina", description: "Servicios de cocina y catering", icon: "👨‍🍳", color: "#8B5CF6" },
+      ];
+
+      await db.insert(serviceCategories).values(sampleCategories);
+      console.log('Database seeded successfully');
+    } catch (error) {
+      console.error('Error seeding database:', error);
+    }
+  }
+
+  // Users
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userUpdate: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(userUpdate)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  // Service Categories
+  async getServiceCategories(): Promise<ServiceCategory[]> {
+    return await db.select().from(serviceCategories);
+  }
+
+  async getServiceCategory(id: string): Promise<ServiceCategory | undefined> {
+    const [category] = await db.select().from(serviceCategories).where(eq(serviceCategories.id, id));
+    return category || undefined;
+  }
+
+  async createServiceCategory(insertCategory: InsertServiceCategory): Promise<ServiceCategory> {
+    const [category] = await db
+      .insert(serviceCategories)
+      .values(insertCategory)
+      .returning();
+    return category;
+  }
+
+  // Providers
+  async getProviders(): Promise<Provider[]> {
+    return await db.select().from(providers).where(eq(providers.isActive, true));
+  }
+
+  async getProvidersByCategory(categoryId: string): Promise<Provider[]> {
+    return await db.select().from(providers)
+      .where(and(eq(providers.categoryId, categoryId), eq(providers.isActive, true)));
+  }
+
+  async getProvider(id: string): Promise<Provider | undefined> {
+    const [provider] = await db.select().from(providers).where(eq(providers.id, id));
+    return provider || undefined;
+  }
+
+  async getProviderByUserId(userId: string): Promise<Provider | undefined> {
+    const [provider] = await db.select().from(providers).where(eq(providers.userId, userId));
+    return provider || undefined;
+  }
+
+  async createProvider(insertProvider: InsertProvider): Promise<Provider> {
+    const [provider] = await db
+      .insert(providers)
+      .values(insertProvider)
+      .returning();
+    return provider;
+  }
+
+  async updateProvider(id: string, providerUpdate: Partial<Provider>): Promise<Provider | undefined> {
+    const [provider] = await db
+      .update(providers)
+      .set(providerUpdate)
+      .where(eq(providers.id, id))
+      .returning();
+    return provider || undefined;
+  }
+
+  // Reviews
+  async getReviewsByProvider(providerId: string): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.providerId, providerId));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values(insertReview)
+      .returning();
+    return review;
+  }
+
+  // Service Requests
+  async getServiceRequests(): Promise<ServiceRequest[]> {
+    return await db.select().from(serviceRequests);
+  }
+
+  async getServiceRequestsByUser(userId: string): Promise<ServiceRequest[]> {
+    return await db.select().from(serviceRequests).where(eq(serviceRequests.requesterId, userId));
+  }
+
+  async getServiceRequestsByProvider(providerId: string): Promise<ServiceRequest[]> {
+    return await db.select().from(serviceRequests).where(eq(serviceRequests.providerId, providerId));
+  }
+
+  async createServiceRequest(insertRequest: InsertServiceRequest): Promise<ServiceRequest> {
+    const [request] = await db
+      .insert(serviceRequests)
+      .values(insertRequest)
+      .returning();
+    return request;
+  }
+
+  async updateServiceRequest(id: string, requestUpdate: Partial<ServiceRequest>): Promise<ServiceRequest | undefined> {
+    const [request] = await db
+      .update(serviceRequests)
+      .set(requestUpdate)
+      .where(eq(serviceRequests.id, id))
+      .returning();
+    return request || undefined;
+  }
+
+  // Messages
+  async getMessagesByRequest(requestId: string): Promise<Message[]> {
+    return await db.select().from(messages).where(eq(messages.requestId, requestId));
+  }
+
+  async getConversation(userId1: string, userId2: string): Promise<Message[]> {
+    return await db.select().from(messages)
+      .where(
+        and(
+          eq(messages.senderId, userId1),
+          eq(messages.receiverId, userId2)
+        )
+      );
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
+    return message;
+  }
+}
+
+export const storage = new DatabaseStorage();

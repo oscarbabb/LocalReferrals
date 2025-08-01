@@ -2,6 +2,12 @@
 
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
+**Recent Changes (January 2025):**
+- Integrated PostgreSQL database using Neon Database with Drizzle ORM
+- Replaced in-memory storage with persistent database storage
+- Added automatic database seeding for service categories
+- Enhanced visual design with larger logo and more orange branding accents
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -22,9 +28,11 @@ Preferred communication style: Simple, everyday language.
 - **Development Setup**: Hot reloading with Vite integration and custom middleware for request logging
 
 ## Data Storage
-- **Primary Database**: PostgreSQL accessed through Neon Database serverless driver
+- **Primary Database**: PostgreSQL accessed through Neon Database serverless driver with WebSocket support
+- **ORM**: Drizzle ORM with type-safe database operations and automatic schema synchronization
 - **Schema Design**: Relational model with tables for users, service categories, providers, reviews, service requests, and messages
 - **Type Safety**: Database schema definitions shared between frontend and backend using Drizzle Zod integration
+- **Data Management**: DatabaseStorage class implementing all CRUD operations with automatic seeding
 
 ## Authentication & Authorization
 - **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
