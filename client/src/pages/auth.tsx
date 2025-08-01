@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Mail, Lock, User, Phone, Building } from "lucide-react";
+import { Mail, Lock, User, Phone, Building } from "lucide-react";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,9 +38,7 @@ export default function Auth() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="w-6 h-6 text-white" />
-            </div>
+            <img src="/logo.png" alt="Referencias Locales" className="w-10 h-10" />
             <span className="text-2xl font-bold text-gray-900">Referencias Locales</span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900">

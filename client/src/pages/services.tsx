@@ -30,7 +30,7 @@ export default function Services() {
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          category.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || category.id === selectedCategory;
+    const matchesCategory = !selectedCategory || selectedCategory === "all" || category.id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -85,7 +85,7 @@ export default function Services() {
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas las categorías</SelectItem>
+                <SelectItem value="all">Todas las categorías</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}

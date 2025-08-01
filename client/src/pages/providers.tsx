@@ -35,7 +35,7 @@ export default function Providers() {
         provider.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || provider.categoryId === selectedCategory;
+      const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
       return matchesSearch && matchesCategory;
     });
 
@@ -116,7 +116,7 @@ export default function Providers() {
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las categorías</SelectItem>
+                  <SelectItem value="all">Todas las categorías</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
