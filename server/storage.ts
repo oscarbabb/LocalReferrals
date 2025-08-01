@@ -123,85 +123,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    const userIds: string[] = [];
     sampleUsers.forEach(user => {
       const id = randomUUID();
       this.users.set(id, { id, ...user, avatar: null, createdAt: new Date() });
-      userIds.push(id);
-    });
-
-    // Create sample providers for each user
-    const categoryIds = Array.from(this.serviceCategories.keys());
-    const sampleProviders = [
-      {
-        userId: userIds[0],
-        categoryId: categoryIds[0], // Limpieza
-        title: "Servicio de Limpieza Profesional",
-        description: "Ofrezco servicios de limpieza profunda para apartamentos. Incluye cocina, baños, habitaciones y áreas comunes. Uso productos ecológicos y tengo 5 años de experiencia.",
-        hourlyRate: "25.00",
-        experience: "5 años de experiencia en limpieza residencial. Certificada en uso de productos de limpieza ecológicos.",
-      },
-      {
-        userId: userIds[1],
-        categoryId: categoryIds[1], // Reparaciones
-        title: "Reparaciones Eléctricas y Plomería",
-        description: "Electricista y plomero certificado. Reparo grifos, instalaciones eléctricas, y mantenimiento general del hogar. Disponible para emergencias.",
-        hourlyRate: "35.00",
-        experience: "8 años como técnico certificado. Especializado en sistemas residenciales.",
-      },
-      {
-        userId: userIds[2],
-        categoryId: categoryIds[2], // Tutorías
-        title: "Clases Particulares de Matemáticas",
-        description: "Profesora de matemáticas con experiencia en primaria y secundaria. Métodos didácticos personalizados para cada estudiante.",
-        hourlyRate: "20.00",
-        experience: "Licenciada en Educación Matemática con 3 años de experiencia en tutoría privada.",
-      },
-    ];
-
-    sampleProviders.forEach(provider => {
-      const id = randomUUID();
-      this.providers.set(id, { 
-        id, 
-        ...provider, 
-        isVerified: true, 
-        isActive: true, 
-        createdAt: new Date() 
-      });
-    });
-
-    // Add sample reviews
-    const providerIds = Array.from(this.providers.keys());
-    const sampleReviews = [
-      {
-        providerId: providerIds[0],
-        reviewerId: userIds[1],
-        rating: 5,
-        comment: "Excelente servicio! María es muy profesional y deja todo impecable. Muy recomendada.",
-      },
-      {
-        providerId: providerIds[0],
-        reviewerId: userIds[2],
-        rating: 5,
-        comment: "Súper confiable y puntual. El apartamento quedó perfecto.",
-      },
-      {
-        providerId: providerIds[1],
-        reviewerId: userIds[0],
-        rating: 5,
-        comment: "Carlos arregló mi grifo rápidamente y a buen precio. Muy profesional.",
-      },
-      {
-        providerId: providerIds[2],
-        reviewerId: userIds[0],
-        rating: 5,
-        comment: "Ana es una excelente tutora. Mi hija mejoró mucho en matemáticas gracias a ella.",
-      },
-    ];
-
-    sampleReviews.forEach(review => {
-      const id = randomUUID();
-      this.reviews.set(id, { id, ...review, createdAt: new Date() });
     });
   }
 
