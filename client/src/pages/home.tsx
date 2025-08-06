@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, MessageCircle, Handshake, UserCheck } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
+import logoPath from "@assets/Logo 2 test_1754014544538.png";
 
 export default function Home() {
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
@@ -49,6 +50,14 @@ export default function Home() {
       <section className="bg-gradient-to-br from-white via-orange-50 to-blue-50 py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            {/* Large Centered Logo */}
+            <div className="mb-8">
+              <img 
+                src={logoPath} 
+                alt="Referencias Locales Logo" 
+                className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 mx-auto object-contain drop-shadow-lg"
+              />
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Encuentra Servicios <br className="hidden sm:block" />
               <span className="text-primary">de Confianza</span> <span className="text-accent">en tu Comunidad</span>
