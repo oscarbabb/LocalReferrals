@@ -17,7 +17,7 @@ export default function Services() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: providers = [] } = useQuery({
+  const { data: providers = [] } = useQuery<any[]>({
     queryKey: ["/api/providers"],
   });
 

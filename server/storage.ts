@@ -101,16 +101,16 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // Seed service categories
+    // Seed service categories with proper emojis
     const categories = [
-      { name: "Limpieza", description: "Servicios de limpieza profesional", icon: "fas fa-broom", color: "blue" },
-      { name: "Reparaciones", description: "Electricidad, plomería y más", icon: "fas fa-tools", color: "green" },
-      { name: "Tutorías", description: "Clases particulares y apoyo", icon: "fas fa-graduation-cap", color: "amber" },
-      { name: "Cuidado", description: "Niñeras y cuidado de mascotas", icon: "fas fa-baby", color: "purple" },
-      { name: "Cocina", description: "Chef personal y catering", icon: "fas fa-utensils", color: "red" },
-      { name: "Tecnología", description: "Soporte técnico y instalación", icon: "fas fa-laptop", color: "indigo" },
-      { name: "Belleza", description: "Peluquería y estética", icon: "fas fa-cut", color: "pink" },
-      { name: "Fitness", description: "Entrenadores personales", icon: "fas fa-dumbbell", color: "teal" },
+      { name: "Limpieza", description: "Servicios de limpieza profesional", icon: "🧹", color: "#3B82F6" },
+      { name: "Reparaciones", description: "Electricidad, plomería y más", icon: "🔧", color: "#10B981" },
+      { name: "Tutorías", description: "Clases particulares y apoyo", icon: "📚", color: "#F59E0B" },
+      { name: "Cuidado", description: "Niñeras y cuidado de mascotas", icon: "🐕", color: "#8B5CF6" },
+      { name: "Cocina", description: "Chef personal y catering", icon: "👨‍🍳", color: "#EF4444" },
+      { name: "Tecnología", description: "Soporte técnico y instalación", icon: "💻", color: "#6366F1" },
+      { name: "Belleza", description: "Peluquería y estética", icon: "✂️", color: "#EC4899" },
+      { name: "Fitness", description: "Entrenadores personales", icon: "💪", color: "#22C55E" },
     ];
 
     categories.forEach(cat => {
