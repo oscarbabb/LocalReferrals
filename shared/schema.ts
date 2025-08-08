@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
   address: text("address"),
+  section: text("section"),
   apartment: text("apartment"),
   building: text("building"),
   phone: text("phone"),

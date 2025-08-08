@@ -80,6 +80,7 @@ export default function Auth() {
       password: password,
       fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
       address: formData.get("address") as string,
+      section: formData.get("section") as string,
       phone: formData.get("phone") as string,
       building: buildingValue,
       apartment: formData.get("apartment") as string,
@@ -254,6 +255,16 @@ export default function Auth() {
                         data-testid="input-address"
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="section">Sección</Label>
+                    <Input
+                      id="section"
+                      name="section"
+                      type="text"
+                      placeholder="Ej: Norte, Sur, A, B, Torre 1"
+                      data-testid="input-section"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
