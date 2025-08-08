@@ -21,36 +21,38 @@ interface ServiceCardProps {
 }
 
 const iconMap: Record<string, any> = {
-  "fas fa-broom": Sparkles,
-  "fas fa-tools": Settings,
-  "fas fa-graduation-cap": BookOpen,
-  "fas fa-baby": Heart,
-  "fas fa-utensils": ChefHat,
-  "fas fa-laptop": Monitor,
-  "fas fa-cut": Scissors,
-  "fas fa-dumbbell": Zap,
+  "🧹": Sparkles,     // Limpieza
+  "🔧": Settings,     // Reparaciones
+  "📚": BookOpen,     // Tutorías
+  "🐕": Heart,        // Cuidado de Mascotas
+  "🌱": Sparkles,     // Jardinería (using Sparkles for nature/growth)
+  "👨‍🍳": ChefHat,      // Cocina
+  "🍽️": ChefHat,     // Alternative cooking icon
+  "💻": Monitor,      // Tech services
+  "✂️": Scissors,     // Beauty services
+  "💪": Zap,          // Fitness
 };
 
 const gradientMap: Record<string, string> = {
-  blue: "from-blue-500 via-blue-600 to-indigo-700",
-  green: "from-emerald-500 via-green-600 to-teal-700", 
-  amber: "from-amber-500 via-orange-500 to-red-600",
-  purple: "from-purple-500 via-purple-600 to-indigo-700",
-  red: "from-red-500 via-rose-500 to-pink-600",
-  indigo: "from-indigo-500 via-purple-600 to-blue-700",
-  pink: "from-pink-500 via-rose-500 to-red-600",
-  teal: "from-teal-500 via-cyan-600 to-blue-700",
+  "#3B82F6": "from-blue-500 via-blue-600 to-indigo-700",    // Blue
+  "#10B981": "from-emerald-500 via-green-600 to-teal-700",  // Green
+  "#F59E0B": "from-amber-500 via-orange-500 to-red-600",    // Amber
+  "#8B5CF6": "from-purple-500 via-purple-600 to-indigo-700", // Purple
+  "#EF4444": "from-red-500 via-rose-500 to-pink-600",       // Red
+  "#6366F1": "from-indigo-500 via-purple-600 to-blue-700",  // Indigo
+  "#EC4899": "from-pink-500 via-rose-500 to-red-600",       // Pink
+  "#22C55E": "from-emerald-500 via-green-600 to-teal-700",  // Green variation
 };
 
 const hoverGradientMap: Record<string, string> = {
-  blue: "group-hover:from-blue-600 group-hover:via-blue-700 group-hover:to-indigo-800",
-  green: "group-hover:from-emerald-600 group-hover:via-green-700 group-hover:to-teal-800",
-  amber: "group-hover:from-amber-600 group-hover:via-orange-600 group-hover:to-red-700", 
-  purple: "group-hover:from-purple-600 group-hover:via-purple-700 group-hover:to-indigo-800",
-  red: "group-hover:from-red-600 group-hover:via-rose-600 group-hover:to-pink-700",
-  indigo: "group-hover:from-indigo-600 group-hover:via-purple-700 group-hover:to-blue-800",
-  pink: "group-hover:from-pink-600 group-hover:via-rose-600 group-hover:to-red-700",
-  teal: "group-hover:from-teal-600 group-hover:via-cyan-700 group-hover:to-blue-800",
+  "#3B82F6": "group-hover:from-blue-600 group-hover:via-blue-700 group-hover:to-indigo-800",
+  "#10B981": "group-hover:from-emerald-600 group-hover:via-green-700 group-hover:to-teal-800",
+  "#F59E0B": "group-hover:from-amber-600 group-hover:via-orange-600 group-hover:to-red-700", 
+  "#8B5CF6": "group-hover:from-purple-600 group-hover:via-purple-700 group-hover:to-indigo-800",
+  "#EF4444": "group-hover:from-red-600 group-hover:via-rose-600 group-hover:to-pink-700",
+  "#6366F1": "group-hover:from-indigo-600 group-hover:via-purple-700 group-hover:to-blue-800",
+  "#EC4899": "group-hover:from-pink-600 group-hover:via-rose-600 group-hover:to-red-700",
+  "#22C55E": "group-hover:from-emerald-600 group-hover:via-green-700 group-hover:to-teal-800",
 };
 
 export default function ServiceCard({ category, providerCount = 0 }: ServiceCardProps) {
