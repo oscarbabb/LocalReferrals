@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn } from "lucide-react";
+import { Menu, User, LogIn, Sparkles } from "lucide-react";
+import { useOnboarding } from "@/hooks/use-onboarding";
 
 export default function Header() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { startOnboarding } = useOnboarding();
 
   const navItems = [
     { href: "/services", label: "Servicios" },
@@ -42,6 +44,16 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={startOnboarding}
+              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+              data-testid="button-start-tour"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Tour
+            </Button>
             <Link href="/auth">
               <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50">
                 <LogIn className="w-4 h-4 mr-2" />
@@ -79,6 +91,18 @@ export default function Header() {
                   </Link>
                 ))}
                 <hr className="my-4" />
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-600 hover:text-orange-600"
+                  onClick={() => {
+                    setIsOpen(false);
+                    startOnboarding();
+                  }}
+                  data-testid="button-start-tour-mobile"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Ver Tour de la Plataforma
+                </Button>
                 <Link href="/auth" onClick={() => setIsOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start">
                     <LogIn className="w-4 h-4 mr-2" />

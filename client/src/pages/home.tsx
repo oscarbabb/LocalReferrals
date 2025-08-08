@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useOnboarding } from "@/hooks/use-onboarding";
+import OnboardingTour from "@/components/onboarding-tour";
 import Header from "@/components/header";
 import ServiceCard from "@/components/service-card";
 import ProviderCard from "@/components/provider-card";
@@ -11,6 +13,8 @@ import type { ServiceCategory } from "@shared/schema";
 import logoPath from "@assets/Logo 2 test_1754014544538.png";
 
 export default function Home() {
+  const { showOnboarding, completeOnboarding } = useOnboarding();
+  
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
   });
@@ -344,6 +348,12 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Onboarding Tour */}
+      <OnboardingTour 
+        isOpen={showOnboarding} 
+        onClose={completeOnboarding} 
+      />
     </div>
   );
 }
