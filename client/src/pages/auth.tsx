@@ -241,14 +241,14 @@ export default function Auth() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="address">Dirección Completa</Label>
+                    <Label htmlFor="address">Dirección Completa / Nombre de tu Condominio</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="address"
                         name="address"
                         type="text"
-                        placeholder="Ej: Av. Principal 123, Colonia Centro, Ciudad"
+                        placeholder="Ej: Condominio Las Flores, Av. Principal 123, Colonia Centro"
                         className="pl-10"
                         required
                         data-testid="input-address"
