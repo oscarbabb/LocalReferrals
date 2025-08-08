@@ -26,6 +26,7 @@ This is a full-stack TypeScript application for a local services marketplace cal
   - Created API endpoints for availability checking, appointment scheduling, and booking workflows
   - Integrated calendar interface with date/time selection and conflict detection
   - Added automated provider availability seeding for all service providers
+  - Reverted service category icons back to original emoji display for better visual appeal
 
 # User Preferences
 

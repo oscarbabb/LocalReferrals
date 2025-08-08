@@ -1,37 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { 
-  Sparkles, 
-  Settings, 
-  BookOpen, 
-  Heart, 
-  ChefHat, 
-  Monitor, 
-  Scissors, 
-  Zap,
-  Home,
-  ArrowRight
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 
 interface ServiceCardProps {
   category: ServiceCategory;
   providerCount?: number;
 }
-
-const iconMap: Record<string, any> = {
-  "🧹": Sparkles,     // Limpieza
-  "🔧": Settings,     // Reparaciones
-  "📚": BookOpen,     // Tutorías
-  "🐕": Heart,        // Cuidado de Mascotas
-  "🌱": Sparkles,     // Jardinería (using Sparkles for nature/growth)
-  "👨‍🍳": ChefHat,      // Cocina
-  "🍽️": ChefHat,     // Alternative cooking icon
-  "💻": Monitor,      // Tech services
-  "✂️": Scissors,     // Beauty services
-  "💪": Zap,          // Fitness
-};
 
 const gradientMap: Record<string, string> = {
   "#3B82F6": "from-blue-500 via-blue-600 to-indigo-700",    // Blue
@@ -58,10 +34,9 @@ const hoverGradientMap: Record<string, string> = {
 export default function ServiceCard({ category, providerCount = 0 }: ServiceCardProps) {
   const gradientClass = gradientMap[category.color] || "from-gray-400 to-gray-600";
   const hoverGradientClass = hoverGradientMap[category.color] || "group-hover:from-gray-500 group-hover:to-gray-700";
-  const IconComponent = iconMap[category.icon] || Home;
 
   return (
-    <Link href={`/services?category=${category.id}`}>
+    <Link href={`/providers?category=${category.id}`}>
       <Card className="group h-full cursor-pointer hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-3 transition-all duration-500 border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm">
         <CardContent className="p-8 text-center relative">
           {/* Enhanced background decorations */}
@@ -73,7 +48,7 @@ export default function ServiceCard({ category, providerCount = 0 }: ServiceCard
           <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
             {/* Shine effect */}
             <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <IconComponent className="w-10 h-10 text-white relative z-10 drop-shadow-sm" />
+            <span className="text-4xl relative z-10 drop-shadow-sm">{category.icon}</span>
           </div>
           
           {/* Content */}
