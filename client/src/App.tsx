@@ -11,6 +11,7 @@ import ProviderDetail from "@/pages/provider-detail";
 import ReviewDemo from "@/pages/review-demo";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
+import Testimonials from "@/pages/testimonials";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/providers" component={Providers} />
       <Route path="/providers/:id" component={ProviderDetail} />
       <Route path="/review-demo" component={ReviewDemo} />
+      <Route path="/testimonials" component={Testimonials} />
       <Route path="/profile" component={Profile} />
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />
