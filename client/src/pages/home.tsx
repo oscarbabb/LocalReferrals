@@ -78,7 +78,7 @@ export default function Home() {
                   size="lg" 
                   className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg w-full sm:w-auto shadow-lg"
                 >
-                  Post a review
+                  Ver Sistema de Reseñas
                 </Button>
               </Link>
             </div>

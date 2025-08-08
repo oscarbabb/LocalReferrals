@@ -41,7 +41,7 @@ export default function QuickBookingButton({
           data-testid="button-quick-booking"
         >
           <Calendar className="w-4 h-4 mr-2" />
-          Reservar Servicio
+          Reservar Ahora
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

@@ -72,10 +72,10 @@ export default function ReviewDemo() {
             <Star className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Advanced Review System
+            Sistema Avanzado de Reseñas
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Experience our enhanced review system with detailed ratings, photo uploads, and verified reviews for better community trust.
+            Experimenta nuestro sistema mejorado de reseñas con calificaciones detalladas, carga de fotos y reseñas verificadas para mayor confianza comunitaria.
           </p>
         </div>
 
@@ -84,24 +84,24 @@ export default function ReviewDemo() {
           <Card className="text-center">
             <CardContent className="p-6">
               <Star className="w-10 h-10 text-orange-500 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Detailed Ratings</h3>
-              <p className="text-gray-600 text-sm">Rate service quality, communication, punctuality, and value separately</p>
+              <h3 className="font-semibold mb-2">Calificaciones Detalladas</h3>
+              <p className="text-gray-600 text-sm">Califica la calidad del servicio, comunicación, puntualidad y valor por separado</p>
             </CardContent>
           </Card>
           
           <Card className="text-center">
             <CardContent className="p-6">
               <Camera className="w-10 h-10 text-orange-500 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Photo Reviews</h3>
-              <p className="text-gray-600 text-sm">Upload photos to show the quality of work and results</p>
+              <h3 className="font-semibold mb-2">Reseñas con Fotos</h3>
+              <p className="text-gray-600 text-sm">Sube fotos para mostrar la calidad del trabajo y los resultados</p>
             </CardContent>
           </Card>
           
           <Card className="text-center">
             <CardContent className="p-6">
               <Users className="w-10 h-10 text-orange-500 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Verified Reviews</h3>
-              <p className="text-gray-600 text-sm">Reviews from completed services are marked as verified</p>
+              <h3 className="font-semibold mb-2">Reseñas Verificadas</h3>
+              <p className="text-gray-600 text-sm">Las reseñas de servicios completados se marcan como verificadas</p>
             </CardContent>
           </Card>
         </div>
@@ -110,7 +110,7 @@ export default function ReviewDemo() {
         <Card className="mb-12">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Write a Review</span>
+              <span>Escribir una Reseña</span>
               <Badge variant="secondary">Demo</Badge>
             </CardTitle>
           </CardHeader>
@@ -118,7 +118,7 @@ export default function ReviewDemo() {
             {!showReviewForm ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 mb-6">
-                  Try our advanced review form with detailed ratings and photo upload
+                  Prueba nuestro formulario avanzado de reseñas con calificaciones detalladas y carga de fotos
                 </p>
                 <Button 
                   onClick={() => setShowReviewForm(true)}
@@ -126,7 +126,7 @@ export default function ReviewDemo() {
                   data-testid="button-show-review-form"
                 >
                   <Star className="w-4 h-4 mr-2" />
-                  Write a Review
+                  Escribir Reseña
                 </Button>
               </div>
             ) : (
@@ -146,9 +146,9 @@ export default function ReviewDemo() {
         {/* Sample Reviews */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Sample Reviews</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Reseñas de Ejemplo</h2>
             <Badge variant="outline">
-              {sampleReviews.length} Reviews
+              {sampleReviews.length} Reseñas
             </Badge>
           </div>
           
@@ -165,17 +165,17 @@ export default function ReviewDemo() {
         {/* Implementation Notes */}
         <Card className="mt-12 border-blue-200 bg-blue-50">
           <CardHeader>
-            <CardTitle className="text-blue-900">Implementation Features</CardTitle>
+            <CardTitle className="text-blue-900">Características de Implementación</CardTitle>
           </CardHeader>
           <CardContent className="text-blue-800">
             <ul className="space-y-2">
-              <li>✓ Enhanced database schema with detailed rating fields and photo arrays</li>
-              <li>✓ Object storage integration for secure photo uploads</li>
-              <li>✓ Advanced review form with 5-star ratings for different service aspects</li>
-              <li>✓ Photo gallery with upload and management capabilities</li>
-              <li>✓ Verification badges for completed service reviews</li>
-              <li>✓ Recommendation system with visual indicators</li>
-              <li>✓ Responsive design for mobile and desktop</li>
+              <li>✓ Esquema de base de datos mejorado con campos de calificación detallados y arrays de fotos</li>
+              <li>✓ Integración de almacenamiento de objetos para cargas de fotos seguras</li>
+              <li>✓ Formulario de reseñas avanzado con calificaciones de 5 estrellas para diferentes aspectos del servicio</li>
+              <li>✓ Galería de fotos con capacidades de carga y gestión</li>
+              <li>✓ Insignias de verificación para reseñas de servicios completados</li>
+              <li>✓ Sistema de recomendaciones con indicadores visuales</li>
+              <li>✓ Diseño responsivo para móvil y escritorio</li>
             </ul>
           </CardContent>
         </Card>

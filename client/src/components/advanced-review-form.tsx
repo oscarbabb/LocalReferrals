@@ -104,8 +104,8 @@ export default function AdvancedReviewForm({
     },
     onSuccess: () => {
       toast({
-        title: "Review submitted!",
-        description: "Thank you for your detailed review.",
+        title: "¡Reseña enviada!",
+        description: "Gracias por tu reseña detallada.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId] });
       onSubmit?.();
@@ -113,7 +113,7 @@ export default function AdvancedReviewForm({
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to submit review. Please try again.",
+        description: "No se pudo enviar la reseña. Intenta nuevamente.",
         variant: "destructive",
       });
     },
@@ -123,12 +123,12 @@ export default function AdvancedReviewForm({
     const response = await apiRequest("/api/objects/upload", "POST");
     return {
       method: "PUT",
-      url: response.uploadURL,
+      url: response.uploadURL as string,
     };
   };
 
   const handlePhotoComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful.length > 0) {
+    if (result.successful && result.successful.length > 0) {
       const uploadedFile = result.successful[0];
       const photoURL = uploadedFile.uploadURL as string;
       
@@ -153,7 +153,7 @@ export default function AdvancedReviewForm({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="w-5 h-5 text-yellow-400" />
-          Write a Detailed Review
+          Escribir una Reseña Detallada
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -165,12 +165,12 @@ export default function AdvancedReviewForm({
               name="rating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Overall Rating</FormLabel>
+                  <FormLabel>Calificación General</FormLabel>
                   <FormControl>
                     <StarRating
                       value={field.value}
                       onChange={field.onChange}
-                      label="Overall"
+                      label="General"
                     />
                   </FormControl>
                   <FormMessage />
@@ -180,7 +180,7 @@ export default function AdvancedReviewForm({
 
             {/* Detailed Ratings */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Detailed Ratings</h4>
+              <h4 className="font-semibold text-gray-900">Calificaciones Detalladas</h4>
               
               <FormField
                 control={form.control}
@@ -191,7 +191,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Service Quality"
+                        label="Calidad del Servicio"
                       />
                     </FormControl>
                   </FormItem>
@@ -207,7 +207,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Communication"
+                        label="Comunicación"
                       />
                     </FormControl>
                   </FormItem>
@@ -223,7 +223,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Punctuality"
+                        label="Puntualidad"
                       />
                     </FormControl>
                   </FormItem>
@@ -239,7 +239,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Value for Money"
+                        label="Relación Calidad-Precio"
                       />
                     </FormControl>
                   </FormItem>
@@ -253,10 +253,10 @@ export default function AdvancedReviewForm({
               name="comment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Written Review</FormLabel>
+                  <FormLabel>Reseña Escrita</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Share your experience with this service provider..."
+                      placeholder="Comparte tu experiencia con este proveedor de servicios..."
                       className="min-h-[120px]"
                       data-testid="textarea-review-comment"
                       {...field}
@@ -269,7 +269,7 @@ export default function AdvancedReviewForm({
 
             {/* Photo Upload */}
             <div className="space-y-4">
-              <FormLabel>Photos</FormLabel>
+              <FormLabel>Fotos</FormLabel>
               
               {uploadedPhotos.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -302,7 +302,7 @@ export default function AdvancedReviewForm({
                 buttonClassName="bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-dashed border-gray-300"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                Add Photos
+                Agregar Fotos
               </ObjectUploader>
             </div>
 
@@ -313,7 +313,7 @@ export default function AdvancedReviewForm({
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div>
-                    <FormLabel>Would you recommend this service provider?</FormLabel>
+                    <FormLabel>¿Recomendarías a este proveedor de servicios?</FormLabel>
                   </div>
                   <FormControl>
                     <Switch
@@ -334,7 +334,7 @@ export default function AdvancedReviewForm({
                 className="flex-1"
                 data-testid="button-submit-review"
               >
-                {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                {createReviewMutation.isPending ? "Enviando..." : "Enviar Reseña"}
               </Button>
               {onCancel && (
                 <Button 
@@ -343,7 +343,7 @@ export default function AdvancedReviewForm({
                   onClick={onCancel}
                   data-testid="button-cancel-review"
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               )}
             </div>

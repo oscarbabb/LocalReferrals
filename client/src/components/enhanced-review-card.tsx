@@ -34,10 +34,10 @@ function StarRating({ rating, size = "w-4 h-4" }: { rating: number; size?: strin
 
 function DetailedRatings({ review }: { review: Review }) {
   const ratings = [
-    { label: "Service Quality", value: review.serviceQuality },
-    { label: "Communication", value: review.communication },
-    { label: "Punctuality", value: review.punctuality },
-    { label: "Value for Money", value: review.valueForMoney },
+    { label: "Calidad del Servicio", value: review.serviceQuality },
+    { label: "Comunicación", value: review.communication },
+    { label: "Puntualidad", value: review.punctuality },
+    { label: "Relación Calidad-Precio", value: review.valueForMoney },
   ];
 
   return (
@@ -103,13 +103,13 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
                   {review.isVerified && (
                     <Badge variant="secondary" className="text-green-600 bg-green-50">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Verified
+                      Verificado
                     </Badge>
                   )}
                   {review.wouldRecommend && (
                     <Badge variant="secondary" className="text-blue-600 bg-blue-50">
                       <ThumbsUp className="w-3 h-3 mr-1" />
-                      Recommends
+                      Recomienda
                     </Badge>
                   )}
                 </div>
@@ -127,7 +127,7 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
               <div className="text-right">
                 <StarRating rating={review.rating} />
                 <div className="text-sm text-gray-500 mt-1" data-testid="text-overall-rating">
-                  {review.rating}/5 Overall
+                  {review.rating}/5 General
                 </div>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
             {/* Detailed ratings */}
             {hasDetailedRatings && (
               <div>
-                <h5 className="text-sm font-medium text-gray-900 mb-2">Detailed Ratings</h5>
+                <h5 className="text-sm font-medium text-gray-900 mb-2">Calificaciones Detalladas</h5>
                 <DetailedRatings review={review} />
               </div>
             )}
