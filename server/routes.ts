@@ -60,6 +60,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single provider by ID
+  app.get("/api/providers/:id", async (req, res) => {
+    try {
+      const provider = await storage.getProvider(req.params.id);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+      res.json(provider);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch provider" });
+    }
+  });
+
+  // Reviews
+  app.get("/api/reviews/:providerId", async (req, res) => {
+    try {
+      const reviews = await storage.getReviewsByProvider(req.params.providerId);
+      
+      // Get reviewer details for each review
+      const reviewsWithReviewers = await Promise.all(
+        reviews.map(async (review) => {
+          const reviewer = await storage.getUser(review.reviewerId);
+          return {
+            ...review,
+            reviewer: reviewer ? {
+              fullName: reviewer.fullName,
+              avatar: reviewer.avatar,
+              building: reviewer.building,
+              apartment: reviewer.apartment
+            } : null
+          };
+        })
+      );
+      
+      res.json(reviewsWithReviewers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Create new review
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const reviewData = insertReviewSchema.parse(req.body);
+      const review = await storage.createReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid review data" });
+    }
+  });
+
+  // Object Storage endpoints for photo uploads
+  app.get("/public-objects/:filePath(*)", async (req, res) => {
+    const filePath = req.params.filePath;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const file = await objectStorageService.searchPublicObject(filePath);
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+      objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      console.error("Error searching for public object:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/objects/upload", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    res.json({ uploadURL });
+  });
+
+  app.put("/api/review-photos", async (req, res) => {
+    if (!req.body.photoURL) {
+      return res.status(400).json({ error: "photoURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.photoURL,
+        {
+          owner: "system",
+          visibility: "public" // Review photos are public
+        }
+      );
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting review photo:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.get("/api/providers/:id", async (req, res) => {
     try {
       const provider = await storage.getProvider(req.params.id);

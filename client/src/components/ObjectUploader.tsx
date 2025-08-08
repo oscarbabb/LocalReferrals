@@ -64,7 +64,6 @@ export function ObjectUploader({
       restrictions: {
         maxNumberOfFiles,
         maxFileSize,
-        allowedFileTypes: ['image/*'], // Only images for reviews
       },
       autoProceed: false,
     })
@@ -74,18 +73,12 @@ export function ObjectUploader({
       })
       .on("complete", (result) => {
         onComplete?.(result);
-        setShowModal(false);
       })
   );
 
   return (
     <div>
-      <Button 
-        onClick={() => setShowModal(true)} 
-        className={buttonClassName}
-        type="button"
-        data-testid="button-upload-photos"
-      >
+      <Button onClick={() => setShowModal(true)} className={buttonClassName}>
         {children}
       </Button>
 

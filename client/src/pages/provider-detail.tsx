@@ -1,21 +1,40 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import Header from "@/components/header";
+import AdvancedReviewForm from "@/components/advanced-review-form";
+import EnhancedReviewCard from "@/components/enhanced-review-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield } from "lucide-react";
+import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus } from "lucide-react";
 
 export default function ProviderDetail() {
   const [, params] = useRoute("/providers/:id");
   const providerId = params?.id;
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   const { data: provider, isLoading } = useQuery({
     queryKey: ["/api/providers", providerId],
     enabled: !!providerId,
   });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["/api/reviews", providerId],
+    enabled: !!providerId,
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
+
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length
+    : 0;
 
   const getInitials = (name: string) => {
     return name
@@ -72,7 +91,7 @@ export default function ProviderDetail() {
             <div className="flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
               <Avatar className="w-24 h-24">
                 <AvatarFallback className="bg-primary text-white text-2xl">
-                  {getInitials(provider.user.fullName)}
+                  {provider.title ? getInitials(provider.title) : "P"}
                 </AvatarFallback>
               </Avatar>
               
@@ -80,9 +99,9 @@ export default function ProviderDetail() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                      {provider.user.fullName}
+                      {provider.title}
                     </h1>
-                    <h2 className="text-xl text-gray-700 mb-3">{provider.title}</h2>
+                    <h2 className="text-xl text-gray-700 mb-3">Proveedor de Servicios</h2>
                   </div>
                   {provider.isVerified && (
                     <Badge className="bg-green-100 text-green-800 mb-4 md:mb-0">
@@ -92,12 +111,12 @@ export default function ProviderDetail() {
                   )}
                 </div>
 
-                {provider.averageRating > 0 && (
+                {averageRating > 0 && (
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="flex items-center">
                       <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span className="text-lg font-semibold">{provider.averageRating}</span>
-                      <span className="text-gray-500 ml-2">({provider.reviewCount} reseñas)</span>
+                      <span className="text-lg font-semibold">{averageRating.toFixed(1)}</span>
+                      <span className="text-gray-500 ml-2">({reviews.length} reseñas)</span>
                     </div>
                   </div>
                 )}
@@ -106,22 +125,18 @@ export default function ProviderDetail() {
                   <div className="flex items-center space-x-4 text-gray-600 mb-4 md:mb-0">
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-1" />
-                      <span>{provider.user.building}, Apt {provider.user.apartment}</span>
+                      <span>Edificio Local</span>
                     </div>
-                    {provider.user.phone && (
-                      <div className="flex items-center">
-                        <Phone className="w-4 h-4 mr-1" />
-                        <span>{provider.user.phone}</span>
-                      </div>
-                    )}
                   </div>
                   
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-gray-900">
-                      ${provider.hourlyRate}
+                  {provider.hourlyRate && (
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-gray-900">
+                        ${provider.hourlyRate}
+                      </div>
+                      <div className="text-gray-500">por hora</div>
                     </div>
-                    <div className="text-gray-500">por hora</div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -160,53 +175,64 @@ export default function ProviderDetail() {
               </CardContent>
             </Card>
 
-            {/* Reviews */}
+            {/* Advanced Reviews Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Reseñas ({provider.reviewCount})</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Reseñas ({reviews.length})</CardTitle>
+                  {user && (
+                    <Button
+                      onClick={() => setShowReviewForm(true)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                      data-testid="button-add-review"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Agregar Reseña
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                {provider.reviews && provider.reviews.length > 0 ? (
+                {showReviewForm && user && (
+                  <div className="mb-8">
+                    <AdvancedReviewForm
+                      providerId={provider.id}
+                      reviewerId={user.id}
+                      onSubmit={() => setShowReviewForm(false)}
+                      onCancel={() => setShowReviewForm(false)}
+                    />
+                  </div>
+                )}
+                
+                {reviews.length > 0 ? (
                   <div className="space-y-6">
-                    {provider.reviews.map((review: any) => (
-                      <div key={review.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
-                        <div className="flex items-start space-x-4">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-gray-300 text-gray-600">
-                              {getInitials(review.reviewer.fullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <h5 className="font-semibold text-gray-900">
-                                {review.reviewer.fullName}
-                              </h5>
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${
-                                      i < review.rating
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-gray-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <p className="text-gray-700">{review.comment}</p>
-                            <p className="text-sm text-gray-500 mt-2">
-                              {new Date(review.createdAt).toLocaleDateString('es-ES')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                    {reviews.map((review: any) => (
+                      <EnhancedReviewCard
+                        key={review.id}
+                        review={review}
+                        data-testid={`card-review-${review.id}`}
+                      />
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    Este proveedor aún no tiene reseñas.
-                  </p>
+                  <div className="text-center py-12">
+                    <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No hay reseñas aún
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      Se el primero en reseñar este proveedor y ayuda a otros usuarios.
+                    </p>
+                    {user && (
+                      <Button
+                        onClick={() => setShowReviewForm(true)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Escribir Primera Reseña
+                      </Button>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -223,19 +249,13 @@ export default function ProviderDetail() {
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-gray-400" />
                   <div>
-                    <p className="font-medium">{provider.user.building}</p>
-                    <p className="text-sm text-gray-600">Apartamento {provider.user.apartment}</p>
+                    <p className="font-medium">Edificio Local</p>
+                    <p className="text-sm text-gray-600">Comunidad Referencias Locales</p>
                   </div>
                 </div>
-                {provider.user.phone && (
-                  <div className="flex items-center space-x-3">
-                    <Phone className="w-5 h-5 text-gray-400" />
-                    <p>{provider.user.phone}</p>
-                  </div>
-                )}
                 <div className="flex items-center space-x-3">
                   <Mail className="w-5 h-5 text-gray-400" />
-                  <p>{provider.user.email}</p>
+                  <p>Contacto disponible</p>
                 </div>
               </CardContent>
             </Card>
@@ -249,22 +269,24 @@ export default function ProviderDetail() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Miembro desde</span>
                   <span className="font-medium">
-                    {new Date(provider.user.createdAt).toLocaleDateString('es-ES')}
+                    {new Date(provider.createdAt).toLocaleDateString('es-ES')}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Servicios completados</span>
-                  <span className="font-medium">{provider.reviewCount}</span>
+                  <span className="font-medium">{reviews.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Calificación promedio</span>
                   <span className="font-medium">
-                    {provider.averageRating > 0 ? `${provider.averageRating}/5` : "Sin calificar"}
+                    {averageRating > 0 ? `${averageRating.toFixed(1)}/5` : "Sin calificar"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tiempo de respuesta</span>
-                  <span className="font-medium">~2 horas</span>
+                  <span className="text-gray-600">Estado</span>
+                  <span className="font-medium">
+                    {provider.isActive ? "Activo" : "Inactivo"}
+                  </span>
                 </div>
               </CardContent>
             </Card>
