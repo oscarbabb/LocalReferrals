@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,26 +13,79 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mail, Lock, User, Phone, Building } from "lucide-react";
 
 export default function Auth() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [buildingValue, setBuildingValue] = useState("");
+
+  const registerMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Error creating account");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "¡Cuenta creada exitosamente!",
+        description: "Bienvenido a Referencias Locales. Ya puedes empezar a explorar servicios.",
+      });
+      setLocation("/");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al crear la cuenta",
+        description: error.message || "Hubo un problema al crear tu cuenta. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect to home or dashboard
-    }, 2000);
+    toast({
+      title: "Funcionalidad en desarrollo",
+      description: "El sistema de login estará disponible próximamente.",
+    });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect to home or dashboard
-    }, 2000);
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error en contraseñas",
+        description: "Las contraseñas no coinciden. Por favor verifica e inténtalo de nuevo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const userData = {
+      username: formData.get("username") as string,
+      email: formData.get("email") as string,
+      password: password,
+      fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
+      phone: formData.get("phone") as string,
+      building: buildingValue,
+      apartment: formData.get("apartment") as string,
+      isProvider: formData.get("isProvider") === "on",
+    };
+
+    registerMutation.mutate(userData);
   };
 
   return (
@@ -105,9 +161,8 @@ export default function Auth() {
                   <Button 
                     type="submit" 
                     className="w-full bg-primary text-white hover:bg-blue-700"
-                    disabled={isLoading}
                   >
-                    {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                    Iniciar Sesión
                   </Button>
                 </form>
               </TabsContent>
@@ -126,6 +181,7 @@ export default function Auth() {
                       <Label htmlFor="first-name">Nombre</Label>
                       <Input
                         id="first-name"
+                        name="firstName"
                         type="text"
                         placeholder="Juan"
                         required
@@ -135,6 +191,7 @@ export default function Auth() {
                       <Label htmlFor="last-name">Apellido</Label>
                       <Input
                         id="last-name"
+                        name="lastName"
                         type="text"
                         placeholder="Pérez"
                         required
@@ -147,6 +204,7 @@ export default function Auth() {
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="username"
+                        name="username"
                         type="text"
                         placeholder="juanperez"
                         className="pl-10"
@@ -160,6 +218,7 @@ export default function Auth() {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="register-email"
+                        name="email"
                         type="email"
                         placeholder="tu@email.com"
                         className="pl-10"
@@ -173,6 +232,7 @@ export default function Auth() {
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="phone"
+                        name="phone"
                         type="tel"
                         placeholder="+1234567890"
                         className="pl-10"
@@ -182,7 +242,7 @@ export default function Auth() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="building">Edificio</Label>
-                      <Select>
+                      <Select value={buildingValue} onValueChange={setBuildingValue}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona" />
                         </SelectTrigger>
@@ -198,6 +258,7 @@ export default function Auth() {
                       <Label htmlFor="apartment">Apartamento</Label>
                       <Input
                         id="apartment"
+                        name="apartment"
                         type="text"
                         placeholder="305"
                         required
@@ -210,6 +271,7 @@ export default function Auth() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="register-password"
+                        name="password"
                         type="password"
                         className="pl-10"
                         required
@@ -222,6 +284,7 @@ export default function Auth() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="confirm-password"
+                        name="confirmPassword"
                         type="password"
                         className="pl-10"
                         required
@@ -229,7 +292,7 @@ export default function Auth() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="provider-option" />
+                    <Checkbox id="provider-option" name="isProvider" />
                     <Label htmlFor="provider-option" className="text-sm">
                       Quiero ofrecer servicios a mi comunidad
                     </Label>
@@ -246,9 +309,9 @@ export default function Auth() {
                   <Button 
                     type="submit" 
                     className="w-full bg-primary text-white hover:bg-blue-700"
-                    disabled={isLoading}
+                    disabled={registerMutation.isPending}
                   >
-                    {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+                    {registerMutation.isPending ? "Creando cuenta..." : "Crear Cuenta"}
                   </Button>
                 </form>
               </TabsContent>
