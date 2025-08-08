@@ -314,8 +314,9 @@ export default function Home() {
               <h3 className="text-lg font-semibold mb-4">Enlaces</h3>
               <ul className="space-y-2">
                 <li><Link href="/services" className="text-gray-300 hover:text-white">Servicios</Link></li>
-                <li><Link href="#como-funciona" className="text-gray-300 hover:text-white">Cómo Funciona</Link></li>
-                <li><Link href="#testimonios" className="text-gray-300 hover:text-white">Testimonios</Link></li>
+                <li><Link href="/como-funciona" className="text-gray-300 hover:text-white">Cómo Funciona</Link></li>
+                <li><Link href="/testimonials" className="text-gray-300 hover:text-white">Testimonios</Link></li>
+                <li><Link href="/verification" className="text-gray-300 hover:text-white">Verificación</Link></li>
                 <li><a href="#" className="text-gray-300 hover:text-white">Ayuda</a></li>
               </ul>
             </div>

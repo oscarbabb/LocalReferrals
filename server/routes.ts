@@ -418,6 +418,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verification System Routes
+  // Verification Documents
+  app.get("/api/providers/:providerId/verification-documents", async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      const documents = await storage.getVerificationDocuments(providerId);
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching verification documents:", error);
+      res.status(500).json({ error: "Failed to fetch verification documents" });
+    }
+  });
+
+  app.post("/api/verification-documents", async (req, res) => {
+    try {
+      const document = await storage.createVerificationDocument(req.body);
+      res.status(201).json(document);
+    } catch (error) {
+      console.error("Error creating verification document:", error);
+      res.status(500).json({ error: "Failed to create verification document" });
+    }
+  });
+
+  app.patch("/api/verification-documents/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.updateVerificationDocument(id, req.body);
+      if (!document) {
+        return res.status(404).json({ error: "Verification document not found" });
+      }
+      res.json(document);
+    } catch (error) {
+      console.error("Error updating verification document:", error);
+      res.status(500).json({ error: "Failed to update verification document" });
+    }
+  });
+
+  // Background Checks
+  app.get("/api/providers/:providerId/background-checks", async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      const checks = await storage.getBackgroundChecks(providerId);
+      res.json(checks);
+    } catch (error) {
+      console.error("Error fetching background checks:", error);
+      res.status(500).json({ error: "Failed to fetch background checks" });
+    }
+  });
+
+  app.post("/api/background-checks", async (req, res) => {
+    try {
+      const check = await storage.createBackgroundCheck(req.body);
+      res.status(201).json(check);
+    } catch (error) {
+      console.error("Error creating background check:", error);
+      res.status(500).json({ error: "Failed to create background check" });
+    }
+  });
+
+  app.patch("/api/background-checks/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const check = await storage.updateBackgroundCheck(id, req.body);
+      if (!check) {
+        return res.status(404).json({ error: "Background check not found" });
+      }
+      res.json(check);
+    } catch (error) {
+      console.error("Error updating background check:", error);
+      res.status(500).json({ error: "Failed to update background check" });
+    }
+  });
+
+  // Verification Reviews
+  app.get("/api/providers/:providerId/verification-reviews", async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      const reviews = await storage.getVerificationReviews(providerId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching verification reviews:", error);
+      res.status(500).json({ error: "Failed to fetch verification reviews" });
+    }
+  });
+
+  app.post("/api/verification-reviews", async (req, res) => {
+    try {
+      const review = await storage.createVerificationReview(req.body);
+      res.status(201).json(review);
+    } catch (error) {
+      console.error("Error creating verification review:", error);
+      res.status(500).json({ error: "Failed to create verification review" });
+    }
+  });
+
+  // Verification Requirements
+  app.get("/api/categories/:categoryId/verification-requirements", async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const requirements = await storage.getVerificationRequirements(categoryId);
+      res.json(requirements);
+    } catch (error) {
+      console.error("Error fetching verification requirements:", error);
+      res.status(500).json({ error: "Failed to fetch verification requirements" });
+    }
+  });
+
+  app.get("/api/verification-requirements", async (req, res) => {
+    try {
+      const requirements = await storage.getAllVerificationRequirements();
+      res.json(requirements);
+    } catch (error) {
+      console.error("Error fetching all verification requirements:", error);
+      res.status(500).json({ error: "Failed to fetch verification requirements" });
+    }
+  });
+
+  app.post("/api/verification-requirements", async (req, res) => {
+    try {
+      const requirement = await storage.createVerificationRequirement(req.body);
+      res.status(201).json(requirement);
+    } catch (error) {
+      console.error("Error creating verification requirement:", error);
+      res.status(500).json({ error: "Failed to create verification requirement" });
+    }
+  });
+
+  // Update provider verification status
+  app.patch("/api/providers/:id/verification-status", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { verificationStatus, verificationLevel, backgroundCheckStatus, verificationNotes } = req.body;
+      
+      const updateData: any = {};
+      if (verificationStatus) updateData.verificationStatus = verificationStatus;
+      if (verificationLevel) updateData.verificationLevel = verificationLevel;
+      if (backgroundCheckStatus) updateData.backgroundCheckStatus = backgroundCheckStatus;
+      if (verificationNotes) updateData.verificationNotes = verificationNotes;
+      if (verificationStatus === 'verified') updateData.lastVerificationDate = new Date();
+
+      const provider = await storage.updateProvider(id, updateData);
+      if (!provider) {
+        return res.status(404).json({ error: "Provider not found" });
+      }
+      res.json(provider);
+    } catch (error) {
+      console.error("Error updating provider verification status:", error);
+      res.status(500).json({ error: "Failed to update verification status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -15,6 +15,14 @@ import {
   type InsertAppointment,
   type Message, 
   type InsertMessage,
+  type VerificationDocument,
+  type InsertVerificationDocument,
+  type BackgroundCheck,
+  type InsertBackgroundCheck,
+  type VerificationReview,
+  type InsertVerificationReview,
+  type VerificationRequirement,
+  type InsertVerificationRequirement,
   users,
   serviceCategories,
   providers,
@@ -22,7 +30,11 @@ import {
   serviceRequests,
   providerAvailability,
   appointments,
-  messages
+  messages,
+  verificationDocuments,
+  backgroundChecks,
+  verificationReviews,
+  verificationRequirements
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -73,6 +85,25 @@ export interface IStorage {
   getMessagesByRequest(requestId: string): Promise<Message[]>;
   getConversation(userId1: string, userId2: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+
+  // Verification Documents
+  getVerificationDocuments(providerId: string): Promise<VerificationDocument[]>;
+  createVerificationDocument(document: InsertVerificationDocument): Promise<VerificationDocument>;
+  updateVerificationDocument(id: string, document: Partial<VerificationDocument>): Promise<VerificationDocument | undefined>;
+
+  // Background Checks
+  getBackgroundChecks(providerId: string): Promise<BackgroundCheck[]>;
+  createBackgroundCheck(check: InsertBackgroundCheck): Promise<BackgroundCheck>;
+  updateBackgroundCheck(id: string, check: Partial<BackgroundCheck>): Promise<BackgroundCheck | undefined>;
+
+  // Verification Reviews
+  getVerificationReviews(providerId: string): Promise<VerificationReview[]>;
+  createVerificationReview(review: InsertVerificationReview): Promise<VerificationReview>;
+
+  // Verification Requirements
+  getVerificationRequirements(categoryId: string): Promise<VerificationRequirement[]>;
+  getAllVerificationRequirements(): Promise<VerificationRequirement[]>;
+  createVerificationRequirement(requirement: InsertVerificationRequirement): Promise<VerificationRequirement>;
 }
 
 export class MemStorage implements IStorage {
@@ -560,6 +591,110 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return message;
   }
+
+  // Provider Availability
+  async getProviderAvailability(providerId: string): Promise<ProviderAvailability[]> {
+    return await db.select().from(providerAvailability).where(eq(providerAvailability.providerId, providerId));
+  }
+
+  async createProviderAvailability(insertAvailability: InsertProviderAvailability): Promise<ProviderAvailability> {
+    const [availability] = await db
+      .insert(providerAvailability)
+      .values(insertAvailability)
+      .returning();
+    return availability;
+  }
+
+  // Appointments
+  async getAppointmentsByProvider(providerId: string): Promise<Appointment[]> {
+    return await db.select().from(appointments).where(eq(appointments.providerId, providerId));
+  }
+
+  async getAppointmentsByUser(userId: string): Promise<Appointment[]> {
+    return await db.select().from(appointments).where(eq(appointments.requesterId, userId));
+  }
+
+  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+    const [appointment] = await db
+      .insert(appointments)
+      .values(insertAppointment)
+      .returning();
+    return appointment;
+  }
+
+  // Verification Documents
+  async getVerificationDocuments(providerId: string): Promise<VerificationDocument[]> {
+    return await db.select().from(verificationDocuments).where(eq(verificationDocuments.providerId, providerId));
+  }
+
+  async createVerificationDocument(insertDocument: InsertVerificationDocument): Promise<VerificationDocument> {
+    const [document] = await db
+      .insert(verificationDocuments)
+      .values(insertDocument)
+      .returning();
+    return document;
+  }
+
+  async updateVerificationDocument(id: string, documentUpdate: Partial<VerificationDocument>): Promise<VerificationDocument | undefined> {
+    const [document] = await db
+      .update(verificationDocuments)
+      .set(documentUpdate)
+      .where(eq(verificationDocuments.id, id))
+      .returning();
+    return document || undefined;
+  }
+
+  // Background Checks
+  async getBackgroundChecks(providerId: string): Promise<BackgroundCheck[]> {
+    return await db.select().from(backgroundChecks).where(eq(backgroundChecks.providerId, providerId));
+  }
+
+  async createBackgroundCheck(insertCheck: InsertBackgroundCheck): Promise<BackgroundCheck> {
+    const [check] = await db
+      .insert(backgroundChecks)
+      .values(insertCheck)
+      .returning();
+    return check;
+  }
+
+  async updateBackgroundCheck(id: string, checkUpdate: Partial<BackgroundCheck>): Promise<BackgroundCheck | undefined> {
+    const [check] = await db
+      .update(backgroundChecks)
+      .set(checkUpdate)
+      .where(eq(backgroundChecks.id, id))
+      .returning();
+    return check || undefined;
+  }
+
+  // Verification Reviews
+  async getVerificationReviews(providerId: string): Promise<VerificationReview[]> {
+    return await db.select().from(verificationReviews).where(eq(verificationReviews.providerId, providerId));
+  }
+
+  async createVerificationReview(insertReview: InsertVerificationReview): Promise<VerificationReview> {
+    const [review] = await db
+      .insert(verificationReviews)
+      .values(insertReview)
+      .returning();
+    return review;
+  }
+
+  // Verification Requirements
+  async getVerificationRequirements(categoryId: string): Promise<VerificationRequirement[]> {
+    return await db.select().from(verificationRequirements).where(eq(verificationRequirements.categoryId, categoryId));
+  }
+
+  async getAllVerificationRequirements(): Promise<VerificationRequirement[]> {
+    return await db.select().from(verificationRequirements);
+  }
+
+  async createVerificationRequirement(insertRequirement: InsertVerificationRequirement): Promise<VerificationRequirement> {
+    const [requirement] = await db
+      .insert(verificationRequirements)
+      .values(insertRequirement)
+      .returning();
+    return requirement;
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

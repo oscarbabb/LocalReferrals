@@ -35,6 +35,12 @@ export const providers = pgTable("providers", {
   experience: text("experience"),
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
+  verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected, suspended
+  verificationLevel: varchar("verification_level").default("basic"), // basic, standard, premium
+  backgroundCheckStatus: varchar("background_check_status").default("not_started"), // not_started, in_progress, passed, failed
+  documentsSubmitted: boolean("documents_submitted").default(false),
+  lastVerificationDate: timestamp("last_verification_date"),
+  verificationNotes: text("verification_notes"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -109,6 +115,56 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// Provider verification documents table
+export const verificationDocuments = pgTable("verification_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  documentType: varchar("document_type").notNull(), // id_card, proof_of_address, professional_license, insurance, criminal_background
+  documentUrl: text("document_url").notNull(),
+  uploadedAt: timestamp("uploaded_at").default(sql`now()`),
+  status: varchar("status").default("pending").notNull(), // pending, approved, rejected
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNotes: text("review_notes"),
+  expiryDate: timestamp("expiry_date"), // For licenses and certifications
+});
+
+// Background check results table
+export const backgroundChecks = pgTable("background_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  checkType: varchar("check_type").notNull(), // criminal, employment, education, reference
+  status: varchar("status").default("pending").notNull(), // pending, in_progress, passed, failed, error
+  result: jsonb("result"), // Detailed results from background check service
+  thirdPartyId: varchar("third_party_id"), // Reference ID from background check service
+  requestedAt: timestamp("requested_at").default(sql`now()`),
+  completedAt: timestamp("completed_at"),
+  validUntil: timestamp("valid_until"), // When this check expires
+  notes: text("notes"),
+});
+
+// Verification reviews and admin actions
+export const verificationReviews = pgTable("verification_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  reviewerId: varchar("reviewer_id").references(() => users.id).notNull(), // Admin who reviewed
+  reviewType: varchar("review_type").notNull(), // document_review, background_check_review, manual_verification
+  status: varchar("status").notNull(), // approved, rejected, requires_more_info
+  comments: text("comments"),
+  actionTaken: text("action_taken"), // What action was taken (e.g., status change, document request)
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Verification requirements by service category
+export const verificationRequirements = pgTable("verification_requirements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
+  requirementType: varchar("requirement_type").notNull(), // document, background_check, reference
+  isRequired: boolean("is_required").default(true),
+  description: text("description").notNull(),
+  verificationLevel: varchar("verification_level").notNull(), // basic, standard, premium
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -152,6 +208,27 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   createdAt: true,
 });
 
+export const insertVerificationDocumentSchema = createInsertSchema(verificationDocuments).omit({
+  id: true,
+  uploadedAt: true,
+  reviewedAt: true,
+});
+
+export const insertBackgroundCheckSchema = createInsertSchema(backgroundChecks).omit({
+  id: true,
+  requestedAt: true,
+  completedAt: true,
+});
+
+export const insertVerificationReviewSchema = createInsertSchema(verificationReviews).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVerificationRequirementSchema = createInsertSchema(verificationRequirements).omit({
+  id: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
@@ -168,3 +245,11 @@ export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type VerificationDocument = typeof verificationDocuments.$inferSelect;
+export type InsertVerificationDocument = z.infer<typeof insertVerificationDocumentSchema>;
+export type BackgroundCheck = typeof backgroundChecks.$inferSelect;
+export type InsertBackgroundCheck = z.infer<typeof insertBackgroundCheckSchema>;
+export type VerificationReview = typeof verificationReviews.$inferSelect;
+export type InsertVerificationReview = z.infer<typeof insertVerificationReviewSchema>;
+export type VerificationRequirement = typeof verificationRequirements.$inferSelect;
+export type InsertVerificationRequirement = z.infer<typeof insertVerificationRequirementSchema>;
