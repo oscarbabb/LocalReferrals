@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Services from "@/pages/services";
 import Providers from "@/pages/providers";
 import ProviderDetail from "@/pages/provider-detail";
+import ReviewDemo from "@/pages/review-demo";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
 
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/services" component={Services} />
       <Route path="/providers" component={Providers} />
       <Route path="/providers/:id" component={ProviderDetail} />
+      <Route path="/review-demo" component={ReviewDemo} />
       <Route path="/profile" component={Profile} />
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />

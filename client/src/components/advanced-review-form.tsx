@@ -1,0 +1,355 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+import { ObjectUploader } from "./ObjectUploader";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Star, Camera, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import type { UploadResult } from "@uppy/core";
+
+const advancedReviewSchema = z.object({
+  providerId: z.string(),
+  reviewerId: z.string(),
+  rating: z.number().min(1).max(5),
+  comment: z.string().optional(),
+  photos: z.array(z.string()).default([]),
+  serviceQuality: z.number().min(1).max(5).optional(),
+  communication: z.number().min(1).max(5).optional(),
+  punctuality: z.number().min(1).max(5).optional(),
+  valueForMoney: z.number().min(1).max(5).optional(),
+  wouldRecommend: z.boolean().default(true),
+});
+
+type AdvancedReviewData = z.infer<typeof advancedReviewSchema>;
+
+interface AdvancedReviewFormProps {
+  providerId: string;
+  reviewerId: string;
+  onSubmit?: () => void;
+  onCancel?: () => void;
+}
+
+interface StarRatingProps {
+  value: number;
+  onChange: (value: number) => void;
+  label: string;
+}
+
+function StarRating({ value, onChange, label }: StarRatingProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-sm font-medium min-w-[120px]">{label}</span>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onChange(star)}
+            className="text-yellow-400 hover:text-yellow-500 transition-colors"
+            data-testid={`star-${label.toLowerCase().replace(/\s+/g, '-')}-${star}`}
+          >
+            <Star 
+              className={`w-5 h-5 ${star <= value ? 'fill-current' : ''}`} 
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function AdvancedReviewForm({ 
+  providerId, 
+  reviewerId, 
+  onSubmit, 
+  onCancel 
+}: AdvancedReviewFormProps) {
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<AdvancedReviewData>({
+    resolver: zodResolver(advancedReviewSchema),
+    defaultValues: {
+      providerId,
+      reviewerId,
+      rating: 5,
+      comment: "",
+      photos: [],
+      serviceQuality: 5,
+      communication: 5,
+      punctuality: 5,
+      valueForMoney: 5,
+      wouldRecommend: true,
+    },
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: async (data: AdvancedReviewData) => {
+      return apiRequest("/api/reviews", "POST", { ...data, photos: uploadedPhotos });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Review submitted!",
+        description: "Thank you for your detailed review.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId] });
+      onSubmit?.();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePhotoUpload = async (): Promise<{ method: "PUT"; url: string }> => {
+    const response = await apiRequest("/api/objects/upload", "POST");
+    return {
+      method: "PUT",
+      url: response.uploadURL,
+    };
+  };
+
+  const handlePhotoComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      const photoURL = uploadedFile.uploadURL as string;
+      
+      // Set ACL policy for the photo
+      await apiRequest("/api/review-photos", "PUT", { photoURL });
+      
+      // Add to uploaded photos list
+      setUploadedPhotos(prev => [...prev, photoURL]);
+    }
+  };
+
+  const removePhoto = (photoUrl: string) => {
+    setUploadedPhotos(prev => prev.filter(photo => photo !== photoUrl));
+  };
+
+  const onFormSubmit = (data: AdvancedReviewData) => {
+    createReviewMutation.mutate(data);
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Star className="w-5 h-5 text-yellow-400" />
+          Write a Detailed Review
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
+            {/* Overall Rating */}
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Overall Rating</FormLabel>
+                  <FormControl>
+                    <StarRating
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Overall"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Detailed Ratings */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">Detailed Ratings</h4>
+              
+              <FormField
+                control={form.control}
+                name="serviceQuality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <StarRating
+                        value={field.value || 5}
+                        onChange={field.onChange}
+                        label="Service Quality"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="communication"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <StarRating
+                        value={field.value || 5}
+                        onChange={field.onChange}
+                        label="Communication"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="punctuality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <StarRating
+                        value={field.value || 5}
+                        onChange={field.onChange}
+                        label="Punctuality"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="valueForMoney"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <StarRating
+                        value={field.value || 5}
+                        onChange={field.onChange}
+                        label="Value for Money"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Written Review */}
+            <FormField
+              control={form.control}
+              name="comment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Written Review</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Share your experience with this service provider..."
+                      className="min-h-[120px]"
+                      data-testid="textarea-review-comment"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Photo Upload */}
+            <div className="space-y-4">
+              <FormLabel>Photos</FormLabel>
+              
+              {uploadedPhotos.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {uploadedPhotos.map((photo, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={photo}
+                        alt={`Review photo ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                        data-testid={`img-review-photo-${index}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(photo)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        data-testid={`button-remove-photo-${index}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <ObjectUploader
+                maxNumberOfFiles={5}
+                maxFileSize={5242880} // 5MB
+                onGetUploadParameters={handlePhotoUpload}
+                onComplete={handlePhotoComplete}
+                buttonClassName="bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-dashed border-gray-300"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Add Photos
+              </ObjectUploader>
+            </div>
+
+            {/* Recommendation */}
+            <FormField
+              control={form.control}
+              name="wouldRecommend"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <FormLabel>Would you recommend this service provider?</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      data-testid="switch-would-recommend"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Submit Buttons */}
+            <div className="flex gap-4 pt-4">
+              <Button 
+                type="submit" 
+                disabled={createReviewMutation.isPending}
+                className="flex-1"
+                data-testid="button-submit-review"
+              >
+                {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+              </Button>
+              {onCancel && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel}
+                  data-testid="button-cancel-review"
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}

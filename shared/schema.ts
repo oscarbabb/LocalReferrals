@@ -44,6 +44,13 @@ export const reviews = pgTable("reviews", {
   reviewerId: varchar("reviewer_id").references(() => users.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment"),
+  photos: text("photos").array().default(sql`ARRAY[]::text[]`), // Array of photo URLs
+  serviceQuality: integer("service_quality"), // 1-5 rating
+  communication: integer("communication"), // 1-5 rating
+  punctuality: integer("punctuality"), // 1-5 rating
+  valueForMoney: integer("value_for_money"), // 1-5 rating
+  wouldRecommend: boolean("would_recommend").default(true),
+  isVerified: boolean("is_verified").default(false), // Verified by completed service
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 

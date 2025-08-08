@@ -7,6 +7,12 @@ This is a full-stack TypeScript application for a local services marketplace cal
 - Replaced in-memory storage with persistent database storage
 - Added automatic database seeding for service categories
 - Enhanced visual design with larger logo and more orange branding accents
+- **Advanced Review System Implementation (January 8, 2025):**
+  - Enhanced database schema with detailed rating fields (service quality, communication, punctuality, value for money)
+  - Integrated object storage for photo uploads in reviews
+  - Created advanced review form with photo upload capabilities
+  - Built enhanced review cards displaying detailed ratings and photo galleries
+  - Added review demo page showcasing new features at `/review-demo`
 
 # User Preferences
 
@@ -33,6 +39,8 @@ Preferred communication style: Simple, everyday language.
 - **Schema Design**: Relational model with tables for users, service categories, providers, reviews, service requests, and messages
 - **Type Safety**: Database schema definitions shared between frontend and backend using Drizzle Zod integration
 - **Data Management**: DatabaseStorage class implementing all CRUD operations with automatic seeding
+- **Object Storage**: Replit Object Storage for photo uploads with public visibility for review photos
+- **Enhanced Reviews**: Review schema supports photo arrays, detailed ratings, verification status, and recommendation flags
 
 ## Authentication & Authorization
 - **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
@@ -42,7 +50,8 @@ Preferred communication style: Simple, everyday language.
 ## Key Features Architecture
 - **Service Discovery**: Categorized service listings with search and filtering capabilities
 - **Provider Profiles**: Detailed provider pages with ratings, reviews, and service descriptions
-- **Review System**: Star-based rating system with written reviews for quality assurance
+- **Advanced Review System**: Enhanced rating system with detailed criteria (service quality, communication, punctuality, value for money), photo uploads, verification badges, and recommendation tracking
+- **Photo Upload**: Object storage integration for review photos with automatic ACL management
 - **Request Management**: Service request workflow for booking and communication between users and providers
 - **Responsive Design**: Mobile-first approach with responsive components and mobile navigation
 

@@ -19,7 +19,7 @@ export default function Home() {
     queryKey: ["/api/providers"],
   });
 
-  const featuredProviders = providers.slice(0, 3);
+  const featuredProviders = (providers as any[]).slice(0, 3);
 
   const testimonials = [
     {
@@ -72,13 +72,13 @@ export default function Home() {
                   Explorar Servicios
                 </Button>
               </Link>
-              <Link href="/auth">
+              <Link href="/review-demo">
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-accent text-accent hover:bg-accent hover:text-white px-8 py-4 text-lg w-full sm:w-auto shadow-lg"
+                  className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg w-full sm:w-auto shadow-lg"
                 >
-                  Ofrecer Servicios
+                  Ver Sistema Avanzado
                 </Button>
               </Link>
             </div>
@@ -111,7 +111,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProviders.map((provider) => (
+            {featuredProviders.map((provider: any) => (
               <ProviderCard key={provider.id} provider={provider} />
             ))}
           </div>
