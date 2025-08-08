@@ -6,7 +6,7 @@ import ProviderCard from "@/components/provider-card";
 import TestimonialCard from "@/components/testimonial-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, MessageCircle, Handshake, UserCheck } from "lucide-react";
+import { Shield, MessageCircle, Handshake, UserCheck, Home as HomeIcon, ArrowRight } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 import logoPath from "@assets/Logo 2 test_1754014544538.png";
 
@@ -87,17 +87,54 @@ export default function Home() {
       </section>
 
       {/* Service Categories */}
-      <section id="servicios" className="py-16 bg-gradient-to-b from-gray-50 to-orange-50 pattern-dots">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Categorías de Servicios</h2>
-            <p className="text-xl text-gray-600">Encuentra exactamente lo que necesitas</p>
+      <section id="servicios" className="py-20 bg-gradient-to-b from-gray-50 via-orange-50 to-white relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 bg-grid-gray-100/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pattern-dots"></div>
+        <div className="absolute top-10 left-10 w-72 h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-2000"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl mb-6 shadow-lg">
+              <HomeIcon className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Categorías de <span className="text-orange-600">Servicios</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Descubre servicios de calidad verificados por tu propia comunidad. Cada categoría está diseñada para satisfacer tus necesidades específicas.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {categories.map((category) => (
-              <ServiceCard key={category.id} category={category} providerCount={Math.floor(Math.random() * 20) + 5} />
+              <ServiceCard 
+                key={category.id} 
+                category={category} 
+                providerCount={Math.floor(Math.random() * 15) + 8} 
+              />
             ))}
+          </div>
+
+          {/* Call to action */}
+          <div className="text-center mt-16">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-orange-200/50">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                ¿No encuentras lo que buscas?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Explora todas nuestras categorías o solicita un nuevo servicio
+              </p>
+              <Link href="/services">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg"
+                >
+                  Ver Todos los Servicios
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
