@@ -221,7 +221,7 @@ export default function HowItWorks() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+      <div className="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <Link href="/" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
@@ -236,7 +236,7 @@ export default function HowItWorks() {
               </h1>
             </div>
             
-            <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
               Descubre lo fácil que es conectar con servicios de confianza en tu comunidad. 
               Desde encontrar el proveedor perfecto hasta recibir un servicio excepcional.
             </p>
@@ -244,21 +244,21 @@ export default function HowItWorks() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">4</div>
-                <div className="text-sm text-orange-200">Pasos Simples</div>
+                <div className="text-sm text-blue-200">Pasos Simples</div>
               </div>
               
-              <div className="hidden sm:block w-px h-12 bg-orange-300"></div>
+              <div className="hidden sm:block w-px h-12 bg-blue-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">100%</div>
-                <div className="text-sm text-orange-200">Verificado</div>
+                <div className="text-sm text-blue-200">Verificado</div>
               </div>
               
-              <div className="hidden sm:block w-px h-12 bg-orange-300"></div>
+              <div className="hidden sm:block w-px h-12 bg-blue-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">24/7</div>
-                <div className="text-sm text-orange-200">Disponible</div>
+                <div className="text-sm text-blue-200">Disponible</div>
               </div>
             </div>
           </div>
@@ -428,22 +428,22 @@ export default function HowItWorks() {
       </div>
 
       {/* Call to Action */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 py-16">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             ¿Listo para Comenzar?
           </h2>
-          <p className="text-xl text-orange-100 mb-8">
+          <p className="text-xl text-indigo-100 mb-8">
             Únete a la comunidad de Referencias Locales y descubre una nueva forma de conectar con servicios de confianza
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/services">
-              <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-explore-services">
+              <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-explore-services">
                 Explorar Servicios
               </Button>
             </Link>
             <Link href="/providers">
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
                 Ser Proveedor
               </Button>
             </Link>
