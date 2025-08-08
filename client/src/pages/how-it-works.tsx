@@ -443,7 +443,7 @@ export default function HowItWorks() {
               </Button>
             </Link>
             <Link href="/providers">
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
                 Ser Proveedor
               </Button>
             </Link>
