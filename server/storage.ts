@@ -8,7 +8,11 @@ import {
   type Review, 
   type InsertReview, 
   type ServiceRequest, 
-  type InsertServiceRequest, 
+  type InsertServiceRequest,
+  type ProviderAvailability,
+  type InsertProviderAvailability,
+  type Appointment,
+  type InsertAppointment,
   type Message, 
   type InsertMessage,
   users,
@@ -16,6 +20,8 @@ import {
   providers,
   reviews,
   serviceRequests,
+  providerAvailability,
+  appointments,
   messages
 } from "@shared/schema";
 import { randomUUID } from "crypto";
@@ -54,6 +60,15 @@ export interface IStorage {
   createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
   updateServiceRequest(id: string, request: Partial<ServiceRequest>): Promise<ServiceRequest | undefined>;
 
+  // Provider Availability
+  getProviderAvailability(providerId: string): Promise<ProviderAvailability[]>;
+  createProviderAvailability(availability: InsertProviderAvailability): Promise<ProviderAvailability>;
+
+  // Appointments
+  getAppointmentsByProvider(providerId: string): Promise<Appointment[]>;
+  getAppointmentsByUser(userId: string): Promise<Appointment[]>;
+  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
+
   // Messages
   getMessagesByRequest(requestId: string): Promise<Message[]>;
   getConversation(userId1: string, userId2: string): Promise<Message[]>;
@@ -66,6 +81,8 @@ export class MemStorage implements IStorage {
   private providers: Map<string, Provider>;
   private reviews: Map<string, Review>;
   private serviceRequests: Map<string, ServiceRequest>;
+  private providerAvailability: Map<string, ProviderAvailability>;
+  private appointments: Map<string, Appointment>;
   private messages: Map<string, Message>;
 
   constructor() {
@@ -74,9 +91,13 @@ export class MemStorage implements IStorage {
     this.providers = new Map();
     this.reviews = new Map();
     this.serviceRequests = new Map();
+    this.providerAvailability = new Map();
+    this.appointments = new Map();
     this.messages = new Map();
     
     this.seedData();
+    // Call this after seeding to add availability for existing providers
+    setTimeout(() => this.seedProviderAvailability(), 100);
   }
 
   private seedData() {
@@ -271,6 +292,43 @@ export class MemStorage implements IStorage {
     return updatedRequest;
   }
 
+  // Provider Availability
+  async getProviderAvailability(providerId: string): Promise<ProviderAvailability[]> {
+    return Array.from(this.providerAvailability.values()).filter(a => a.providerId === providerId);
+  }
+
+  async createProviderAvailability(insertAvailability: InsertProviderAvailability): Promise<ProviderAvailability> {
+    const id = randomUUID();
+    const availability: ProviderAvailability = { 
+      ...insertAvailability, 
+      id, 
+      createdAt: new Date() 
+    };
+    this.providerAvailability.set(id, availability);
+    return availability;
+  }
+
+  // Appointments
+  async getAppointmentsByProvider(providerId: string): Promise<Appointment[]> {
+    return Array.from(this.appointments.values()).filter(a => a.providerId === providerId);
+  }
+
+  async getAppointmentsByUser(userId: string): Promise<Appointment[]> {
+    return Array.from(this.appointments.values()).filter(a => a.requesterId === userId);
+  }
+
+  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+    const id = randomUUID();
+    const appointment: Appointment = { 
+      ...insertAppointment, 
+      id, 
+      createdAt: new Date(),
+      updatedAt: new Date() 
+    };
+    this.appointments.set(id, appointment);
+    return appointment;
+  }
+
   // Messages
   async getMessagesByRequest(requestId: string): Promise<Message[]> {
     return Array.from(this.messages.values())
@@ -292,6 +350,30 @@ export class MemStorage implements IStorage {
     const message: Message = { ...insertMessage, id, createdAt: new Date() };
     this.messages.set(id, message);
     return message;
+  }
+
+  private seedProviderAvailability() {
+    // Add default availability for all providers (Mon-Fri, 9 AM - 5 PM)
+    const defaultSchedule = [
+      { dayOfWeek: 1, startTime: "09:00", endTime: "17:00" }, // Monday
+      { dayOfWeek: 2, startTime: "09:00", endTime: "17:00" }, // Tuesday
+      { dayOfWeek: 3, startTime: "09:00", endTime: "17:00" }, // Wednesday
+      { dayOfWeek: 4, startTime: "09:00", endTime: "17:00" }, // Thursday
+      { dayOfWeek: 5, startTime: "09:00", endTime: "17:00" }, // Friday
+    ];
+
+    Array.from(this.providers.keys()).forEach(providerId => {
+      defaultSchedule.forEach(schedule => {
+        const id = randomUUID();
+        this.providerAvailability.set(id, {
+          id,
+          providerId,
+          ...schedule,
+          isAvailable: true,
+          createdAt: new Date(),
+        });
+      });
+    });
   }
 }
 
@@ -480,4 +562,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

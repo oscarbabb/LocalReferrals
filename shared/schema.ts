@@ -62,8 +62,42 @@ export const serviceRequests = pgTable("service_requests", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   preferredDate: timestamp("preferred_date"),
-  status: text("status").default("pending"), // pending, accepted, completed, cancelled
+  preferredTime: text("preferred_time"), // "morning", "afternoon", "evening"
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  location: text("location"), // apartment number or specific location
+  notes: text("notes"),
+  status: text("status").default("pending"), // pending, confirmed, in_progress, completed, cancelled
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }),
+  confirmedDate: timestamp("confirmed_date"),
+  confirmedTime: text("confirmed_time"),
   createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+// New table for provider availability
+export const providerAvailability = pgTable("provider_availability", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 (Sunday-Saturday)
+  startTime: text("start_time").notNull(), // "09:00"
+  endTime: text("end_time").notNull(), // "17:00"
+  isAvailable: boolean("is_available").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// New table for booked appointments
+export const appointments = pgTable("appointments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  serviceRequestId: varchar("service_request_id").references(() => serviceRequests.id).notNull(),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  requesterId: varchar("requester_id").references(() => users.id).notNull(),
+  appointmentDate: timestamp("appointment_date").notNull(),
+  startTime: text("start_time").notNull(), // "14:00"
+  endTime: text("end_time").notNull(), // "16:00"
+  status: text("status").default("scheduled"), // scheduled, completed, cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
 export const messages = pgTable("messages", {
@@ -99,6 +133,18 @@ export const insertServiceRequestSchema = createInsertSchema(serviceRequests).om
   id: true,
   status: true,
   createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProviderAvailabilitySchema = createInsertSchema(providerAvailability).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAppointmentSchema = createInsertSchema(appointments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
@@ -116,5 +162,9 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type ServiceRequest = typeof serviceRequests.$inferSelect;
 export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
+export type ProviderAvailability = typeof providerAvailability.$inferSelect;
+export type InsertProviderAvailability = z.infer<typeof insertProviderAvailabilitySchema>;
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;

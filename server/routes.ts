@@ -9,7 +9,9 @@ import {
   insertUserSchema, 
   insertProviderSchema, 
   insertReviewSchema, 
-  insertServiceRequestSchema, 
+  insertServiceRequestSchema,
+  insertProviderAvailabilitySchema,
+  insertAppointmentSchema,
   insertMessageSchema 
 } from "@shared/schema";
 
@@ -255,14 +257,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Service Requests
+  // Service Requests and Booking System
+  app.get("/api/service-requests", async (req, res) => {
+    try {
+      const { userId, providerId } = req.query;
+      let requests;
+      
+      if (userId) {
+        requests = await storage.getServiceRequestsByUser(userId as string);
+      } else if (providerId) {
+        requests = await storage.getServiceRequestsByProvider(providerId as string);
+      } else {
+        requests = await storage.getServiceRequests();
+      }
+      
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch service requests" });
+    }
+  });
+
   app.post("/api/service-requests", async (req, res) => {
     try {
-      const validatedData = insertServiceRequestSchema.parse(req.body);
-      const request = await storage.createServiceRequest(validatedData);
-      res.status(201).json(request);
+      const requestData = insertServiceRequestSchema.parse(req.body);
+      const serviceRequest = await storage.createServiceRequest(requestData);
+      res.status(201).json(serviceRequest);
     } catch (error) {
+      console.error("Service request creation error:", error);
       res.status(400).json({ message: "Invalid service request data" });
+    }
+  });
+
+  // Provider Availability
+  app.get("/api/providers/:id/availability", async (req, res) => {
+    try {
+      const availability = await storage.getProviderAvailability(req.params.id);
+      res.json(availability);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch availability" });
+    }
+  });
+
+  app.post("/api/providers/:id/availability", async (req, res) => {
+    try {
+      const availabilityData = insertProviderAvailabilitySchema.parse({
+        ...req.body,
+        providerId: req.params.id
+      });
+      const availability = await storage.createProviderAvailability(availabilityData);
+      res.status(201).json(availability);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid availability data" });
+    }
+  });
+
+  // Appointments
+  app.get("/api/appointments/:providerId", async (req, res) => {
+    try {
+      const appointments = await storage.getAppointmentsByProvider(req.params.providerId);
+      res.json(appointments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch appointments" });
+    }
+  });
+
+  app.post("/api/appointments", async (req, res) => {
+    try {
+      const appointmentData = insertAppointmentSchema.parse(req.body);
+      const appointment = await storage.createAppointment(appointmentData);
+      res.status(201).json(appointment);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid appointment data" });
     }
   });
 

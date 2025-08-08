@@ -4,6 +4,7 @@ import { useRoute } from "wouter";
 import Header from "@/components/header";
 import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
+import QuickBookingButton from "@/components/quick-booking-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -144,13 +145,14 @@ export default function ProviderDetail() {
             <Separator className="my-6" />
             
             <div className="flex flex-col md:flex-row gap-4">
-              <Button size="lg" className="bg-primary text-white hover:bg-blue-700 flex-1">
+              <QuickBookingButton 
+                provider={provider} 
+                size="lg" 
+                className="flex-1"
+              />
+              <Button variant="outline" size="lg" className="flex-1">
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Enviar Mensaje
-              </Button>
-              <Button variant="outline" size="lg" className="flex-1">
-                <Calendar className="w-5 h-5 mr-2" />
-                Solicitar Servicio
               </Button>
             </div>
           </CardContent>
