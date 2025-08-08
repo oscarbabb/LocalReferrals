@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Lock, User, Phone, Building } from "lucide-react";
+import { Mail, Lock, User, Phone, Building, MapPin } from "lucide-react";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -79,6 +79,7 @@ export default function Auth() {
       email: formData.get("email") as string,
       password: password,
       fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
+      address: formData.get("address") as string,
       phone: formData.get("phone") as string,
       building: buildingValue,
       apartment: formData.get("apartment") as string,
@@ -236,6 +237,21 @@ export default function Auth() {
                         type="tel"
                         placeholder="+1234567890"
                         className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Dirección Completa</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        id="address"
+                        name="address"
+                        type="text"
+                        placeholder="Ej: Av. Principal 123, Colonia Centro, Ciudad"
+                        className="pl-10"
+                        required
+                        data-testid="input-address"
                       />
                     </div>
                   </div>
