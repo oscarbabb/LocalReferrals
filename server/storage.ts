@@ -415,20 +415,72 @@ export class DatabaseStorage implements IStorage {
 
   private async seedDatabase() {
     try {
-      // Check if data already exists
+      // Check if we need comprehensive categories (only 6 basic ones exist)
       const existingCategories = await db.select().from(serviceCategories);
-      if (existingCategories.length > 0) {
-        return; // Data already seeded
+      if (existingCategories.length > 15) {
+        return; // Comprehensive categories already seeded
+      }
+      
+      // If we only have basic categories, clear everything and reseed with comprehensive list
+      if (existingCategories.length > 0 && existingCategories.length <= 6) {
+        console.log("Upgrading to comprehensive service categories...");
+        
+        // Clear all dependent data first to avoid foreign key constraints
+        await db.delete(verificationReviews);
+        await db.delete(verificationDocuments);
+        await db.delete(backgroundChecks);
+        await db.delete(providerAvailability);
+        await db.delete(appointments);
+        await db.delete(reviews);
+        await db.delete(serviceRequests);
+        await db.delete(messages);
+        await db.delete(providers);
+        await db.delete(serviceCategories);
+        
+        console.log("Cleared existing data for comprehensive reseeding");
       }
 
-      // Seed service categories
+      // Seed service categories with comprehensive service offerings
       const sampleCategories = [
+        // Essential Home Services
         { name: "Limpieza", description: "Servicios de limpieza para el hogar", icon: "🧹", color: "#3B82F6" },
         { name: "Reparaciones", description: "Plomería, electricidad y reparaciones generales", icon: "🔧", color: "#10B981" },
-        { name: "Tutorías", description: "Clases particulares y apoyo académico", icon: "📚", color: "#F59E0B" },
-        { name: "Cuidado de Mascotas", description: "Paseo, cuidado y servicios veterinarios", icon: "🐕", color: "#EF4444" },
         { name: "Jardinería", description: "Mantenimiento de plantas y jardines", icon: "🌱", color: "#22C55E" },
         { name: "Cocina", description: "Servicios de cocina y catering", icon: "👨‍🍳", color: "#8B5CF6" },
+        
+        // Education & Learning
+        { name: "Tutorías", description: "Clases particulares y apoyo académico", icon: "📚", color: "#F59E0B" },
+        { name: "Idiomas", description: "Clases de idiomas, traducción e interpretación", icon: "🌍", color: "#0369A1" },
+        { name: "Música y Entretenimiento", description: "Clases de música, DJ para eventos y entretenimiento en vivo", icon: "🎵", color: "#7C2D12" },
+        { name: "Arte y Manualidades", description: "Clases de arte, manualidades y talleres creativos", icon: "🖌️", color: "#DB2777" },
+        
+        // Health & Wellness
+        { name: "Medicina y Salud", description: "Servicios médicos a domicilio, enfermería y terapias", icon: "🩺", color: "#DC2626" },
+        { name: "Psicología y Bienestar", description: "Terapia psicológica, coaching de vida y servicios de bienestar mental", icon: "🧠", color: "#7C3AED" },
+        { name: "Belleza y Cuidado Personal", description: "Servicios de peluquería, manicure, pedicure y tratamientos estéticos", icon: "💅", color: "#EC4899" },
+        { name: "Masajes y Spa", description: "Masajes terapéuticos, relajantes y tratamientos de spa a domicilio", icon: "💆", color: "#8B5A96" },
+        { name: "Entrenamiento Personal", description: "Entrenadores personales y clases de fitness a domicilio", icon: "🏋️", color: "#DC2626" },
+        
+        // Care Services
+        { name: "Cuidado de Niños", description: "Niñeras, cuidado infantil y servicios de babysitting", icon: "👶", color: "#F59E0B" },
+        { name: "Cuidado de Adultos Mayores", description: "Acompañamiento y cuidado especializado para personas mayores", icon: "👵", color: "#059669" },
+        { name: "Cuidado de Mascotas", description: "Paseo, cuidado y servicios veterinarios", icon: "🐕", color: "#EF4444" },
+        { name: "Veterinaria", description: "Servicios veterinarios a domicilio, consultas y cuidado animal", icon: "🐾", color: "#059669" },
+        
+        // Technical & Professional Services
+        { name: "Tecnología y Computación", description: "Soporte técnico, reparación de equipos y configuración de dispositivos", icon: "💻", color: "#1E40AF" },
+        { name: "Asesoría Legal", description: "Consultoría jurídica, trámites legales y asesoría profesional", icon: "⚖️", color: "#1F2937" },
+        { name: "Contabilidad y Finanzas", description: "Servicios contables, declaración de impuestos y asesoría financiera", icon: "💰", color: "#166534" },
+        { name: "Seguridad", description: "Servicios de seguridad privada, instalación de cámaras y cerrajería", icon: "🛡️", color: "#374151" },
+        
+        // Creative & Event Services
+        { name: "Fotografía y Video", description: "Servicios fotográficos para eventos, retratos y producción audiovisual", icon: "📸", color: "#0891B2" },
+        { name: "Organización de Eventos", description: "Planificación y organización de fiestas, celebraciones y eventos", icon: "🎉", color: "#BE185D" },
+        { name: "Decoración y Diseño", description: "Diseño de interiores, decoración y ambientación de espacios", icon: "🎨", color: "#065F46" },
+        
+        // Specialized Services
+        { name: "Transporte y Mudanzas", description: "Servicios de transporte, mudanzas y envío de paquetes", icon: "🚚", color: "#7C3AED" },
+        { name: "Costura y Confección", description: "Reparación de ropa, confección a medida y arreglos textiles", icon: "🧵", color: "#92400E" },
       ];
 
       await db.insert(serviceCategories).values(sampleCategories);
