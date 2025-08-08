@@ -12,6 +12,7 @@ import ReviewDemo from "@/pages/review-demo";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
 import Testimonials from "@/pages/testimonials";
+import HowItWorks from "@/pages/how-it-works";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/providers/:id" component={ProviderDetail} />
       <Route path="/review-demo" component={ReviewDemo} />
       <Route path="/testimonials" component={Testimonials} />
+      <Route path="/como-funciona" component={HowItWorks} />
       <Route path="/profile" component={Profile} />
       <Route path="/auth" component={Auth} />
       <Route component={NotFound} />
