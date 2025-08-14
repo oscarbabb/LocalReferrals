@@ -331,10 +331,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/appointments/user/:userId", async (req, res) => {
+    try {
+      const appointments = await storage.getAppointmentsByUser(req.params.userId);
+      
+      // Populate with provider details
+      const appointmentsWithProviders = await Promise.all(
+        appointments.map(async (appointment) => {
+          const provider = await storage.getProvider(appointment.providerId);
+          return { ...appointment, provider };
+        })
+      );
+      
+      res.json(appointmentsWithProviders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch appointments" });
+    }
+  });
+
   app.get("/api/service-requests/user/:userId", async (req, res) => {
     try {
       const requests = await storage.getServiceRequestsByUser(req.params.userId);
-      res.json(requests);
+      
+      // Populate with provider details
+      const requestsWithProviders = await Promise.all(
+        requests.map(async (request) => {
+          const provider = await storage.getProvider(request.providerId);
+          return { ...request, provider };
+        })
+      );
+      
+      res.json(requestsWithProviders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch service requests" });
+    }
+  });
+
+  app.get("/api/service-requests/provider/:providerId", async (req, res) => {
+    try {
+      const requests = await storage.getServiceRequestsByProvider(req.params.providerId);
+      
+      // Populate with requester details
+      const requestsWithRequesters = await Promise.all(
+        requests.map(async (request) => {
+          const requester = await storage.getUser(request.requesterId);
+          return { ...request, requester };
+        })
+      );
+      
+      res.json(requestsWithRequesters);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch service requests" });
     }

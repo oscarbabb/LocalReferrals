@@ -156,6 +156,8 @@ export class MemStorage implements IStorage {
         email: "maria@example.com",
         password: "password123",
         fullName: "María García",
+        address: "Condominio Las Flores, Torre Norte",
+        section: "Norte",
         apartment: "304",
         building: "Edificio A",
         phone: "+1234567890",
@@ -166,6 +168,8 @@ export class MemStorage implements IStorage {
         email: "carlos@example.com",
         password: "password123",
         fullName: "Carlos Mendoza",
+        address: "Condominio Las Flores, Torre Sur",
+        section: "Sur",
         apartment: "201",
         building: "Edificio B",
         phone: "+1234567891",
@@ -183,9 +187,16 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    sampleUsers.forEach(user => {
+    sampleUsers.forEach(userData => {
       const id = randomUUID();
-      this.users.set(id, { id, ...user, avatar: null, createdAt: new Date() });
+      this.users.set(id, { 
+        id, 
+        ...userData, 
+        avatar: null, 
+        address: userData.address || null,
+        section: userData.section || null,
+        createdAt: new Date() 
+      });
     });
   }
 
@@ -207,7 +218,9 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      avatar: null, 
+      avatar: null,
+      address: insertUser.address || null,
+      section: insertUser.section || null,
       createdAt: new Date() 
     };
     this.users.set(id, user);
