@@ -117,6 +117,7 @@ export class MemStorage implements IStorage {
   private messages: Map<string, Message>;
 
   constructor() {
+    console.log("🏗️  Initializing MemStorage...");
     this.users = new Map();
     this.serviceCategories = new Map();
     this.providers = new Map();
@@ -126,7 +127,10 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.messages = new Map();
     
+    console.log("📦 Starting data seeding...");
     this.seedData();
+    console.log("✅ Data seeding completed");
+    
     // Call this after seeding to add availability for existing providers
     setTimeout(() => this.seedProviderAvailability(), 100);
   }
@@ -256,12 +260,13 @@ export class MemStorage implements IStorage {
         const newProvider = {
           id,
           ...provider,
-          isVerified: true,
           isActive: true,
-          verificationStatus: "verified",
-          verificationLevel: "standard",
-          verificationDate: new Date(),
-          serviceAreas: null,
+          isVerified: true,
+          verificationStatus: "verified" as const,
+          verificationLevel: "standard" as const,
+          lastVerificationDate: new Date(),
+          backgroundCheckStatus: "completed" as const,
+          documentsSubmitted: true,
           verificationNotes: null,
           createdAt: new Date(),
         };
@@ -270,9 +275,16 @@ export class MemStorage implements IStorage {
       }
     });
     
-    console.log(`Total providers created: ${this.providers.size}`);
+    console.log(`=== PROVIDER SEEDING DEBUG ===`);
     console.log(`Available categories: ${availableCategories.length}`);
     console.log(`Provider data entries: ${providerData.length}`);
+    console.log(`Total providers created: ${this.providers.size}`);
+    console.log(`First category ID: ${availableCategories[0]?.id}`);
+    console.log(`First user ID: ${userIds[0]}`);
+    console.log(`=== END DEBUG ===`);
+    
+    // Also seed some sample reviews
+    this.seedSampleReviews();
   }
 
   // Users
@@ -289,11 +301,21 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Check if user already exists by email
+    const existingUser = await this.getUserByEmail(insertUser.email);
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+    
     const id = randomUUID();
     const user: User = { 
       ...insertUser, 
       id, 
       avatar: null,
+      apartment: insertUser.apartment || null,
+      building: insertUser.building || null,
+      phone: insertUser.phone || null,
+      isProvider: insertUser.isProvider || false,
       address: insertUser.address || null,
       section: insertUser.section || null,
       createdAt: new Date() 
@@ -349,15 +371,14 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const provider: Provider = { 
       ...insertProvider, 
-      id, 
-      hourlyRate: insertProvider.hourlyRate || null,
-      experience: insertProvider.experience || null,
-      isVerified: insertProvider.isVerified || false, 
-      isActive: insertProvider.isActive !== false, 
-      verificationStatus: insertProvider.verificationStatus || null,
-      verificationLevel: insertProvider.verificationLevel || null,
-      verificationDate: insertProvider.verificationDate || null,
-      serviceAreas: insertProvider.serviceAreas || null,
+      id,
+      isActive: insertProvider.isActive !== false,
+      isVerified: insertProvider.isVerified || false,
+      verificationStatus: insertProvider.verificationStatus || "pending",
+      verificationLevel: insertProvider.verificationLevel || "basic",
+      lastVerificationDate: insertProvider.lastVerificationDate || null,
+      backgroundCheckStatus: insertProvider.backgroundCheckStatus || "pending", 
+      documentsSubmitted: insertProvider.documentsSubmitted || false,
       verificationNotes: insertProvider.verificationNotes || null,
       createdAt: new Date() 
     };
@@ -380,7 +401,18 @@ export class MemStorage implements IStorage {
 
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = randomUUID();
-    const review: Review = { ...insertReview, id, createdAt: new Date() };
+    const review: Review = { 
+      ...insertReview, 
+      id, 
+      isVerified: insertReview.isVerified || false,
+      photos: insertReview.photos || null,
+      serviceQuality: insertReview.serviceQuality || null,
+      communication: insertReview.communication || null,
+      punctuality: insertReview.punctuality || null,
+      valueForMoney: insertReview.valueForMoney || null,
+      wouldRecommend: insertReview.wouldRecommend || null,
+      createdAt: new Date() 
+    };
     this.reviews.set(id, review);
     return review;
   }
@@ -403,7 +435,16 @@ export class MemStorage implements IStorage {
     const request: ServiceRequest = { 
       ...insertRequest, 
       id, 
-      status: "pending", 
+      status: insertRequest.status || "pending",
+      preferredDate: insertRequest.preferredDate || null,
+      preferredTime: insertRequest.preferredTime || null,
+      urgency: insertRequest.urgency || null,
+      budgetRange: insertRequest.budgetRange || null,
+      contactPhone: insertRequest.contactPhone || null,
+      specialRequirements: insertRequest.specialRequirements || null,
+      confirmedDate: insertRequest.confirmedDate || null,
+      confirmedTime: insertRequest.confirmedTime || null,
+      updatedAt: new Date(),
       createdAt: new Date() 
     };
     this.serviceRequests.set(id, request);
@@ -428,6 +469,7 @@ export class MemStorage implements IStorage {
     const availability: ProviderAvailability = { 
       ...insertAvailability, 
       id, 
+      isAvailable: insertAvailability.isAvailable !== false,
       createdAt: new Date() 
     };
     this.providerAvailability.set(id, availability);
@@ -448,6 +490,8 @@ export class MemStorage implements IStorage {
     const appointment: Appointment = { 
       ...insertAppointment, 
       id, 
+      status: insertAppointment.status || "pending",
+      notes: insertAppointment.notes || null,
       createdAt: new Date(),
       updatedAt: new Date() 
     };
@@ -473,9 +517,95 @@ export class MemStorage implements IStorage {
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const id = randomUUID();
-    const message: Message = { ...insertMessage, id, createdAt: new Date() };
+    const message: Message = { 
+      ...insertMessage, 
+      id, 
+      requestId: insertMessage.requestId || null,
+      createdAt: new Date() 
+    };
     this.messages.set(id, message);
     return message;
+  }
+
+  // Verification methods (required by IStorage interface)
+  async getVerificationDocuments(): Promise<any[]> {
+    return [];
+  }
+
+  async createVerificationDocument(doc: any): Promise<any> {
+    return doc;
+  }
+
+  async updateVerificationDocument(id: string, update: any): Promise<any> {
+    return update;
+  }
+
+  async getBackgroundChecks(): Promise<any[]> {
+    return [];
+  }
+
+  async createBackgroundCheck(check: any): Promise<any> {
+    return check;
+  }
+
+  async updateBackgroundCheck(id: string, update: any): Promise<any> {
+    return update;
+  }
+
+  async getVerificationRequirements(): Promise<any[]> {
+    return [];
+  }
+
+  private seedSampleReviews() {
+    // Create some sample reviews for providers
+    const providerIds = Array.from(this.providers.keys());
+    const userIds = Array.from(this.users.keys()).filter(userId => {
+      const user = this.users.get(userId);
+      return user && !user.isProvider; // Only non-provider users can leave reviews
+    });
+
+    // If no regular users exist, create one for reviews
+    if (userIds.length === 0) {
+      const reviewerId = randomUUID();
+      this.users.set(reviewerId, {
+        id: reviewerId,
+        username: "cliente.demo",
+        email: "cliente@example.com", 
+        password: "password123",
+        fullName: "Cliente Demo",
+        address: "Condominio Las Flores",
+        section: "Centro",
+        apartment: "102",
+        building: "Edificio D",
+        phone: "+1234567893",
+        isProvider: false,
+        avatar: null,
+        createdAt: new Date()
+      });
+      userIds.push(reviewerId);
+    }
+
+    // Create sample reviews
+    providerIds.forEach((providerId, index) => {
+      if (userIds.length > 0) {
+        const reviewId = randomUUID();
+        this.reviews.set(reviewId, {
+          id: reviewId,
+          providerId,
+          reviewerId: userIds[0],
+          rating: 4.5 + (index * 0.2), // Varying ratings
+          comment: `Excelente servicio profesional. Muy recomendado para la comunidad.`,
+          photos: [],
+          serviceQuality: 5,
+          communication: 4,
+          punctuality: 5,
+          valueForMoney: 4,
+          wouldRecommend: true,
+          isVerified: true,
+          createdAt: new Date()
+        });
+      }
+    });
   }
 
   private seedProviderAvailability() {
@@ -512,9 +642,24 @@ export class DatabaseStorage implements IStorage {
     try {
       // Check if we need comprehensive categories (only 6 basic ones exist)
       const existingCategories = await db.select().from(serviceCategories);
+      console.log(`🔍 Database check: Found ${existingCategories.length} existing categories`);
+      
       if (existingCategories.length > 15) {
+        console.log(`✅ Comprehensive categories already seeded (${existingCategories.length} > 15)`);
+        
+        // Check if providers exist, if not, seed them
+        const existingProviders = await db.select().from(providers);
+        console.log(`🔍 Found ${existingProviders.length} existing providers`);
+        
+        if (existingProviders.length === 0) {
+          console.log(`📦 Seeding sample providers...`);
+          await this.seedSampleProviders();
+        }
+        
         return; // Comprehensive categories already seeded
       }
+      
+      console.log(`📦 Starting comprehensive seeding process...`);
       
       // If we only have basic categories, clear everything and reseed with comprehensive list
       if (existingCategories.length > 0 && existingCategories.length <= 6) {
@@ -582,6 +727,190 @@ export class DatabaseStorage implements IStorage {
       console.log('Database seeded successfully');
     } catch (error) {
       console.error('Error seeding database:', error);
+    }
+  }
+
+  private async seedSampleProviders() {
+    try {
+      // Get categories first
+      const categories = await db.select().from(serviceCategories);
+      console.log(`📂 Available categories for providers: ${categories.length}`);
+      
+      // Sample provider data
+      const sampleProviders = [
+        {
+          title: "María Limpieza Pro",
+          description: "Especialista en limpieza profunda de hogares. Con más de 8 años de experiencia, ofrezco servicios de limpieza confiables y detallados.",
+          categoryId: categories.find(c => c.name === "Limpieza")?.id!,
+          userId: "sample-user-1", // Will be replaced with actual user IDs
+          hourlyRate: 25000,
+          experience: "8 años de experiencia en limpieza profesional",
+          skills: ["Limpieza profunda", "Desinfección", "Organización"],
+          contactPhone: "+57 300 123 4567",
+          availability: "Lunes a Sábado, 7:00 AM - 5:00 PM",
+          isActive: true,
+          isVerified: true,
+          verificationStatus: "verified" as const,
+          verificationLevel: "standard" as const,
+          backgroundCheckStatus: "approved" as const,
+          documentsSubmitted: true
+        },
+        {
+          title: "Carlos Reparaciones Hogar", 
+          description: "Electricista y plomero certificado. Arreglo cualquier problema eléctrico o de plomería en tu hogar con garantía.",
+          categoryId: categories.find(c => c.name === "Reparaciones")?.id!,
+          userId: "sample-user-2",
+          hourlyRate: 45000,
+          experience: "12 años en reparaciones eléctricas y plomería",
+          skills: ["Instalaciones eléctricas", "Plomería", "Reparaciones generales"],
+          contactPhone: "+57 301 234 5678",
+          availability: "Lunes a Domingo, 8:00 AM - 6:00 PM",
+          isActive: true,
+          isVerified: true,
+          verificationStatus: "verified" as const,
+          verificationLevel: "premium" as const,
+          backgroundCheckStatus: "approved" as const,
+          documentsSubmitted: true
+        },
+        {
+          title: "Ana Tutorías Matemáticas",
+          description: "Profesora de matemáticas con experiencia en todos los niveles. Ayudo a estudiantes a mejorar sus notas y comprender mejor los conceptos.",
+          categoryId: categories.find(c => c.name === "Tutorías")?.id!,
+          userId: "sample-user-3",
+          hourlyRate: 35000,
+          experience: "6 años enseñando matemáticas",
+          skills: ["Matemáticas básicas", "Álgebra", "Cálculo", "Estadística"],
+          contactPhone: "+57 302 345 6789",
+          availability: "Lunes a Viernes, 2:00 PM - 8:00 PM",
+          isActive: true,
+          isVerified: true,
+          verificationStatus: "verified" as const,
+          verificationLevel: "standard" as const,
+          backgroundCheckStatus: "approved" as const,
+          documentsSubmitted: true
+        },
+        {
+          title: "Dr. Ricardo Consultas Médicas",
+          description: "Médico general con consultas domiciliarias. Atención médica de calidad en la comodidad de tu hogar.",
+          categoryId: categories.find(c => c.name === "Medicina y Salud")?.id!,
+          userId: "sample-user-4",
+          hourlyRate: 80000,
+          experience: "15 años en medicina general",
+          skills: ["Medicina general", "Consulta domiciliaria", "Primeros auxilios"],
+          contactPhone: "+57 303 456 7890",
+          availability: "Lunes a Viernes, 9:00 AM - 7:00 PM",
+          isActive: true,
+          isVerified: true,
+          verificationStatus: "verified" as const,
+          verificationLevel: "premium" as const,
+          backgroundCheckStatus: "approved" as const,
+          documentsSubmitted: true
+        }
+      ];
+
+      // Create sample users first
+      const sampleUsers = [
+        {
+          username: "maria.limpieza",
+          email: "maria@ejemplolimpieza.com",
+          password: "demo123",
+          fullName: "María González",
+          address: "Condominio Las Flores",
+          section: "Torre A",
+          apartment: "501",
+          building: "Torre A",
+          phone: "+57 300 123 4567",
+          isProvider: true
+        },
+        {
+          username: "carlos.reparaciones",
+          email: "carlos@ejemploreparaciones.com", 
+          password: "demo123",
+          fullName: "Carlos Rodríguez",
+          address: "Condominio Las Flores",
+          section: "Torre B", 
+          apartment: "302",
+          building: "Torre B",
+          phone: "+57 301 234 5678",
+          isProvider: true
+        },
+        {
+          username: "ana.tutorias",
+          email: "ana@ejemplotutorias.com",
+          password: "demo123", 
+          fullName: "Ana Patricia López",
+          address: "Condominio Las Flores",
+          section: "Torre A",
+          apartment: "205",
+          building: "Torre A", 
+          phone: "+57 302 345 6789",
+          isProvider: true
+        },
+        {
+          username: "dr.ricardo",
+          email: "ricardo@ejemplomedico.com",
+          password: "demo123",
+          fullName: "Dr. Ricardo Méndez", 
+          address: "Condominio Las Flores",
+          section: "Torre C",
+          apartment: "401",
+          building: "Torre C",
+          phone: "+57 303 456 7890",
+          isProvider: true
+        }
+      ];
+
+      // Insert users
+      const createdUsers = [];
+      for (const userData of sampleUsers) {
+        const [user] = await db.insert(users).values(userData).returning();
+        createdUsers.push(user);
+        console.log(`👤 Created user: ${user.fullName}`);
+      }
+
+      // Insert providers with actual user IDs
+      const providersWithUserIds = sampleProviders.map((provider, index) => ({
+        ...provider,
+        userId: createdUsers[index].id
+      }));
+
+      for (const providerData of providersWithUserIds) {
+        const [provider] = await db.insert(providers).values(providerData).returning();
+        console.log(`👨‍💼 Created provider: ${provider.title}`);
+        
+        // Add some sample availability for each provider
+        const weekdays = [1, 2, 3, 4, 5]; // Monday to Friday
+        for (const dayOfWeek of weekdays) {
+          await db.insert(providerAvailability).values({
+            providerId: provider.id,
+            dayOfWeek,
+            startTime: "09:00",
+            endTime: "17:00",
+            isAvailable: true
+          });
+        }
+      }
+
+      // Create some sample reviews
+      const sampleReviews = [
+        {
+          userId: createdUsers[0].id,
+          providerId: providersWithUserIds[0].title,
+          rating: 5,
+          comment: "Excelente servicio de limpieza. Muy detallista y puntual. Totalmente recomendado.",
+          serviceQuality: 5,
+          communication: 5, 
+          punctuality: 5,
+          valueForMoney: 5,
+          wouldRecommend: true,
+          isVerified: true
+        }
+      ];
+
+      console.log(`✅ Sample providers and users seeded successfully!`);
+      
+    } catch (error) {
+      console.error('❌ Error seeding sample providers:', error);
     }
   }
 
