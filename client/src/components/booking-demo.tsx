@@ -65,7 +65,7 @@ export default function BookingDemo() {
       };
       return apiRequest("/api/users", "POST", userData);
     },
-    onSuccess: (user) => {
+    onSuccess: (user: DemoUser) => {
       setDemoUser(user);
       toast({
         title: "Usuario demo creado",
@@ -217,9 +217,9 @@ export default function BookingDemo() {
               </div>
             ))}
           </div>
-        ) : providers.length > 0 ? (
+        ) : (providers as Provider[]).length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {providers.map((provider: Provider) => (
+            {(providers as Provider[]).map((provider: Provider) => (
               <ProviderCard key={provider.id} provider={provider} />
             ))}
           </div>
@@ -262,7 +262,7 @@ export default function BookingDemo() {
             </div>
             <div className="p-6">
               <BookingCalendar
-                provider={selectedProvider}
+                provider={selectedProvider as any}
                 userId={demoUser.id}
                 onBookingComplete={handleBookingComplete}
               />

@@ -132,16 +132,34 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // Seed service categories with proper emojis
+    // Seed comprehensive service categories
     const categories = [
-      { name: "Limpieza", description: "Servicios de limpieza profesional", icon: "🧹", color: "#3B82F6" },
-      { name: "Reparaciones", description: "Electricidad, plomería y más", icon: "🔧", color: "#10B981" },
-      { name: "Tutorías", description: "Clases particulares y apoyo", icon: "📚", color: "#F59E0B" },
-      { name: "Cuidado", description: "Niñeras y cuidado de mascotas", icon: "🐕", color: "#8B5CF6" },
-      { name: "Cocina", description: "Chef personal y catering", icon: "👨‍🍳", color: "#EF4444" },
-      { name: "Tecnología", description: "Soporte técnico y instalación", icon: "💻", color: "#6366F1" },
-      { name: "Belleza", description: "Peluquería y estética", icon: "✂️", color: "#EC4899" },
-      { name: "Fitness", description: "Entrenadores personales", icon: "💪", color: "#22C55E" },
+      { name: "Limpieza", description: "Servicios de limpieza para el hogar", icon: "🧹", color: "#3B82F6" },
+      { name: "Reparaciones", description: "Plomería, electricidad y reparaciones generales", icon: "🔧", color: "#10B981" },
+      { name: "Jardinería", description: "Mantenimiento de plantas y jardines", icon: "🌱", color: "#22C55E" },
+      { name: "Cocina", description: "Servicios de cocina y catering", icon: "👨‍🍳", color: "#8B5CF6" },
+      { name: "Tutorías", description: "Clases particulares y apoyo académico", icon: "📚", color: "#F59E0B" },
+      { name: "Idiomas", description: "Clases de idiomas, traducción e interpretación", icon: "🌍", color: "#0369A1" },
+      { name: "Música y Entretenimiento", description: "Clases de música, DJ para eventos y entretenimiento en vivo", icon: "🎵", color: "#7C2D12" },
+      { name: "Arte y Manualidades", description: "Clases de arte, manualidades y talleres creativos", icon: "🖌️", color: "#DB2777" },
+      { name: "Medicina y Salud", description: "Servicios médicos a domicilio, enfermería y terapias", icon: "🩺", color: "#DC2626" },
+      { name: "Psicología y Bienestar", description: "Terapia psicológica, coaching de vida y servicios de bienestar mental", icon: "🧠", color: "#7C3AED" },
+      { name: "Belleza y Cuidado Personal", description: "Servicios de peluquería, manicure, pedicure y tratamientos estéticos", icon: "💅", color: "#EC4899" },
+      { name: "Masajes y Spa", description: "Masajes terapéuticos, relajantes y tratamientos de spa a domicilio", icon: "💆", color: "#8B5A96" },
+      { name: "Entrenamiento Personal", description: "Entrenadores personales y clases de fitness a domicilio", icon: "🏋️", color: "#DC2626" },
+      { name: "Cuidado de Niños", description: "Niñeras, cuidado infantil y servicios de babysitting", icon: "👶", color: "#F59E0B" },
+      { name: "Cuidado de Adultos Mayores", description: "Acompañamiento y cuidado especializado para personas mayores", icon: "👵", color: "#059669" },
+      { name: "Cuidado de Mascotas", description: "Paseo, cuidado y servicios veterinarios", icon: "🐕", color: "#EF4444" },
+      { name: "Veterinaria", description: "Servicios veterinarios a domicilio, consultas y cuidado animal", icon: "🐾", color: "#059669" },
+      { name: "Tecnología y Computación", description: "Soporte técnico, reparación de equipos y configuración de dispositivos", icon: "💻", color: "#1E40AF" },
+      { name: "Asesoría Legal", description: "Consultoría jurídica, trámites legales y asesoría profesional", icon: "⚖️", color: "#1F2937" },
+      { name: "Contabilidad y Finanzas", description: "Servicios contables, declaración de impuestos y asesoría financiera", icon: "💰", color: "#166534" },
+      { name: "Seguridad", description: "Servicios de seguridad privada, instalación de cámaras y cerrajería", icon: "🛡️", color: "#374151" },
+      { name: "Fotografía y Video", description: "Servicios fotográficos para eventos, retratos y producción audiovisual", icon: "📸", color: "#0891B2" },
+      { name: "Organización de Eventos", description: "Planificación y organización de fiestas, celebraciones y eventos", icon: "🎉", color: "#BE185D" },
+      { name: "Decoración y Diseño", description: "Diseño de interiores, decoración y ambientación de espacios", icon: "🎨", color: "#065F46" },
+      { name: "Transporte y Mudanzas", description: "Servicios de transporte, mudanzas y envío de paquetes", icon: "🚚", color: "#7C3AED" },
+      { name: "Costura y Confección", description: "Reparación de ropa, confección a medida y arreglos textiles", icon: "🧵", color: "#92400E" },
     ];
 
     categories.forEach(cat => {
@@ -157,9 +175,9 @@ export class MemStorage implements IStorage {
         password: "password123",
         fullName: "María García",
         address: "Condominio Las Flores, Torre Norte",
-        section: "Norte",
+        section: "Norte", 
         apartment: "304",
-        building: "Edificio A",
+        building: "Edificio A", 
         phone: "+1234567890",
         isProvider: true,
       },
@@ -168,7 +186,7 @@ export class MemStorage implements IStorage {
         email: "carlos@example.com",
         password: "password123",
         fullName: "Carlos Mendoza",
-        address: "Condominio Las Flores, Torre Sur",
+        address: "Condominio Las Flores, Torre Sur", 
         section: "Sur",
         apartment: "201",
         building: "Edificio B",
@@ -176,10 +194,12 @@ export class MemStorage implements IStorage {
         isProvider: true,
       },
       {
-        username: "ana.ruiz",
+        username: "ana.ruiz", 
         email: "ana@example.com",
         password: "password123",
         fullName: "Ana Ruiz",
+        address: "Condominio Las Flores, Torre Este",
+        section: "Este",
         apartment: "405",
         building: "Edificio C",
         phone: "+1234567892",
@@ -187,8 +207,10 @@ export class MemStorage implements IStorage {
       },
     ];
 
+    const userIds: string[] = [];
     sampleUsers.forEach(userData => {
       const id = randomUUID();
+      userIds.push(id);
       this.users.set(id, { 
         id, 
         ...userData, 
@@ -198,6 +220,59 @@ export class MemStorage implements IStorage {
         createdAt: new Date() 
       });
     });
+
+    // Create providers for some users
+    const availableCategories = Array.from(this.serviceCategories.values());
+    const providerData = [
+      {
+        userId: userIds[0],
+        categoryId: availableCategories[0]?.id, // Limpieza
+        title: "Servicio de Limpieza Profesional",
+        description: "Limpieza profunda de apartamentos, oficinas y espacios comerciales. Experiencia de 5 años.",
+        hourlyRate: "25",
+        experience: "5 años de experiencia",
+      },
+      {
+        userId: userIds[1],
+        categoryId: availableCategories[1]?.id, // Reparaciones
+        title: "Reparaciones Eléctricas y Plomería",
+        description: "Especialista en instalaciones eléctricas y reparaciones de plomería. Certificado profesional.",
+        hourlyRate: "40",
+        experience: "8 años de experiencia",
+      },
+      {
+        userId: userIds[2],
+        categoryId: availableCategories[4]?.id, // Tutorías
+        title: "Clases de Matemáticas y Física",
+        description: "Profesor universitario ofrece clases particulares de matemáticas y física para todos los niveles.",
+        hourlyRate: "30",
+        experience: "10 años de experiencia",
+      },
+    ];
+
+    providerData.forEach(provider => {
+      if (provider.categoryId) {
+        const id = randomUUID();
+        const newProvider = {
+          id,
+          ...provider,
+          isVerified: true,
+          isActive: true,
+          verificationStatus: "verified",
+          verificationLevel: "standard",
+          verificationDate: new Date(),
+          serviceAreas: null,
+          verificationNotes: null,
+          createdAt: new Date(),
+        };
+        this.providers.set(id, newProvider);
+        console.log(`Created provider: ${newProvider.title} with ID: ${id}`);
+      }
+    });
+    
+    console.log(`Total providers created: ${this.providers.size}`);
+    console.log(`Available categories: ${availableCategories.length}`);
+    console.log(`Provider data entries: ${providerData.length}`);
   }
 
   // Users
@@ -275,8 +350,15 @@ export class MemStorage implements IStorage {
     const provider: Provider = { 
       ...insertProvider, 
       id, 
-      isVerified: false, 
-      isActive: true, 
+      hourlyRate: insertProvider.hourlyRate || null,
+      experience: insertProvider.experience || null,
+      isVerified: insertProvider.isVerified || false, 
+      isActive: insertProvider.isActive !== false, 
+      verificationStatus: insertProvider.verificationStatus || null,
+      verificationLevel: insertProvider.verificationLevel || null,
+      verificationDate: insertProvider.verificationDate || null,
+      serviceAreas: insertProvider.serviceAreas || null,
+      verificationNotes: insertProvider.verificationNotes || null,
       createdAt: new Date() 
     };
     this.providers.set(id, provider);
