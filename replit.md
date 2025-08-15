@@ -6,8 +6,9 @@ This is a full-stack TypeScript application for a local services marketplace cal
 - **Currency Conversion to Mexican Pesos (January 15, 2025):**
   - Completed comprehensive conversion from Colombian pesos to Mexican pesos throughout entire platform
   - Updated all frontend currency displays to use "MXN $" format for clear identification
-  - Updated backend sample provider data with realistic Mexican peso hourly rates (1500-2000 MXN/hour)
-  - Updated all form placeholders and examples to reflect realistic Mexican pricing
+  - Updated backend sample provider data with realistic Mexican peso hourly rates (1500-2500 MXN/hour)
+  - Updated database provider records with realistic Mexican market pricing
+  - Updated all form placeholders and examples to reflect realistic Mexican pricing (1500-5000 MXN ranges)
   - Entire platform now consistently uses Mexican peso pricing across all components and calculations
 - Integrated PostgreSQL database using Neon Database with Drizzle ORM
 - Replaced in-memory storage with persistent database storage
