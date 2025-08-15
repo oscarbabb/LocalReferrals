@@ -23,22 +23,23 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center space-x-3">
-            <img src="/logo.png" alt="Referencias Locales" className="w-12 h-12" />
-            <span className="text-xl font-bold text-gray-900">Referencias Locales</span>
+          <Link href="/" className="flex items-center space-x-3 hover-scale group" data-testid="nav-logo">
+            <img src="/logo.png" alt="Referencias Locales" className="w-12 h-12 transition-transform group-hover:rotate-6" />
+            <span className="text-xl font-bold text-gray-900 transition-colors group-hover:text-primary">Referencias Locales</span>
           </Link>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
+            {navItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition-colors ${
+                className={`transition-all duration-300 hover-lift ${
                   location === item.href
                     ? "text-primary font-medium"
-                    : "text-gray-700 hover:text-primary"
+                    : "text-gray-700 hover:text-primary hover:scale-105"
                 }`}
+                data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 {item.label}
               </Link>
@@ -50,20 +51,20 @@ export default function Header() {
               variant="ghost" 
               size="sm"
               onClick={startOnboarding}
-              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 btn-animate hover-scale"
               data-testid="button-start-tour"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Sparkles className="w-4 h-4 mr-2 transition-transform hover:rotate-12" />
               Tour
             </Button>
             <Link href="/auth">
-              <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50">
-                <LogIn className="w-4 h-4 mr-2" />
+              <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-animate hover-scale" data-testid="button-login">
+                <LogIn className="w-4 h-4 mr-2 transition-transform hover:translate-x-1" />
                 Iniciar Sesión
               </Button>
             </Link>
             <Link href="/auth">
-              <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md">
+              <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-animate hover-lift" data-testid="button-register">
                 Registrarse
               </Button>
             </Link>

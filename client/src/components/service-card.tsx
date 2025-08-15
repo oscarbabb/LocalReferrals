@@ -73,7 +73,7 @@ export default function ServiceCard({ category, providerCount = 0 }: ServiceCard
 
   return (
     <Link href={`/providers?category=${category.id}`}>
-      <Card className="group h-full cursor-pointer hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-3 transition-all duration-500 border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm">
+      <Card className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm">
         <CardContent className="p-8 text-center relative">
           {/* Enhanced background decorations */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>

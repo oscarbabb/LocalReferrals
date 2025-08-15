@@ -41,11 +41,11 @@ export default function Services() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 animate-pulse">
-                <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded mb-3"></div>
-                <div className="h-3 bg-gray-200 rounded w-20 mx-auto"></div>
+              <div key={i} className="bg-white rounded-xl p-6 pulse-gentle stagger-item">
+                <div className="w-12 h-12 skeleton rounded-lg mx-auto mb-4"></div>
+                <div className="h-4 skeleton rounded mb-2"></div>
+                <div className="h-3 skeleton rounded mb-3"></div>
+                <div className="h-3 skeleton rounded w-20 mx-auto"></div>
               </div>
             ))}
           </div>
@@ -60,28 +60,29 @@ export default function Services() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
             Categorías de Servicios
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 mb-8 animate-fade-in">
             Encuentra exactamente lo que necesitas
           </p>
 
           {/* Search and Filter */}
-          <div className="max-w-2xl mx-auto mb-8 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <div className="max-w-2xl mx-auto mb-8 space-y-4 animate-slide-up">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
                 placeholder="Buscar servicios..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 py-3 text-lg"
+                className="pl-10 py-3 text-lg transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-gray-300"
+                data-testid="input-search-services"
               />
             </div>
             
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full transition-all duration-300 hover:border-gray-300 focus:ring-2 focus:ring-primary/20" data-testid="select-category-filter">
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -104,12 +105,13 @@ export default function Services() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredCategories.map((category) => (
-              <ServiceCard 
-                key={category.id} 
-                category={category} 
-                providerCount={providerCounts[category.id] || 0}
-              />
+            {filteredCategories.map((category, index) => (
+              <div key={category.id} className="stagger-item">
+                <ServiceCard 
+                  category={category} 
+                  providerCount={providerCounts[category.id] || 0}
+                />
+              </div>
             ))}
           </div>
         )}

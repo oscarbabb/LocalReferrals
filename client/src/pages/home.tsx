@@ -55,24 +55,24 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             {/* Large Centered Logo */}
-            <div className="mb-8">
+            <div className="mb-8 animate-bounce-in">
               <img 
                 src={logoPath} 
                 alt="Referencias Locales Logo" 
-                className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 mx-auto object-contain drop-shadow-lg"
+                className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 mx-auto object-contain drop-shadow-lg hover-scale animate-float"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-slide-up">
               Encuentra Servicios <br className="hidden sm:block" />
               <span className="text-primary">de Confianza</span> <span className="text-accent">en tu Comunidad</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto animate-fade-in">
               Conecta con vecinos que ofrecen servicios verificados. Desde limpieza hasta tutorías, 
               encuentra profesionales recomendados por tu propia comunidad.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
               <Link href="/services">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary px-8 py-4 text-lg w-full sm:w-auto shadow-lg">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary px-8 py-4 text-lg w-full sm:w-auto shadow-lg btn-animate hover-lift" data-testid="button-explore-services">
                   Explorar Servicios
                 </Button>
               </Link>
@@ -80,7 +80,8 @@ export default function Home() {
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg w-full sm:w-auto shadow-lg"
+                  className="border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg w-full sm:w-auto shadow-lg btn-animate hover-lift"
+                  data-testid="button-view-reviews"
                 >
                   Ver Sistema de Reseñas
                 </Button>
@@ -111,12 +112,13 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {categories.map((category) => (
-              <ServiceCard 
-                key={category.id} 
-                category={category} 
-                providerCount={Math.floor(Math.random() * 15) + 8} 
-              />
+            {categories.slice(0, 8).map((category, index) => (
+              <div key={category.id} className="stagger-item">
+                <ServiceCard 
+                  category={category} 
+                  providerCount={Math.floor(Math.random() * 15) + 8} 
+                />
+              </div>
             ))}
           </div>
 
@@ -132,10 +134,11 @@ export default function Home() {
               <Link href="/services">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg btn-animate hover-lift"
+                  data-testid="button-view-all-services"
                 >
                   Ver Todos los Servicios
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             </div>
@@ -152,8 +155,10 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProviders.map((provider: any) => (
-              <ProviderCard key={provider.id} provider={provider} />
+            {featuredProviders.map((provider: any, index) => (
+              <div key={provider.id} className="stagger-item">
+                <ProviderCard provider={provider} />
+              </div>
             ))}
           </div>
 
@@ -162,7 +167,8 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-2 border-accent text-accent hover:bg-gradient-to-r hover:from-accent hover:to-orange-500 hover:text-white px-8 py-3 text-lg shadow-md"
+                className="border-2 border-accent text-accent hover:bg-gradient-to-r hover:from-accent hover:to-orange-500 hover:text-white px-8 py-3 text-lg shadow-md btn-animate hover-lift"
+                data-testid="button-view-all-providers"
               >
                 Ver Todos los Proveedores
               </Button>

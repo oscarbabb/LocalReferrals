@@ -34,7 +34,7 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
   };
 
   return (
-    <Card className="h-full hover:shadow-md transition-shadow">
+    <Card className="h-full card-animate hover-lift hover-glow group">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="w-12 h-12">
@@ -80,7 +80,7 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
         </div>
 
         <Link href={`/providers/${provider.id}`}>
-          <Button className="w-full bg-primary text-white hover:bg-blue-700">
+          <Button className="w-full bg-primary text-white hover:bg-blue-700 btn-animate hover-scale" data-testid="button-view-profile">
             Ver Perfil
           </Button>
         </Link>
