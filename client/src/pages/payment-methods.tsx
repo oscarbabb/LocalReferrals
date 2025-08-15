@@ -281,7 +281,7 @@ export default function PaymentMethods() {
             </Button>
           </CardHeader>
           <CardContent>
-            {(!paymentMethods || paymentMethods.length === 0) ? (
+            {(!Array.isArray(paymentMethods) || paymentMethods.length === 0) ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -300,7 +300,7 @@ export default function PaymentMethods() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {paymentMethods.map((method: PaymentMethod) => (
+                {Array.isArray(paymentMethods) && paymentMethods.map((method: PaymentMethod) => (
                   <Card key={method.id} className="hover-lift transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -403,7 +403,7 @@ export default function PaymentMethods() {
         </Card>
 
         {/* Menu Items Section */}
-        {paymentMethods?.some((method: PaymentMethod) => method.paymentType === "menu_based" && method.isActive) && (
+        {Array.isArray(paymentMethods) && paymentMethods.some((method: PaymentMethod) => method.paymentType === "menu_based" && method.isActive) && (
           <Card className="card-animate">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -425,7 +425,7 @@ export default function PaymentMethods() {
               </Button>
             </CardHeader>
             <CardContent>
-              {(!menuItems || menuItems.length === 0) ? (
+              {(!Array.isArray(menuItems) || menuItems.length === 0) ? (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
                   <MenuIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -444,7 +444,7 @@ export default function PaymentMethods() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {menuItems.map((item: MenuItem) => (
+                  {Array.isArray(menuItems) && menuItems.map((item: MenuItem) => (
                     <Card key={item.id} className="hover-lift transition-all duration-300">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">

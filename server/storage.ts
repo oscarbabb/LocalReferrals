@@ -550,6 +550,56 @@ export class MemStorage implements IStorage {
     return message;
   }
 
+  // Payment Methods - stubbed for MemStorage (not used in production)
+  async getPaymentMethods(providerId: string): Promise<PaymentMethod[]> {
+    return [];
+  }
+
+  async createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const id = randomUUID();
+    return {
+      ...paymentMethod,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as PaymentMethod;
+  }
+
+  async updatePaymentMethod(id: string, paymentMethod: Partial<PaymentMethod>): Promise<PaymentMethod | undefined> {
+    return undefined;
+  }
+
+  // Menu Items - stubbed for MemStorage (not used in production)
+  async getMenuItems(providerId: string): Promise<MenuItem[]> {
+    return [];
+  }
+
+  async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
+    const id = randomUUID();
+    return {
+      ...menuItem,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as MenuItem;
+  }
+
+  async updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    return undefined;
+  }
+
+  async getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]> {
+    return [];
+  }
+
+  async createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation> {
+    const id = randomUUID();
+    return {
+      ...variation,
+      id
+    } as MenuItemVariation;
+  }
+
   // Verification methods (required by IStorage interface)
   async getVerificationDocuments(): Promise<any[]> {
     return [];
