@@ -5,6 +5,7 @@ import {
   ObjectStorageService,
   ObjectNotFoundError,
 } from "./objectStorage";
+import { z } from "zod";
 import { 
   insertUserSchema, 
   insertProviderSchema, 
@@ -12,7 +13,10 @@ import {
   insertServiceRequestSchema,
   insertProviderAvailabilitySchema,
   insertAppointmentSchema,
-  insertMessageSchema 
+  insertMessageSchema,
+  insertPaymentMethodSchema,
+  insertMenuItemSchema,
+  insertMenuItemVariationSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -382,6 +386,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(requestsWithRequesters);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch service requests" });
+    }
+  });
+
+  // Payment Methods management
+  app.get("/api/providers/:providerId/payment-methods", async (req, res) => {
+    try {
+      const paymentMethods = await storage.getPaymentMethods(req.params.providerId);
+      res.json(paymentMethods);
+    } catch (error: any) {
+      console.error("Failed to get payment methods:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/providers/:providerId/payment-methods", async (req, res) => {
+    try {
+      const insertPaymentMethodSchema = z.object({
+        paymentType: z.enum(["hourly", "fixed_job", "menu_based"]),
+        isActive: z.boolean().default(true),
+        hourlyRate: z.string().nullable().optional(),
+        minimumHours: z.string().nullable().optional(),
+        fixedJobRate: z.string().nullable().optional(),
+        jobDescription: z.string().nullable().optional(),
+        estimatedDuration: z.number().nullable().optional(),
+        requiresDeposit: z.boolean().default(false),
+        depositPercentage: z.number().default(0),
+        cancellationPolicy: z.string().nullable().optional()
+      });
+      
+      const validatedData = insertPaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.createPaymentMethod({
+        ...validatedData,
+        providerId: req.params.providerId
+      });
+      res.json(paymentMethod);
+    } catch (error: any) {
+      console.error("Failed to create payment method:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Menu Items management
+  app.get("/api/providers/:providerId/menu-items", async (req, res) => {
+    try {
+      const menuItems = await storage.getMenuItems(req.params.providerId);
+      res.json(menuItems);
+    } catch (error: any) {
+      console.error("Failed to get menu items:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/providers/:providerId/menu-items", async (req, res) => {
+    try {
+      const insertMenuItemSchema = z.object({
+        categoryName: z.string(),
+        itemName: z.string(),
+        description: z.string().nullable().optional(),
+        price: z.string(),
+        duration: z.number().nullable().optional(),
+        isAvailable: z.boolean().default(true),
+        imageUrl: z.string().nullable().optional(),
+        hasVariations: z.boolean().default(false),
+        minQuantity: z.number().default(1),
+        maxQuantity: z.number().nullable().optional(),
+        sortOrder: z.number().default(0)
+      });
+      
+      const validatedData = insertMenuItemSchema.parse(req.body);
+      const menuItem = await storage.createMenuItem({
+        ...validatedData,
+        providerId: req.params.providerId
+      });
+      res.json(menuItem);
+    } catch (error: any) {
+      console.error("Failed to create menu item:", error);
+      res.status(400).json({ error: error.message });
     }
   });
 

@@ -167,6 +167,64 @@ export const verificationRequirements = pgTable("verification_requirements", {
   verificationLevel: varchar("verification_level").notNull(), // basic, standard, premium
 });
 
+// Payment method configurations for providers
+export const paymentMethods = pgTable("payment_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  paymentType: varchar("payment_type").notNull(), // hourly, fixed_job, menu_based
+  isActive: boolean("is_active").default(true),
+  
+  // For hourly payments
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+  minimumHours: decimal("minimum_hours", { precision: 3, scale: 1 }), // 0.5, 1.0, 2.0 etc
+  
+  // For fixed job payments
+  fixedJobRate: decimal("fixed_job_rate", { precision: 10, scale: 2 }),
+  jobDescription: text("job_description"),
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  
+  // Configuration options
+  requiresDeposit: boolean("requires_deposit").default(false),
+  depositPercentage: integer("deposit_percentage").default(0), // 0-100%
+  cancellationPolicy: text("cancellation_policy"),
+  
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+// Menu items for menu-based providers (restaurants, nail salons, etc.)
+export const menuItems = pgTable("menu_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id).notNull(),
+  categoryName: varchar("category_name").notNull(), // "Entrées", "Manicures", "Hair Cuts"
+  itemName: varchar("item_name").notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  duration: integer("duration"), // service duration in minutes
+  isAvailable: boolean("is_available").default(true),
+  imageUrl: text("image_url"),
+  
+  // Additional options
+  hasVariations: boolean("has_variations").default(false), // size options, add-ons
+  minQuantity: integer("min_quantity").default(1),
+  maxQuantity: integer("max_quantity"),
+  
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+// Menu item variations (sizes, add-ons, etc.)
+export const menuItemVariations = pgTable("menu_item_variations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  menuItemId: varchar("menu_item_id").references(() => menuItems.id).notNull(),
+  variationType: varchar("variation_type").notNull(), // size, addon, customization
+  variationName: varchar("variation_name").notNull(), // "Large", "Extra cheese", "Color choice"
+  priceModifier: decimal("price_modifier", { precision: 10, scale: 2 }).default(sql`'0.00'`), // +/- price adjustment
+  isRequired: boolean("is_required").default(false),
+  sortOrder: integer("sort_order").default(0),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -231,6 +289,22 @@ export const insertVerificationRequirementSchema = createInsertSchema(verificati
   id: true,
 });
 
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMenuItemVariationSchema = createInsertSchema(menuItemVariations).omit({
+  id: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
@@ -255,3 +329,9 @@ export type VerificationReview = typeof verificationReviews.$inferSelect;
 export type InsertVerificationReview = z.infer<typeof insertVerificationReviewSchema>;
 export type VerificationRequirement = typeof verificationRequirements.$inferSelect;
 export type InsertVerificationRequirement = z.infer<typeof insertVerificationRequirementSchema>;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
+export type MenuItem = typeof menuItems.$inferSelect;
+export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
+export type MenuItemVariation = typeof menuItemVariations.$inferSelect;
+export type InsertMenuItemVariation = z.infer<typeof insertMenuItemVariationSchema>;

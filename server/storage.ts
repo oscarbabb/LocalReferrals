@@ -23,6 +23,12 @@ import {
   type InsertVerificationReview,
   type VerificationRequirement,
   type InsertVerificationRequirement,
+  type PaymentMethod,
+  type InsertPaymentMethod,
+  type MenuItem,
+  type InsertMenuItem,
+  type MenuItemVariation,
+  type InsertMenuItemVariation,
   users,
   serviceCategories,
   providers,
@@ -34,7 +40,10 @@ import {
   verificationDocuments,
   backgroundChecks,
   verificationReviews,
-  verificationRequirements
+  verificationRequirements,
+  paymentMethods,
+  menuItems,
+  menuItemVariations
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -104,6 +113,20 @@ export interface IStorage {
   getVerificationRequirements(categoryId: string): Promise<VerificationRequirement[]>;
   getAllVerificationRequirements(): Promise<VerificationRequirement[]>;
   createVerificationRequirement(requirement: InsertVerificationRequirement): Promise<VerificationRequirement>;
+
+  // Payment Methods
+  getPaymentMethods(providerId: string): Promise<PaymentMethod[]>;
+  createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  updatePaymentMethod(id: string, paymentMethod: Partial<PaymentMethod>): Promise<PaymentMethod | undefined>;
+
+  // Menu Items
+  getMenuItems(providerId: string): Promise<MenuItem[]>;
+  createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
+  updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined>;
+  
+  // Menu Item Variations
+  getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]>;
+  createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation>;
 }
 
 export class MemStorage implements IStorage {
@@ -1170,6 +1193,63 @@ export class DatabaseStorage implements IStorage {
       .values(insertRequirement)
       .returning();
     return requirement;
+  }
+
+  // Payment Methods
+  async getPaymentMethods(providerId: string): Promise<PaymentMethod[]> {
+    return await db.select().from(paymentMethods).where(eq(paymentMethods.providerId, providerId));
+  }
+
+  async createPaymentMethod(insertPaymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [paymentMethod] = await db
+      .insert(paymentMethods)
+      .values(insertPaymentMethod)
+      .returning();
+    return paymentMethod;
+  }
+
+  async updatePaymentMethod(id: string, paymentMethodUpdate: Partial<PaymentMethod>): Promise<PaymentMethod | undefined> {
+    const [paymentMethod] = await db
+      .update(paymentMethods)
+      .set(paymentMethodUpdate)
+      .where(eq(paymentMethods.id, id))
+      .returning();
+    return paymentMethod || undefined;
+  }
+
+  // Menu Items
+  async getMenuItems(providerId: string): Promise<MenuItem[]> {
+    return await db.select().from(menuItems).where(eq(menuItems.providerId, providerId));
+  }
+
+  async createMenuItem(insertMenuItem: InsertMenuItem): Promise<MenuItem> {
+    const [menuItem] = await db
+      .insert(menuItems)
+      .values(insertMenuItem)
+      .returning();
+    return menuItem;
+  }
+
+  async updateMenuItem(id: string, menuItemUpdate: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const [menuItem] = await db
+      .update(menuItems)
+      .set(menuItemUpdate)
+      .where(eq(menuItems.id, id))
+      .returning();
+    return menuItem || undefined;
+  }
+
+  // Menu Item Variations
+  async getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]> {
+    return await db.select().from(menuItemVariations).where(eq(menuItemVariations.menuItemId, menuItemId));
+  }
+
+  async createMenuItemVariation(insertVariation: InsertMenuItemVariation): Promise<MenuItemVariation> {
+    const [variation] = await db
+      .insert(menuItemVariations)
+      .values(insertVariation)
+      .returning();
+    return variation;
   }
 }
 
