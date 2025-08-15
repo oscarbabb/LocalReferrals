@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { User, Settings, Star, Calendar, MessageCircle } from "lucide-react";
+import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Profile() {
   // Mock user data - in a real app, this would come from authentication context
@@ -21,6 +22,7 @@ export default function Profile() {
     phone: "+1234567890",
     building: "Edificio A",
     apartment: "305",
+    address: "Condominio Las Flores, Av. Principal 123, Colonia Centro",
     isProvider: true,
   };
 
@@ -107,6 +109,15 @@ export default function Profile() {
                       <div>
                         <Label htmlFor="apartment">Apartamento</Label>
                         <Input id="apartment" defaultValue={user.apartment} />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="address">Dirección</Label>
+                        <AppleMapsAddressInput
+                          id="address"
+                          value={user.address}
+                          onChange={() => {}} // In real app, this would update user state
+                          placeholder="Dirección completa"
+                        />
                       </div>
                     </div>
 

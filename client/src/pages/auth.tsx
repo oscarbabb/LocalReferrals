@@ -11,11 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Lock, User, Phone, Building, MapPin } from "lucide-react";
+import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [buildingValue, setBuildingValue] = useState("");
+  const [addressValue, setAddressValue] = useState("");
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -79,7 +81,7 @@ export default function Auth() {
       email: formData.get("email") as string,
       password: password,
       fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
-      address: formData.get("address") as string,
+      address: addressValue,
       section: formData.get("section") as string,
       phone: formData.get("phone") as string,
       building: buildingValue,
@@ -243,18 +245,15 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Dirección Completa / Nombre de tu Condominio</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="address"
-                        name="address"
-                        type="text"
-                        placeholder="Ej: Condominio Las Flores, Av. Principal 123, Colonia Centro"
-                        className="pl-10"
-                        required
-                        data-testid="input-address"
-                      />
-                    </div>
+                    <AppleMapsAddressInput
+                      id="address"
+                      name="address"
+                      value={addressValue}
+                      onChange={setAddressValue}
+                      placeholder="Ej: Condominio Las Flores, Av. Principal 123, Colonia Centro"
+                      required
+                      testId="input-address"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="section">Sección</Label>

@@ -14,6 +14,7 @@ import { ChevronLeft, ChevronRight, Clock, Calendar, MapPin, DollarSign } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Provider } from "@shared/schema";
+import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 interface BookingCalendarProps {
   provider: Provider;
@@ -192,12 +193,12 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
           </div>
           <div>
             <Label htmlFor="location">Ubicación</Label>
-            <Input
+            <AppleMapsAddressInput
               id="location"
-              placeholder="ej. Apartamento 301, Edificio A"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              data-testid="input-location"
+              onChange={setLocation}
+              placeholder="ej. Apartamento 301, Edificio A"
+              testId="input-location"
             />
           </div>
         </div>
