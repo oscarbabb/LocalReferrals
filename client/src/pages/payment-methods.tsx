@@ -551,7 +551,7 @@ export default function PaymentMethods() {
                               <FormLabel>Tarifa por Hora (MXN $)</FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder="25.00" 
+                                  placeholder="1500.00" 
                                   type="number" 
                                   step="0.01"
                                   {...field} 
@@ -598,7 +598,7 @@ export default function PaymentMethods() {
                               <FormLabel>Precio del Trabajo (MXN $)</FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder="150.00" 
+                                  placeholder="5000.00" 
                                   type="number" 
                                   step="0.01"
                                   {...field} 
@@ -841,7 +841,7 @@ export default function PaymentMethods() {
                             <FormLabel>Precio (MXN $)</FormLabel>
                             <FormControl>
                               <Input 
-                                placeholder="25.00" 
+                                placeholder="800.00" 
                                 type="number" 
                                 step="0.01"
                                 {...field} 

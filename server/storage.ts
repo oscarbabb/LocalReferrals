@@ -256,7 +256,7 @@ export class MemStorage implements IStorage {
         categoryId: availableCategories[0]?.id, // Limpieza
         title: "Servicio de Limpieza Profesional",
         description: "Limpieza profunda de apartamentos, oficinas y espacios comerciales. Experiencia de 5 años.",
-        hourlyRate: "25",
+        hourlyRate: "1500",
         experience: "5 años de experiencia",
       },
       {
@@ -264,7 +264,7 @@ export class MemStorage implements IStorage {
         categoryId: availableCategories[1]?.id, // Reparaciones
         title: "Reparaciones Eléctricas y Plomería",
         description: "Especialista en instalaciones eléctricas y reparaciones de plomería. Certificado profesional.",
-        hourlyRate: "40",
+        hourlyRate: "2000",
         experience: "8 años de experiencia",
       },
       {
@@ -272,7 +272,7 @@ export class MemStorage implements IStorage {
         categoryId: availableCategories[4]?.id, // Tutorías
         title: "Clases de Matemáticas y Física",
         description: "Profesor universitario ofrece clases particulares de matemáticas y física para todos los niveles.",
-        hourlyRate: "30",
+        hourlyRate: "1800",
         experience: "10 años de experiencia",
       },
     ];

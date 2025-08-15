@@ -220,7 +220,7 @@ export default function Profile() {
                       </div>
                       <div>
                         <Label htmlFor="hourlyRate">Tarifa por Hora (MXN $)</Label>
-                        <Input id="hourlyRate" type="number" placeholder="25" />
+                        <Input id="hourlyRate" type="number" placeholder="1500" />
                       </div>
                     </div>
 

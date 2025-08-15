@@ -3,6 +3,12 @@
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
 **Recent Changes (January 2025):**
+- **Currency Conversion to Mexican Pesos (January 15, 2025):**
+  - Completed comprehensive conversion from Colombian pesos to Mexican pesos throughout entire platform
+  - Updated all frontend currency displays to use "MXN $" format for clear identification
+  - Updated backend sample provider data with realistic Mexican peso hourly rates (1500-2000 MXN/hour)
+  - Updated all form placeholders and examples to reflect realistic Mexican pricing
+  - Entire platform now consistently uses Mexican peso pricing across all components and calculations
 - Integrated PostgreSQL database using Neon Database with Drizzle ORM
 - Replaced in-memory storage with persistent database storage
 - Added automatic database seeding for service categories
