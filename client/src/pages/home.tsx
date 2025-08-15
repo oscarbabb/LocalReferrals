@@ -61,6 +61,9 @@ export default function Home() {
                 alt="Referencias Locales Logo" 
                 className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 mx-auto object-contain drop-shadow-lg hover-scale animate-float"
               />
+              <p className="text-lg md:text-xl text-gray-600 mt-4 font-medium animate-fade-in">
+                Busca y encuentra servicios cercanos a tu condominio
+              </p>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-slide-up">
               Encuentra Servicios <br className="hidden sm:block" />
