@@ -19,8 +19,12 @@ import Testimonials from "@/pages/testimonials";
 import HowItWorks from "@/pages/how-it-works";
 import ProviderVerification from "@/pages/provider-verification";
 import Header from "@/components/header";
+import OnboardingTour from "@/components/onboarding-tour";
+import { useOnboarding } from "@/hooks/use-onboarding";
 
 function Router() {
+  const { showOnboarding, completeOnboarding } = useOnboarding();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -40,6 +44,11 @@ function Router() {
         <Route path="/auth" component={Auth} />
         <Route component={NotFound} />
       </Switch>
+      
+      <OnboardingTour 
+        isOpen={showOnboarding} 
+        onClose={completeOnboarding} 
+      />
     </div>
   );
 }
