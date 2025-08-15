@@ -133,7 +133,7 @@ export default function ProviderDetail() {
                   {provider.hourlyRate && (
                     <div className="text-right">
                       <div className="text-3xl font-bold text-gray-900">
-                        ${provider.hourlyRate}
+                        MXN ${provider.hourlyRate}
                       </div>
                       <div className="text-gray-500">por hora</div>
                     </div>

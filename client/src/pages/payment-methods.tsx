@@ -323,7 +323,7 @@ export default function PaymentMethods() {
                             {method.hourlyRate && (
                               <div className="p-3 bg-blue-50 rounded-lg">
                                 <p className="text-sm font-medium text-blue-700">Tarifa por Hora</p>
-                                <p className="text-lg font-bold text-blue-900">${method.hourlyRate}</p>
+                                <p className="text-lg font-bold text-blue-900">MXN ${method.hourlyRate}</p>
                               </div>
                             )}
                             {method.minimumHours && (
@@ -340,7 +340,7 @@ export default function PaymentMethods() {
                             {method.fixedJobRate && (
                               <div className="p-3 bg-green-50 rounded-lg">
                                 <p className="text-sm font-medium text-green-700">Precio del Trabajo</p>
-                                <p className="text-lg font-bold text-green-900">${method.fixedJobRate}</p>
+                                <p className="text-lg font-bold text-green-900">MXN ${method.fixedJobRate}</p>
                               </div>
                             )}
                             {method.jobDescription && (
@@ -455,7 +455,7 @@ export default function PaymentMethods() {
                             </Badge>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-purple-600">${item.price}</p>
+                            <p className="text-2xl font-bold text-purple-600">MXN ${item.price}</p>
                             {item.duration && (
                               <p className="text-xs text-gray-500">{item.duration} min</p>
                             )}
@@ -548,7 +548,7 @@ export default function PaymentMethods() {
                           name="hourlyRate"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Tarifa por Hora ($)</FormLabel>
+                              <FormLabel>Tarifa por Hora (MXN $)</FormLabel>
                               <FormControl>
                                 <Input 
                                   placeholder="25.00" 
@@ -595,7 +595,7 @@ export default function PaymentMethods() {
                           name="fixedJobRate"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Precio del Trabajo ($)</FormLabel>
+                              <FormLabel>Precio del Trabajo (MXN $)</FormLabel>
                               <FormControl>
                                 <Input 
                                   placeholder="150.00" 
@@ -838,7 +838,7 @@ export default function PaymentMethods() {
                         name="price"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Precio ($)</FormLabel>
+                            <FormLabel>Precio (MXN $)</FormLabel>
                             <FormControl>
                               <Input 
                                 placeholder="25.00" 

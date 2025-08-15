@@ -73,7 +73,7 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
           </div>
           <div className="text-right">
             <span className="text-2xl font-bold text-gray-900">
-              ${provider.hourlyRate}
+              MXN ${provider.hourlyRate}
             </span>
             <span className="text-sm text-gray-500">/hora</span>
           </div>

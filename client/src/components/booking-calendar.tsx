@@ -224,7 +224,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
             <div>
               <Label>Total estimado</Label>
               <p className="text-2xl font-bold text-green-600">
-                ${calculateTotal().toFixed(2)}
+                MXN ${calculateTotal().toFixed(2)}
               </p>
             </div>
           </div>

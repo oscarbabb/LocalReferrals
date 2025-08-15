@@ -219,7 +219,7 @@ export default function Profile() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="hourlyRate">Tarifa por Hora ($)</Label>
+                        <Label htmlFor="hourlyRate">Tarifa por Hora (MXN $)</Label>
                         <Input id="hourlyRate" type="number" placeholder="25" />
                       </div>
                     </div>
