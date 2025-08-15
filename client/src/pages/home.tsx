@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useOnboarding } from "@/hooks/use-onboarding";
+import { useLanguage } from "@/hooks/use-language";
 import OnboardingTour from "@/components/onboarding-tour";
-import Header from "@/components/header";
 import ServiceCard from "@/components/service-card";
 import ProviderCard from "@/components/provider-card";
 import TestimonialCard from "@/components/testimonial-card";
@@ -14,6 +14,7 @@ import logoPath from "@assets/Logo 2 test_1754014544538.png";
 
 export default function Home() {
   const { showOnboarding, completeOnboarding } = useOnboarding();
+  const { t } = useLanguage();
   
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
@@ -48,7 +49,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-white via-orange-50 to-blue-50 py-12 md:py-20">
@@ -62,7 +62,7 @@ export default function Home() {
                 className="w-40 h-40 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto object-contain drop-shadow-lg hover-scale animate-float"
               />
               <p className="text-lg md:text-xl text-gray-600 mt-4 font-medium animate-fade-in">
-                Busca y encuentra servicios cercanos a tu condominio
+                {t('home.slogan')}
               </p>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-slide-up">

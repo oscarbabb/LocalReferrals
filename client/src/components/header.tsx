@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, LogIn, Sparkles } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function Header() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { startOnboarding } = useOnboarding();
+  const { t } = useLanguage();
 
   const navItems = [
-    { href: "/services", label: "Servicios" },
-    { href: "/como-funciona", label: "Cómo Funciona" },
-    { href: "/providers", label: "Proveedores" },
+    { href: "/services", label: t('nav.services') },
+    { href: "/como-funciona", label: t('nav.howItWorks') },
+    { href: "/providers", label: t('nav.providers') },
     { href: "/booking-demo", label: "Demo Reservas" },
     { href: "/bookings", label: "Mis Reservas" },
-    { href: "/testimonials", label: "Testimonios" },
+    { href: "/testimonials", label: t('nav.testimonials') },
   ];
 
   return (
@@ -50,6 +53,7 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageToggle />
             <Button 
               variant="ghost" 
               size="sm"
@@ -63,12 +67,12 @@ export default function Header() {
             <Link href="/auth">
               <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-login">
                 <LogIn className="w-4 h-4 mr-2 transition-transform hover:translate-x-1" />
-                Iniciar Sesión
+                {t('nav.login')}
               </Button>
             </Link>
             <Link href="/auth">
               <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-enhance hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300" data-testid="button-register">
-                Registrarse
+                {t('auth.register')}
               </Button>
             </Link>
           </div>
@@ -102,6 +106,9 @@ export default function Header() {
                   </Link>
                 ))}
                 <hr className="my-4" />
+                <div className="flex items-center justify-center mb-4">
+                  <LanguageToggle />
+                </div>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-gray-600 hover:text-orange-600"
@@ -117,12 +124,12 @@ export default function Header() {
                 <Link href="/auth" onClick={() => setIsOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start">
                     <LogIn className="w-4 h-4 mr-2" />
-                    Iniciar Sesión
+                    {t('nav.login')}
                   </Button>
                 </Link>
                 <Link href="/auth" onClick={() => setIsOpen(false)}>
                   <Button className="w-full bg-primary text-white">
-                    Registrarse
+                    {t('auth.register')}
                   </Button>
                 </Link>
               </div>
