@@ -29,14 +29,14 @@ export default function Header() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden md:flex space-x-4">
             {navItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`nav-tab nav-item-enter ${
                   location === item.href ? "active" : ""
-                } px-1 py-2 relative text-sm`}
+                } px-1 py-2 relative text-xs font-medium whitespace-nowrap`}
                 style={{
                   animationDelay: `${index * 0.1}s`
                 }}
