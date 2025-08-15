@@ -25,7 +25,10 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-3 hover-scale group" data-testid="nav-logo">
             <img src="/logo.png" alt="Referencias Locales" className="w-12 h-12 transition-transform group-hover:rotate-6" />
-            <span className="text-xl font-bold text-gray-900 transition-colors group-hover:text-primary">Referencias Locales</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-gray-900 transition-colors group-hover:text-primary">Referencias Locales</span>
+              <span className="text-xs text-gray-600 transition-colors group-hover:text-primary/80">Busca y encuentra servicios cercanos a tu condominio</span>
+            </div>
           </Link>
           
           {/* Desktop Navigation */}
