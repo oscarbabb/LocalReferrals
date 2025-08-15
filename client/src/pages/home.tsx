@@ -59,7 +59,7 @@ export default function Home() {
               <img 
                 src={logoPath} 
                 alt="Referencias Locales Logo" 
-                className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 mx-auto object-contain drop-shadow-lg hover-scale animate-float"
+                className="w-40 h-40 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto object-contain drop-shadow-lg hover-scale animate-float"
               />
               <p className="text-lg md:text-xl text-gray-600 mt-4 font-medium animate-fade-in">
                 Busca y encuentra servicios cercanos a tu condominio
