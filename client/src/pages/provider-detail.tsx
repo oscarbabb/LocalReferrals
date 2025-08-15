@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import Header from "@/components/header";
 import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
 import QuickBookingButton from "@/components/quick-booking-button";
@@ -48,7 +47,7 @@ export default function ProviderDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
             <div className="bg-white rounded-xl p-8 mb-8">
@@ -70,7 +69,7 @@ export default function ProviderDetail() {
   if (!provider) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Proveedor no encontrado</h1>
@@ -83,7 +82,7 @@ export default function ProviderDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Provider Header */}

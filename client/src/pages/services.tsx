@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Header from "@/components/header";
 import ServiceCard from "@/components/service-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -36,29 +35,23 @@ export default function Services() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 pulse-gentle stagger-item">
-                <div className="w-12 h-12 skeleton rounded-lg mx-auto mb-4"></div>
-                <div className="h-4 skeleton rounded mb-2"></div>
-                <div className="h-3 skeleton rounded mb-3"></div>
-                <div className="h-3 skeleton rounded w-20 mx-auto"></div>
-              </div>
-            ))}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl p-6 pulse-gentle stagger-item">
+              <div className="w-12 h-12 skeleton rounded-lg mx-auto mb-4"></div>
+              <div className="h-4 skeleton rounded mb-2"></div>
+              <div className="h-3 skeleton rounded mb-3"></div>
+              <div className="h-3 skeleton rounded w-20 mx-auto"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
             Categorías de Servicios
@@ -116,6 +109,5 @@ export default function Services() {
           </div>
         )}
       </div>
-    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Header from "@/components/header";
 import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ export default function ReviewDemo() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
