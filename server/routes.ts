@@ -427,6 +427,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/providers/:providerId/payment-methods/:id", async (req, res) => {
+    try {
+      const updatePaymentMethodSchema = z.object({
+        paymentType: z.enum(["hourly", "fixed_job", "menu_based"]).optional(),
+        isActive: z.boolean().optional(),
+        hourlyRate: z.string().nullable().optional(),
+        minimumHours: z.string().nullable().optional(),
+        fixedJobRate: z.string().nullable().optional(),
+        jobDescription: z.string().nullable().optional(),
+        estimatedDuration: z.number().nullable().optional(),
+        requiresDeposit: z.boolean().optional(),
+        depositPercentage: z.number().optional(),
+        cancellationPolicy: z.string().nullable().optional()
+      });
+      
+      const validatedData = updatePaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.updatePaymentMethod(req.params.id, validatedData);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      console.error("Failed to update payment method:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Menu Items management
   app.get("/api/providers/:providerId/menu-items", async (req, res) => {
     try {
@@ -462,6 +486,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(menuItem);
     } catch (error: any) {
       console.error("Failed to create menu item:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.put("/api/providers/:providerId/menu-items/:id", async (req, res) => {
+    try {
+      const updateMenuItemSchema = z.object({
+        categoryName: z.string().optional(),
+        itemName: z.string().optional(),
+        description: z.string().nullable().optional(),
+        price: z.string().optional(),
+        duration: z.number().nullable().optional(),
+        isAvailable: z.boolean().optional(),
+        imageUrl: z.string().nullable().optional(),
+        hasVariations: z.boolean().optional(),
+        minQuantity: z.number().optional(),
+        maxQuantity: z.number().nullable().optional(),
+        sortOrder: z.number().optional()
+      });
+      
+      const validatedData = updateMenuItemSchema.parse(req.body);
+      const menuItem = await storage.updateMenuItem(req.params.id, validatedData);
+      res.json(menuItem);
+    } catch (error: any) {
+      console.error("Failed to update menu item:", error);
       res.status(400).json({ error: error.message });
     }
   });
