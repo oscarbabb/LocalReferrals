@@ -12,11 +12,11 @@ export default function Header() {
 
   const navItems = [
     { href: "/services", label: "Servicios" },
+    { href: "/como-funciona", label: "Cómo Funciona" },
     { href: "/providers", label: "Proveedores" },
     { href: "/booking-demo", label: "Demo Reservas" },
     { href: "/bookings", label: "Mis Reservas" },
     { href: "/testimonials", label: "Testimonios" },
-    { href: "/como-funciona", label: "Cómo Funciona" },
   ];
 
   return (
