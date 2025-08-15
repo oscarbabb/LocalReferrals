@@ -34,14 +34,17 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition-all duration-300 hover-lift ${
-                  location === item.href
-                    ? "text-primary font-medium"
-                    : "text-gray-700 hover:text-primary hover:scale-105"
-                }`}
+                className={`nav-tab nav-item-enter ${
+                  location === item.href ? "active" : ""
+                } px-1 py-2 relative`}
+                style={{
+                  animationDelay: `${index * 0.1}s`
+                }}
                 data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
-                {item.label}
+                <span className="nav-tab-text">
+                  {item.label}
+                </span>
               </Link>
             ))}
           </nav>
@@ -51,20 +54,20 @@ export default function Header() {
               variant="ghost" 
               size="sm"
               onClick={startOnboarding}
-              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 btn-animate hover-scale"
+              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 btn-enhance transition-all duration-300"
               data-testid="button-start-tour"
             >
               <Sparkles className="w-4 h-4 mr-2 transition-transform hover:rotate-12" />
               Tour
             </Button>
             <Link href="/auth">
-              <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-animate hover-scale" data-testid="button-login">
+              <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-login">
                 <LogIn className="w-4 h-4 mr-2 transition-transform hover:translate-x-1" />
                 Iniciar Sesión
               </Button>
             </Link>
             <Link href="/auth">
-              <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-animate hover-lift" data-testid="button-register">
+              <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-enhance hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300" data-testid="button-register">
                 Registrarse
               </Button>
             </Link>
@@ -79,18 +82,23 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px]">
               <div className="flex flex-col space-y-4 mt-8">
-                {navItems.map((item) => (
+                {navItems.map((item, index) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`text-left p-2 rounded-lg transition-colors ${
+                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform ${
                       location === item.href
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-700 hover:text-primary hover:bg-gray-100"
+                        ? "text-primary bg-gradient-to-r from-primary/10 to-accent/5 font-semibold border-l-4 border-primary shadow-sm scale-105"
+                        : "text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 hover:scale-102 hover:shadow-sm"
                     }`}
+                    style={{
+                      animationDelay: `${index * 0.1}s`
+                    }}
                   >
-                    {item.label}
+                    <span className="block transition-transform duration-200">
+                      {item.label}
+                    </span>
                   </Link>
                 ))}
                 <hr className="my-4" />

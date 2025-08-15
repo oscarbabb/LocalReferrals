@@ -70,6 +70,130 @@
   background-size: 30px 30px;
 }
 
+/* Tab Navigation Micro-interactions */
+.nav-tab {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tab::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 1px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.nav-tab:hover::before {
+  width: 100%;
+}
+
+.nav-tab.active::before {
+  width: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  height: 3px;
+  box-shadow: 0 0 8px hsla(15, 90%, 60%, 0.5);
+}
+
+.nav-tab:hover {
+  transform: translateY(-2px);
+  color: var(--accent);
+}
+
+.nav-tab.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-tab-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pulse animation for active tab */
+.nav-tab.active .nav-tab-text {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.02);
+  }
+}
+
+/* Staggered animation for navigation items */
+.nav-item-enter {
+  animation: slideInUp 0.5s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced button micro-interactions */
+.btn-enhance {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-enhance::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transition: all 0.4s ease-out;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.btn-enhance:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-enhance:active {
+  transform: scale(0.95);
+}
+
+/* Mobile menu animations */
+.mobile-menu-item {
+  animation: slideInFromRight 0.4s ease-out forwards;
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Micro-animations and smooth transitions */
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out;
