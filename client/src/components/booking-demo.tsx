@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, MapPin, User, DollarSign, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, User, DollarSign, Star, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ export default function BookingDemo() {
 
   // Create demo user mutation
   const createDemoUserMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<DemoUser> => {
       const userData = {
         username: `demo_user_${Date.now()}`,
         email: `demo${Date.now()}@example.com`,
@@ -63,7 +63,8 @@ export default function BookingDemo() {
         phone: "+1234567890",
         isProvider: false,
       };
-      return apiRequest("/api/users", "POST", userData);
+      const response = await apiRequest("/api/users", "POST", userData);
+      return response as DemoUser;
     },
     onSuccess: (user: DemoUser) => {
       setDemoUser(user);
@@ -91,62 +92,74 @@ export default function BookingDemo() {
   };
 
   const ProviderCard = ({ provider }: { provider: Provider }) => (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold text-lg">{provider.title}</h3>
-              {provider.isVerified && (
-                <Badge variant="default" className="bg-green-100 text-green-700">
-                  <Star className="w-3 h-3 mr-1" />
-                  Verificado
-                </Badge>
-              )}
-            </div>
-            <p className="text-gray-600 text-sm mb-3">{provider.description}</p>
-            <div className="space-y-2">
-              {provider.user && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <User className="w-4 h-4" />
-                  {provider.user.fullName}
+    <Card className="card-animate hover-lift hover-glow transition-all duration-300 cursor-pointer h-full">
+      <CardContent className="p-6 h-full flex flex-col">
+        <div className="flex-1">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold text-lg text-gray-900">{provider.title}</h3>
+                {provider.isVerified && (
+                  <Badge variant="default" className="bg-green-100 text-green-700 border-green-200">
+                    <Star className="w-3 h-3 mr-1" />
+                    Verificado
+                  </Badge>
+                )}
+              </div>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{provider.description}</p>
+              
+              <div className="space-y-3">
+                {provider.user && (
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-700">{provider.user.fullName}</span>
+                  </div>
+                )}
+                {provider.user?.address && (
+                  <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                    <MapPin className="w-4 h-4 text-blue-500" />
+                    <div className="text-sm">
+                      <div className="font-medium text-gray-700">{provider.user.address}</div>
+                      <div className="text-gray-500">Sección {provider.user.section}</div>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-green-500" />
+                  <div className="text-sm">
+                    <span className="font-semibold text-green-700">${provider.hourlyRate}/hora</span>
+                    <div className="text-gray-500">Tarifa estándar</div>
+                  </div>
                 </div>
-              )}
-              {provider.user?.address && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <MapPin className="w-4 h-4" />
-                  {provider.user.address} - Sección {provider.user.section}
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <DollarSign className="w-4 h-4" />
-                <span className="font-semibold">${provider.hourlyRate}/hora</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        {/* Action Buttons - Always at bottom */}
+        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSelectedProvider(provider)}
-            className="flex-1"
+            className="w-full btn-animate hover-scale transition-all duration-300 border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300"
+            data-testid={`button-view-availability-${provider.id}`}
           >
             <Calendar className="w-4 h-4 mr-2" />
             Ver Disponibilidad
           </Button>
           <Button
             size="sm"
-            className="flex-1 bg-orange-500 hover:bg-orange-600"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white btn-animate hover-lift shadow-md"
             onClick={() => {
               setSelectedProvider(provider);
               setShowBookingCalendar(true);
             }}
             disabled={!demoUser}
+            data-testid={`button-book-now-${provider.id}`}
           >
             <Clock className="w-4 h-4 mr-2" />
-            Reservar Ahora
+            {!demoUser ? "Crear Usuario Primero" : "Reservar Ahora"}
           </Button>
         </div>
       </CardContent>
@@ -218,9 +231,11 @@ export default function BookingDemo() {
             ))}
           </div>
         ) : (providers as Provider[]).length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {(providers as Provider[]).map((provider: Provider) => (
-              <ProviderCard key={provider.id} provider={provider} />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            {(providers as Provider[]).map((provider: Provider, index) => (
+              <div key={provider.id} className="stagger-item">
+                <ProviderCard provider={provider} />
+              </div>
             ))}
           </div>
         ) : (
@@ -273,39 +288,106 @@ export default function BookingDemo() {
 
       {/* Provider Availability Display */}
       {selectedProvider && !showBookingCalendar && (
-        <Card className="mt-8">
+        <Card className="mt-8 animate-slide-up">
           <CardHeader>
-            <CardTitle>Disponibilidad de {selectedProvider.title}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-orange-500" />
+              Disponibilidad de {selectedProvider.title}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="font-semibold mb-2">Información del Proveedor</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Tarifa:</strong> ${selectedProvider.hourlyRate}/hora</p>
-                    <p><strong>Experiencia:</strong> {selectedProvider.experience}</p>
-                    <p><strong>Estado:</strong> {selectedProvider.isVerified ? "Verificado" : "No verificado"}</p>
+            <div className="space-y-6">
+              {/* Provider Info Grid */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4">
+                  <h4 className="font-semibold mb-3 text-gray-900">Información del Proveedor</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                      <DollarSign className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">${selectedProvider.hourlyRate}/hora</p>
+                        <p className="text-sm text-gray-600">Tarifa por servicio</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                      <Star className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">{selectedProvider.experience}</p>
+                        <p className="text-sm text-gray-600">Años de experiencia</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-orange-600" />
+                      <div>
+                        <p className="font-medium">{selectedProvider.isVerified ? "Verificado" : "No verificado"}</p>
+                        <p className="text-sm text-gray-600">Estado de verificación</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Ubicación</h4>
-                  <div className="space-y-2 text-sm">
+                
+                <div className="space-y-4">
+                  <h4 className="font-semibold mb-3 text-gray-900">Información de Contacto</h4>
+                  <div className="space-y-3">
                     {selectedProvider.user && (
                       <>
-                        <p><strong>Proveedor:</strong> {selectedProvider.user.fullName}</p>
-                        <p><strong>Dirección:</strong> {selectedProvider.user.address}</p>
-                        <p><strong>Sección:</strong> {selectedProvider.user.section}</p>
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <User className="w-5 h-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">{selectedProvider.user.fullName}</p>
+                            <p className="text-sm text-gray-600">Nombre del proveedor</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <MapPin className="w-5 h-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">{selectedProvider.user.address}</p>
+                            <p className="text-sm text-gray-600">Sección {selectedProvider.user.section}</p>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 pt-4">
+
+              {/* Availability Time Slots */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold mb-4 text-gray-900">Horarios Disponibles</h4>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    { day: "Lunes", time: "9:00 AM - 5:00 PM", available: true },
+                    { day: "Martes", time: "9:00 AM - 5:00 PM", available: true },
+                    { day: "Miércoles", time: "10:00 AM - 4:00 PM", available: true },
+                    { day: "Jueves", time: "9:00 AM - 5:00 PM", available: false },
+                    { day: "Viernes", time: "9:00 AM - 3:00 PM", available: true },
+                    { day: "Sábado", time: "10:00 AM - 2:00 PM", available: true },
+                  ].map((slot) => (
+                    <div
+                      key={slot.day}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        slot.available
+                          ? "border-green-200 bg-green-50 text-green-800"
+                          : "border-gray-200 bg-gray-50 text-gray-500"
+                      }`}
+                    >
+                      <div className="font-medium">{slot.day}</div>
+                      <div className="text-sm">{slot.time}</div>
+                      <div className="text-xs mt-1">
+                        {slot.available ? "Disponible" : "No disponible"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                 <Button
                   onClick={() => setShowBookingCalendar(true)}
                   disabled={!demoUser}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-orange-500 hover:bg-orange-600 btn-animate hover-lift flex-1"
+                  data-testid="button-make-booking"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Hacer Reserva
@@ -313,6 +395,8 @@ export default function BookingDemo() {
                 <Button
                   variant="outline"
                   onClick={() => setSelectedProvider(null)}
+                  className="btn-animate hover-lift flex-1"
+                  data-testid="button-back-to-providers"
                 >
                   Volver a Proveedores
                 </Button>
