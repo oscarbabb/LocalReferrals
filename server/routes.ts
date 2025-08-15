@@ -744,6 +744,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Geocoding API endpoint for address autocomplete
+  app.get("/api/geocoding/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 3) {
+        return res.json({ features: [] });
+      }
+
+      const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
+      if (!mapboxToken) {
+        return res.status(500).json({ error: "Mapbox token not configured" });
+      }
+
+      // Use Mapbox Geocoding API focused on Mexico
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
+        `access_token=${mapboxToken}&` +
+        `country=mx&` +
+        `limit=5&` +
+        `language=es&` +
+        `types=address,poi,place,neighborhood,locality,district`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Mapbox API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      res.status(500).json({ error: "Failed to search addresses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
