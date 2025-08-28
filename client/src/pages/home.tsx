@@ -346,7 +346,7 @@ export default function Home() {
           
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Referencias Locales. Todos los derechos reservados.
+              © 2025 Referencias Locales. Todos los derechos reservados.
             </p>
             <p className="text-gray-400 text-sm mt-2 md:mt-0">
               Hecho con ❤️ para tu comunidad
