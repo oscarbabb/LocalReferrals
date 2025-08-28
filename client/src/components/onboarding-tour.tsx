@@ -103,7 +103,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto"
         data-testid="onboarding-overlay"
       >
         <motion.div
@@ -111,30 +111,30 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ type: "spring", duration: 0.5 }}
-          className="w-full max-w-4xl"
+          className="w-full max-w-4xl my-4 sm:my-8"
         >
           <Card className="bg-white shadow-2xl border-0 overflow-hidden">
             <CardContent className="p-0">
               {/* Header */}
-              <div className="relative bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white p-6">
+              <div className="relative bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white p-4 sm:p-6">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={skip}
-                  className="absolute top-4 right-4 text-white hover:bg-white/20"
+                  className="absolute top-2 right-2 sm:top-4 sm:right-4 text-white hover:bg-white/20"
                   data-testid="button-skip-tour"
                 >
                   <X className="w-4 h-4" />
                 </Button>
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${currentTourStep.color} rounded-xl flex items-center justify-center`}>
-                    <IconComponent className="w-6 h-6 text-white" />
+                <div className="flex items-center gap-3 sm:gap-4 pr-10">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${currentTourStep.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold" data-testid="text-tour-title">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg sm:text-2xl font-bold leading-tight" data-testid="text-tour-title">
                       {currentTourStep.title}
                     </h2>
-                    <p className="text-orange-100" data-testid="text-tour-description">
+                    <p className="text-orange-100 text-sm sm:text-base leading-tight" data-testid="text-tour-description">
                       {currentTourStep.description}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
               </div>
 
               {/* Content Area */}
-              <div className="p-8 min-h-[400px]">
+              <div className="p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px]">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep}
@@ -224,7 +224,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                           </p>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                           {showcaseCategories.map((category, index) => (
                             <motion.div
                               key={category.id}
@@ -272,7 +272,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                           </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                           <div className="space-y-4">
                             <div className="flex items-start gap-3">
                               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -331,7 +331,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                           </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                           <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -405,7 +405,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                           </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                           <div className="space-y-4">
                             <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
                               <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
@@ -469,37 +469,48 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
               </div>
 
               {/* Footer Navigation */}
-              <div className="border-t bg-gray-50 p-6">
-                <div className="flex justify-between items-center">
-                  <Button
-                    variant="outline"
-                    onClick={prevStep}
-                    disabled={currentStep === 0}
-                    data-testid="button-prev-step"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Anterior
-                  </Button>
-
-                  <div className="flex gap-2">
+              <div className="border-t bg-gray-50 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  {/* Mobile: Step indicators on top */}
+                  <div className="flex gap-2 order-1 sm:order-2">
                     {tourSteps.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-2 h-2 rounded-full transition-colors ${
+                        className={`w-3 h-3 sm:w-2 sm:h-2 rounded-full transition-colors ${
                           index === currentStep ? 'bg-orange-500' : 'bg-gray-300'
                         }`}
                       />
                     ))}
                   </div>
 
-                  <Button
-                    onClick={nextStep}
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
-                    data-testid="button-next-step"
-                  >
-                    {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  {/* Navigation buttons */}
+                  <div className="flex justify-between w-full sm:w-auto order-2 sm:order-none">
+                    <Button
+                      variant="outline"
+                      onClick={prevStep}
+                      disabled={currentStep === 0}
+                      className="min-w-[100px] sm:min-w-auto"
+                      data-testid="button-prev-step"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Anterior</span>
+                      <span className="sm:hidden">Atrás</span>
+                    </Button>
+
+                    <Button
+                      onClick={nextStep}
+                      className="bg-orange-500 hover:bg-orange-600 text-white min-w-[100px] sm:min-w-auto ml-4 sm:ml-0"
+                      data-testid="button-next-step"
+                    >
+                      <span className="hidden sm:inline">
+                        {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente'}
+                      </span>
+                      <span className="sm:hidden">
+                        {currentStep === tourSteps.length - 1 ? 'Fin' : 'Sig'}
+                      </span>
+                      <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
