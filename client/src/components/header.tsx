@@ -17,7 +17,6 @@ export default function Header() {
     { href: "/services", label: t('nav.services') },
     { href: "/como-funciona", label: t('nav.howItWorks') },
     { href: "/providers", label: t('nav.providers') },
-    { href: "/booking-demo", label: "Demo Reservas" },
     { href: "/bookings", label: "Mis Reservas" },
     { href: "/testimonials", label: t('nav.testimonials') },
   ];
