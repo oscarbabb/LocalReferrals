@@ -97,8 +97,9 @@ const menuItemSchema = z.object({
 type PaymentMethodFormData = z.infer<typeof paymentMethodSchema>;
 type MenuItemFormData = z.infer<typeof menuItemSchema>;
 
-// Demo provider ID - in real app this would come from authentication
-const DEMO_PROVIDER_ID = "57da14c6-07b1-4827-bf3e-8a3291096790";
+// This would come from authentication in a real app
+// For now using the first provider as example
+const getProviderIdFromAuth = () => "57da14c6-07b1-4827-bf3e-8a3291096790";
 
 export default function PaymentMethods() {
   const { toast } = useToast();
@@ -109,14 +110,14 @@ export default function PaymentMethods() {
 
   // Fetch payment methods
   const { data: paymentMethods, isLoading: loadingPaymentMethods } = useQuery({
-    queryKey: ["/api/providers", DEMO_PROVIDER_ID, "payment-methods"],
-    queryFn: () => apiRequest("GET", `/api/providers/${DEMO_PROVIDER_ID}/payment-methods`),
+    queryKey: ["/api/providers", getProviderIdFromAuth(), "payment-methods"],
+    queryFn: () => apiRequest("GET", `/api/providers/${getProviderIdFromAuth()}/payment-methods`),
   });
 
   // Fetch menu items
   const { data: menuItems, isLoading: loadingMenuItems } = useQuery({
-    queryKey: ["/api/providers", DEMO_PROVIDER_ID, "menu-items"],
-    queryFn: () => apiRequest("GET", `/api/providers/${DEMO_PROVIDER_ID}/menu-items`),
+    queryKey: ["/api/providers", getProviderIdFromAuth(), "menu-items"],
+    queryFn: () => apiRequest("GET", `/api/providers/${getProviderIdFromAuth()}/menu-items`),
   });
 
   // Payment method form
@@ -144,7 +145,7 @@ export default function PaymentMethods() {
   // Create payment method mutation
   const createPaymentMethodMutation = useMutation({
     mutationFn: async (data: PaymentMethodFormData) => {
-      return await apiRequest("POST", `/api/providers/${DEMO_PROVIDER_ID}/payment-methods`, data);
+      return await apiRequest("POST", `/api/providers/${getProviderIdFromAuth()}/payment-methods`, data);
     },
     onSuccess: () => {
       toast({
@@ -152,7 +153,7 @@ export default function PaymentMethods() {
         description: "El método de pago se ha configurado correctamente.",
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/providers", DEMO_PROVIDER_ID, "payment-methods"],
+        queryKey: ["/api/providers", getProviderIdFromAuth(), "payment-methods"],
       });
       setShowPaymentForm(false);
       paymentForm.reset();
@@ -169,7 +170,7 @@ export default function PaymentMethods() {
   // Create menu item mutation
   const createMenuItemMutation = useMutation({
     mutationFn: async (data: MenuItemFormData) => {
-      return await apiRequest("POST", `/api/providers/${DEMO_PROVIDER_ID}/menu-items`, data);
+      return await apiRequest("POST", `/api/providers/${getProviderIdFromAuth()}/menu-items`, data);
     },
     onSuccess: () => {
       toast({
@@ -177,7 +178,7 @@ export default function PaymentMethods() {
         description: "El artículo se ha agregado al menú correctamente.",
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/providers", DEMO_PROVIDER_ID, "menu-items"],
+        queryKey: ["/api/providers", getProviderIdFromAuth(), "menu-items"],
       });
       setShowMenuForm(false);
       menuForm.reset();

@@ -52,12 +52,50 @@ export default function Auth() {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: async (loginData: { email: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginData),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Error logging in");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "¡Bienvenido de vuelta!",
+        description: "Has iniciado sesión exitosamente.",
+      });
+      setLocation("/");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al iniciar sesión",
+        description: error.message || "Credenciales incorrectas. Verifica tu email y contraseña.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Funcionalidad en desarrollo",
-      description: "El sistema de login estará disponible próximamente.",
-    });
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const loginData = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    };
+
+    loginMutation.mutate(loginData);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
