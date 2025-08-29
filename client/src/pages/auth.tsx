@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Mail, Lock, User, Phone, Building, MapPin } from "lucide-react";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
@@ -306,17 +306,19 @@ export default function Auth() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="building">Edificio</Label>
-                      <Select value={buildingValue} onValueChange={setBuildingValue}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="edificio-a">Edificio A</SelectItem>
-                          <SelectItem value="edificio-b">Edificio B</SelectItem>
-                          <SelectItem value="edificio-c">Edificio C</SelectItem>
-                          <SelectItem value="edificio-d">Edificio D</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="relative">
+                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          id="building"
+                          name="building"
+                          type="text"
+                          placeholder="Ej: Torre Norte, Edificio A, Casa 123"
+                          className="pl-10"
+                          value={buildingValue}
+                          onChange={(e) => setBuildingValue(e.target.value)}
+                          data-testid="input-building"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="apartment">Apartamento</Label>
