@@ -4,6 +4,7 @@ import { useRoute } from "wouter";
 import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
 import QuickBookingButton from "@/components/quick-booking-button";
+import PayForServiceButton from "@/components/pay-for-service-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -291,6 +292,19 @@ export default function ProviderDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Payment and Booking Options */}
+            <div className="space-y-4">
+              <PayForServiceButton
+                providerId={provider.id}
+                providerName={provider.user?.fullName || 'Proveedor'}
+                serviceName={provider.title}
+                hourlyRate={provider.hourlyRate}
+                description={provider.description}
+              />
+              
+
+            </div>
           </div>
         </div>
       </div>

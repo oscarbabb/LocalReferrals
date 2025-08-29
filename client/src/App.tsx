@@ -12,6 +12,8 @@ import ProviderDetail from "@/pages/provider-detail";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
 import Bookings from "@/pages/bookings";
+import Checkout from "@/pages/checkout";
+import PaymentSuccess from "@/pages/payment-success";
 import PaymentMethods from "@/pages/payment-methods";
 import Testimonials from "@/pages/testimonials";
 import HowItWorks from "@/pages/how-it-works";
@@ -35,6 +37,8 @@ function Router() {
         <Route path="/como-funciona" component={HowItWorks} />
         <Route path="/verification" component={ProviderVerification} />
         <Route path="/bookings" component={Bookings} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/payment-success" component={PaymentSuccess} />
         <Route path="/payment-methods" component={PaymentMethods} />
         <Route path="/profile" component={Profile} />
         <Route path="/auth" component={Auth} />
