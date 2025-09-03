@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Mail, Lock, User, Phone, Building, MapPin } from "lucide-react";
+import { Mail, Lock, User, Phone, Building, MapPin, Briefcase } from "lucide-react";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Auth() {
@@ -357,11 +357,29 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="provider-option" name="isProvider" />
-                    <Label htmlFor="provider-option" className="text-sm">
-                      Quiero ofrecer servicios a mi comunidad
-                    </Label>
+                  {/* Provider Option - Enhanced */}
+                  <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3 hover:border-orange-300 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox id="provider-option" name="isProvider" className="w-5 h-5" />
+                      <div className="flex items-center space-x-2">
+                        <Briefcase className="w-5 h-5 text-orange-600" />
+                        <Label htmlFor="provider-option" className="text-base font-semibold text-gray-800 cursor-pointer">
+                          ¿Quieres ofrecer servicios profesionales?
+                        </Label>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 ml-8">
+                      Únete como proveedor de servicios y conecta con vecinos que necesitan tu trabajo. 
+                      Perfectecto para limpieza, tutorías, mantenimiento, cuidado infantil y más.
+                    </p>
+                    <div className="flex items-center space-x-2 ml-8">
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                        💰 Gana dinero extra
+                      </span>
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                        👥 Ayuda a tu comunidad
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="terms" required />
