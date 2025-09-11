@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin } from "lucide-react";
 import { Link } from "wouter";
 
@@ -14,6 +14,7 @@ interface Provider {
     fullName: string;
     building: string;
     apartment: string;
+    avatar?: string;
   };
   averageRating: number;
   reviewCount: number;
@@ -38,6 +39,13 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="w-12 h-12">
+            {provider.user?.avatar && (
+              <AvatarImage 
+                src={provider.user.avatar} 
+                alt={provider.user.fullName}
+                data-testid={`img-provider-avatar-${provider.id}`}
+              />
+            )}
             <AvatarFallback className="bg-primary text-white">
               {getInitials(provider.user.fullName)}
             </AvatarFallback>
