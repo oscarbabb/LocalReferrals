@@ -80,16 +80,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Create session or JWT token here
-      // For now, return user data
-      res.json({
-        user: {
-          id: user.id,
+      // Create authenticated session
+      const sessionUser = {
+        claims: {
+          sub: user.id,
           email: user.email,
-          username: user.username,
-          fullName: user.fullName,
+          first_name: user.fullName?.split(' ')[0] || '',
+          last_name: user.fullName?.split(' ').slice(1).join(' ') || '',
+          profile_image_url: user.avatar
         },
-        message: "Login successful"
+        access_token: null,
+        refresh_token: null,
+        expires_at: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+      };
+
+      // Use Passport's login method to establish session
+      req.login(sessionUser, (err) => {
+        if (err) {
+          console.error("Session creation error:", err);
+          return res.status(500).json({ message: "Failed to create session" });
+        }
+
+        res.json({
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            fullName: user.fullName,
+          },
+          message: "Login successful"
+        });
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -98,8 +118,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", async (req, res) => {
-    // Clear session or invalidate token
-    res.json({ message: "Logout successful" });
+    // Properly destroy session using Passport's logout method
+    req.logout((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      
+      // Destroy the session completely
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error("Session destroy error:", destroyErr);
+          return res.status(500).json({ message: "Failed to clear session" });
+        }
+        
+        // Clear the session cookie
+        res.clearCookie('connect.sid');
+        res.json({ message: "Logout successful" });
+      });
+    });
   });
 
   // Stripe payment routes
@@ -469,11 +506,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.status(201).json({ 
-        user,
-        providerSetupToken // Only included if user is a provider
+      // Auto-login the newly created user by establishing a session
+      const sessionUser = {
+        claims: {
+          sub: user.id,
+          email: user.email,
+          first_name: user.fullName?.split(' ')[0] || '',
+          last_name: user.fullName?.split(' ').slice(1).join(' ') || '',
+          profile_image_url: user.avatar
+        },
+        access_token: null,
+        refresh_token: null,
+        expires_at: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+      };
+
+      // Use Passport's login method to establish session for auto-login
+      req.login(sessionUser, (err) => {
+        if (err) {
+          console.error("Auto-login session creation error:", err);
+          // Still return success for user creation even if session fails
+          return res.status(201).json({ 
+            user,
+            providerSetupToken, // Only included if user is a provider
+            message: "Account created successfully, but session failed. Please log in manually."
+          });
+        }
+
+        res.status(201).json({ 
+          user,
+          providerSetupToken, // Only included if user is a provider
+          message: "Account created and logged in successfully"
+        });
       });
     } catch (error) {
+      console.error("Registration error:", error);
       res.status(400).json({ message: "Invalid user data" });
     }
   });
@@ -660,10 +726,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insertPaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]),
         isActive: z.boolean().default(true),
-        hourlyRate: z.coerce.number().nullable().optional(),
-        minimumHours: z.coerce.number().nullable().optional(),
-        fixedJobRate: z.coerce.number().nullable().optional(),
-        eventRate: z.coerce.number().nullable().optional(),
+        hourlyRate: z.string().nullable().optional(),
+        minimumHours: z.string().nullable().optional(),
+        fixedJobRate: z.string().nullable().optional(),
+        eventRate: z.string().nullable().optional(),
         eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
         estimatedDuration: z.number().nullable().optional(),
@@ -689,10 +755,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatePaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]).optional(),
         isActive: z.boolean().optional(),
-        hourlyRate: z.coerce.number().nullable().optional(),
-        minimumHours: z.coerce.number().nullable().optional(),
-        fixedJobRate: z.coerce.number().nullable().optional(),
-        eventRate: z.coerce.number().nullable().optional(),
+        hourlyRate: z.string().nullable().optional(),
+        minimumHours: z.string().nullable().optional(),
+        fixedJobRate: z.string().nullable().optional(),
+        eventRate: z.string().nullable().optional(),
         eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
         estimatedDuration: z.number().nullable().optional(),
@@ -729,7 +795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const ownership = await validateProviderOwnership(req.params.providerId, userId);
       if (!ownership.valid) {
-        return res.status(ownership.status).json({ error: ownership.error });
+        return res.status(ownership.status!).json({ error: ownership.error });
       }
 
       const menuItems = await storage.getMenuItems(req.params.providerId);
@@ -746,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const ownership = await validateProviderOwnership(req.params.providerId, userId);
       if (!ownership.valid) {
-        return res.status(ownership.status).json({ error: ownership.error });
+        return res.status(ownership.status!).json({ error: ownership.error });
       }
 
       const insertMenuItemSchema = z.object({
@@ -785,7 +851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const ownership = await validateProviderOwnership(req.params.providerId, userId);
       if (!ownership.valid) {
-        return res.status(ownership.status).json({ error: ownership.error });
+        return res.status(ownership.status!).json({ error: ownership.error });
       }
       
       const updateMenuItemSchema = z.object({
@@ -825,7 +891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const ownership = await validateProviderOwnership(req.params.providerId, userId);
       if (!ownership.valid) {
-        return res.status(ownership.status).json({ error: ownership.error });
+        return res.status(ownership.status!).json({ error: ownership.error });
       }
       
       // Use storage method with providerId constraint for security

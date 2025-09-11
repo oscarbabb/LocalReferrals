@@ -1413,13 +1413,52 @@ export class DatabaseStorage implements IStorage {
     return menuItem;
   }
 
-  async updateMenuItem(id: string, menuItemUpdate: Partial<MenuItem>): Promise<MenuItem | undefined> {
+  async updateMenuItem(id: string, providerId: string, menuItemUpdate: Partial<MenuItem>): Promise<MenuItem | undefined> {
     const [menuItem] = await db
       .update(menuItems)
       .set(menuItemUpdate)
-      .where(eq(menuItems.id, id))
+      .where(and(
+        eq(menuItems.id, id),
+        eq(menuItems.providerId, providerId)
+      ))
       .returning();
     return menuItem || undefined;
+  }
+
+  async deleteMenuItem(id: string, providerId: string): Promise<boolean> {
+    const result = await db.delete(menuItems).where(
+      and(
+        eq(menuItems.id, id),
+        eq(menuItems.providerId, providerId)
+      )
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Required for Replit Auth
+  async upsertUser(userData: any): Promise<User> {
+    const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email.split('@')[0];
+    const username = userData.email.split('@')[0];
+    
+    const existingUser = this.users.get(userData.id);
+    const user: User = {
+      id: userData.id,
+      username: existingUser?.username || username,
+      email: userData.email,
+      password: existingUser?.password || 'oauth_user',
+      fullName,
+      avatar: userData.profileImageUrl,
+      address: existingUser?.address || null,
+      section: existingUser?.section || null,
+      apartment: existingUser?.apartment || null,
+      building: existingUser?.building || null,
+      phone: existingUser?.phone || null,
+      isProvider: existingUser?.isProvider || false,
+      createdAt: existingUser?.createdAt || new Date(),
+    };
+    
+    this.users.set(userData.id, user);
+    return user;
   }
 
   // Menu Item Variations

@@ -316,23 +316,24 @@ export class DatabaseStorage implements IStorage {
 
   // Required for Replit Auth
   async upsertUser(userData: any): Promise<User> {
+    const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email.split('@')[0];
+    
     const [user] = await db
       .insert(users)
       .values({
         id: userData.id,
         email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        profileImageUrl: userData.profileImageUrl,
+        username: userData.email.split('@')[0], // Use email prefix as username
+        password: 'oauth_user', // Placeholder for OAuth users
+        fullName,
+        avatar: userData.profileImageUrl,
       })
       .onConflictDoUpdate({
         target: users.id,
         set: {
           email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          updatedAt: new Date(),
+          fullName,
+          avatar: userData.profileImageUrl,
         },
       })
       .returning();
