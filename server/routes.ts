@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import Stripe from "stripe";
 import { randomBytes } from "crypto";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertUserSchema, 
   insertProviderSchema, 
@@ -31,7 +32,35 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const providerSetupTokens = new Map<string, { userId: string, expiresAt: number }>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
   // Authentication routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Get current user's provider profile
+  app.get('/api/auth/provider', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const provider = await storage.getProviderByUserId(userId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider profile not found" });
+      }
+      res.json(provider);
+    } catch (error) {
+      console.error("Error fetching provider:", error);
+      res.status(500).json({ message: "Failed to fetch provider" });
+    }
+  });
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -677,19 +706,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to validate user-provider ownership
+  const validateProviderOwnership = async (providerId: string, userId: string) => {
+    const provider = await storage.getProvider(providerId);
+    if (!provider) {
+      return { valid: false, error: "Provider not found", status: 404 };
+    }
+    if (provider.userId !== userId) {
+      return { valid: false, error: "Unauthorized: You can only access your own provider data", status: 403 };
+    }
+    return { valid: true, provider };
+  };
+
   // Menu Items management
-  app.get("/api/providers/:providerId/menu-items", async (req, res) => {
+  app.get("/api/providers/:providerId/menu-items", isAuthenticated, async (req: any, res) => {
     try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.providerId, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status).json({ error: ownership.error });
+      }
+
       const menuItems = await storage.getMenuItems(req.params.providerId);
       res.json(menuItems);
     } catch (error: any) {
       console.error("Failed to get menu items:", error);
-      res.status(400).json({ error: error.message });
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.post("/api/providers/:providerId/menu-items", async (req, res) => {
+  app.post("/api/providers/:providerId/menu-items", isAuthenticated, async (req: any, res) => {
     try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.providerId, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status).json({ error: ownership.error });
+      }
+
       const insertMenuItemSchema = z.object({
         categoryName: z.string(),
         itemName: z.string(),
@@ -709,15 +764,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...validatedData,
         providerId: req.params.providerId
       });
-      res.json(menuItem);
+      res.status(201).json(menuItem);
     } catch (error: any) {
       console.error("Failed to create menu item:", error);
-      res.status(400).json({ error: error.message });
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid menu item data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   });
 
-  app.put("/api/providers/:providerId/menu-items/:id", async (req, res) => {
+  app.put("/api/providers/:providerId/menu-items/:id", isAuthenticated, async (req: any, res) => {
     try {
+      // Validate user-provider ownership FIRST
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.providerId, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status).json({ error: ownership.error });
+      }
+      
       const updateMenuItemSchema = z.object({
         categoryName: z.string().optional(),
         itemName: z.string().optional(),
@@ -733,11 +799,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const validatedData = updateMenuItemSchema.parse(req.body);
-      const menuItem = await storage.updateMenuItem(req.params.id, validatedData);
+      // Use storage method with providerId constraint for security
+      const menuItem = await storage.updateMenuItem(req.params.id, req.params.providerId, validatedData);
+      if (!menuItem) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
       res.json(menuItem);
     } catch (error: any) {
       console.error("Failed to update menu item:", error);
-      res.status(400).json({ error: error.message });
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid menu item data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/providers/:providerId/menu-items/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user-provider ownership FIRST
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.providerId, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status).json({ error: ownership.error });
+      }
+      
+      // Use storage method with providerId constraint for security
+      const deleted = await storage.deleteMenuItem(req.params.id, req.params.providerId);
+      if (deleted) {
+        res.status(200).json({ message: "Menu item deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Menu item not found" });
+      }
+    } catch (error: any) {
+      console.error("Failed to delete menu item:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

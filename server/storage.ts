@@ -56,6 +56,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
+  upsertUser(user: any): Promise<User>;
 
   // Service Categories
   getServiceCategories(): Promise<ServiceCategory[]>;
@@ -121,8 +122,10 @@ export interface IStorage {
 
   // Menu Items
   getMenuItems(providerId: string): Promise<MenuItem[]>;
+  getMenuItem(id: string): Promise<MenuItem | undefined>;
   createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
-  updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined>;
+  updateMenuItem(id: string, providerId: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: string, providerId: string): Promise<boolean>;
   
   // Menu Item Variations
   getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]>;
@@ -138,6 +141,13 @@ export class MemStorage implements IStorage {
   private providerAvailability: Map<string, ProviderAvailability>;
   private appointments: Map<string, Appointment>;
   private messages: Map<string, Message>;
+  private verificationDocuments: Map<string, VerificationDocument>;
+  private backgroundChecks: Map<string, BackgroundCheck>;
+  private verificationReviews: Map<string, VerificationReview>;
+  private verificationRequirements: Map<string, VerificationRequirement>;
+  private paymentMethods: Map<string, PaymentMethod>;
+  private menuItems: Map<string, MenuItem>;
+  private menuItemVariations: Map<string, MenuItemVariation>;
 
   constructor() {
     console.log("🏗️  Initializing MemStorage...");
@@ -149,6 +159,13 @@ export class MemStorage implements IStorage {
     this.providerAvailability = new Map();
     this.appointments = new Map();
     this.messages = new Map();
+    this.verificationDocuments = new Map();
+    this.backgroundChecks = new Map();
+    this.verificationReviews = new Map();
+    this.verificationRequirements = new Map();
+    this.paymentMethods = new Map();
+    this.menuItems = new Map();
+    this.menuItemVariations = new Map();
     
     console.log("📦 Starting data seeding...");
     this.seedData();
@@ -569,64 +586,180 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
-  // Menu Items - stubbed for MemStorage (not used in production)
+  // Menu Items - fully implemented for MemStorage
   async getMenuItems(providerId: string): Promise<MenuItem[]> {
-    return [];
+    return Array.from(this.menuItems.values()).filter(item => item.providerId === providerId);
+  }
+
+  async getMenuItem(id: string): Promise<MenuItem | undefined> {
+    return this.menuItems.get(id);
   }
 
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
     const id = randomUUID();
-    return {
+    const newMenuItem: MenuItem = {
       ...menuItem,
       id,
       createdAt: new Date(),
       updatedAt: new Date()
-    } as MenuItem;
+    };
+    this.menuItems.set(id, newMenuItem);
+    return newMenuItem;
   }
 
-  async updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined> {
-    return undefined;
+  async updateMenuItem(id: string, providerId: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const existing = this.menuItems.get(id);
+    if (!existing || existing.providerId !== providerId) return undefined;
+    
+    const updated: MenuItem = {
+      ...existing,
+      ...menuItem,
+      id,
+      updatedAt: new Date()
+    };
+    this.menuItems.set(id, updated);
+    return updated;
+  }
+
+  async deleteMenuItem(id: string, providerId: string): Promise<boolean> {
+    const existing = this.menuItems.get(id);
+    if (!existing || existing.providerId !== providerId) return false;
+    
+    return this.menuItems.delete(id);
   }
 
   async getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]> {
-    return [];
+    return Array.from(this.menuItemVariations.values()).filter(variation => variation.menuItemId === menuItemId);
   }
 
   async createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation> {
     const id = randomUUID();
-    return {
+    const newVariation: MenuItemVariation = {
       ...variation,
       id
-    } as MenuItemVariation;
+    };
+    this.menuItemVariations.set(id, newVariation);
+    return newVariation;
   }
 
-  // Verification methods (required by IStorage interface)
-  async getVerificationDocuments(): Promise<any[]> {
-    return [];
+  // Verification Documents
+  async getVerificationDocuments(providerId: string): Promise<VerificationDocument[]> {
+    return Array.from(this.verificationDocuments.values()).filter(doc => doc.providerId === providerId);
   }
 
-  async createVerificationDocument(doc: any): Promise<any> {
-    return doc;
+  async createVerificationDocument(doc: InsertVerificationDocument): Promise<VerificationDocument> {
+    const id = randomUUID();
+    const newDoc: VerificationDocument = {
+      ...doc,
+      id,
+      uploadedAt: new Date()
+    };
+    this.verificationDocuments.set(id, newDoc);
+    return newDoc;
   }
 
-  async updateVerificationDocument(id: string, update: any): Promise<any> {
-    return update;
+  async updateVerificationDocument(id: string, update: Partial<VerificationDocument>): Promise<VerificationDocument | undefined> {
+    const existing = this.verificationDocuments.get(id);
+    if (!existing) return undefined;
+    
+    const updated: VerificationDocument = {
+      ...existing,
+      ...update,
+      id
+    };
+    this.verificationDocuments.set(id, updated);
+    return updated;
   }
 
-  async getBackgroundChecks(): Promise<any[]> {
-    return [];
+  // Background Checks
+  async getBackgroundChecks(providerId: string): Promise<BackgroundCheck[]> {
+    return Array.from(this.backgroundChecks.values()).filter(check => check.providerId === providerId);
   }
 
-  async createBackgroundCheck(check: any): Promise<any> {
-    return check;
+  async createBackgroundCheck(check: InsertBackgroundCheck): Promise<BackgroundCheck> {
+    const id = randomUUID();
+    const newCheck: BackgroundCheck = {
+      ...check,
+      id,
+      requestedAt: new Date()
+    };
+    this.backgroundChecks.set(id, newCheck);
+    return newCheck;
   }
 
-  async updateBackgroundCheck(id: string, update: any): Promise<any> {
-    return update;
+  async updateBackgroundCheck(id: string, update: Partial<BackgroundCheck>): Promise<BackgroundCheck | undefined> {
+    const existing = this.backgroundChecks.get(id);
+    if (!existing) return undefined;
+    
+    const updated: BackgroundCheck = {
+      ...existing,
+      ...update,
+      id
+    };
+    this.backgroundChecks.set(id, updated);
+    return updated;
   }
 
-  async getVerificationRequirements(): Promise<any[]> {
-    return [];
+  // Verification Reviews
+  async getVerificationReviews(providerId: string): Promise<VerificationReview[]> {
+    return Array.from(this.verificationReviews.values()).filter(review => review.providerId === providerId);
+  }
+
+  async createVerificationReview(review: InsertVerificationReview): Promise<VerificationReview> {
+    const id = randomUUID();
+    const newReview: VerificationReview = {
+      ...review,
+      id,
+      createdAt: new Date()
+    };
+    this.verificationReviews.set(id, newReview);
+    return newReview;
+  }
+
+  // Verification Requirements
+  async getVerificationRequirements(categoryId: string): Promise<VerificationRequirement[]> {
+    return Array.from(this.verificationRequirements.values()).filter(req => req.categoryId === categoryId);
+  }
+
+  async getAllVerificationRequirements(): Promise<VerificationRequirement[]> {
+    return Array.from(this.verificationRequirements.values());
+  }
+
+  async createVerificationRequirement(requirement: InsertVerificationRequirement): Promise<VerificationRequirement> {
+    const id = randomUUID();
+    const newRequirement: VerificationRequirement = {
+      ...requirement,
+      id
+    };
+    this.verificationRequirements.set(id, newRequirement);
+    return newRequirement;
+  }
+
+  // Required for Replit Auth
+  async upsertUser(userData: any): Promise<User> {
+    const existingUser = this.users.get(userData.id);
+    const user: User = {
+      id: userData.id,
+      email: userData.email,
+      username: userData.email?.split('@')[0] || userData.id,
+      fullName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+      password: existingUser?.password || '',
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      address: existingUser?.address || null,
+      section: existingUser?.section || null,
+      apartment: existingUser?.apartment || null,
+      building: existingUser?.building || null,
+      phone: existingUser?.phone || null,
+      avatar: userData.profileImageUrl || existingUser?.avatar || null,
+      isOnline: existingUser?.isOnline || false,
+      lastSeen: existingUser?.lastSeen || null,
+      createdAt: existingUser?.createdAt || new Date(),
+      updatedAt: new Date()
+    };
+    this.users.set(userData.id, user);
+    return user;
   }
 
   private seedSampleReviews() {

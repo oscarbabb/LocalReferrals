@@ -274,14 +274,34 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(menuItems).where(eq(menuItems.providerId, providerId));
   }
 
+  async getMenuItem(id: string): Promise<MenuItem | undefined> {
+    const [menuItem] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return menuItem || undefined;
+  }
+
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
     const [newMenuItem] = await db.insert(menuItems).values(menuItem).returning();
     return newMenuItem;
   }
 
-  async updateMenuItem(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined> {
-    const [updatedMenuItem] = await db.update(menuItems).set(menuItem).where(eq(menuItems.id, id)).returning();
+  async updateMenuItem(id: string, providerId: string, menuItem: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const [updatedMenuItem] = await db.update(menuItems).set(menuItem).where(
+      and(
+        eq(menuItems.id, id),
+        eq(menuItems.providerId, providerId)
+      )
+    ).returning();
     return updatedMenuItem || undefined;
+  }
+
+  async deleteMenuItem(id: string, providerId: string): Promise<boolean> {
+    const result = await db.delete(menuItems).where(
+      and(
+        eq(menuItems.id, id),
+        eq(menuItems.providerId, providerId)
+      )
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Menu Item Variations
@@ -292,5 +312,30 @@ export class DatabaseStorage implements IStorage {
   async createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation> {
     const [newVariation] = await db.insert(menuItemVariations).values(variation).returning();
     return newVariation;
+  }
+
+  // Required for Replit Auth
+  async upsertUser(userData: any): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: userData.id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+      })
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 }
