@@ -7,6 +7,7 @@ import {
 } from "./objectStorage";
 import { z } from "zod";
 import Stripe from "stripe";
+import { randomBytes } from "crypto";
 import { 
   insertUserSchema, 
   insertProviderSchema, 
@@ -25,6 +26,9 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Temporary storage for provider setup tokens (in production, use Redis or database)
+const providerSetupTokens = new Map<string, { userId: string, expiresAt: number }>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -313,12 +317,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/providers", async (req, res) => {
     try {
-      const validatedData = insertProviderSchema.parse(req.body);
+      const { providerSetupToken, ...providerData } = req.body;
       
-      // Security: Validate that the userId exists and is a provider
-      const user = await storage.getUser(validatedData.userId);
+      // Security: Validate the setup token instead of trusting client-supplied userId
+      if (!providerSetupToken) {
+        return res.status(400).json({ message: "Provider setup token is required" });
+      }
+      
+      const tokenData = providerSetupTokens.get(providerSetupToken);
+      if (!tokenData) {
+        return res.status(400).json({ message: "Invalid or expired setup token" });
+      }
+      
+      // Check if token has expired
+      if (Date.now() > tokenData.expiresAt) {
+        providerSetupTokens.delete(providerSetupToken);
+        return res.status(400).json({ message: "Setup token has expired" });
+      }
+      
+      // Get userId from server-side token storage (not from client)
+      const userId = tokenData.userId;
+      
+      // Validate that the user exists and is a provider
+      const user = await storage.getUser(userId);
       if (!user) {
-        return res.status(400).json({ message: "Invalid user ID" });
+        return res.status(400).json({ message: "Invalid user" });
       }
       
       if (!user.isProvider) {
@@ -326,12 +349,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if provider already exists for this user
-      const existingProvider = await storage.getProviderByUserId(validatedData.userId);
+      const existingProvider = await storage.getProviderByUserId(userId);
       if (existingProvider) {
         return res.status(400).json({ message: "Provider profile already exists for this user" });
       }
       
+      // Validate provider data and include the server-determined userId
+      const validatedData = insertProviderSchema.parse({
+        ...providerData,
+        userId: userId
+      });
+      
       const provider = await storage.createProvider(validatedData);
+      
+      // Consume the token (invalidate it after successful use)
+      providerSetupTokens.delete(providerSetupToken);
+      
       res.status(201).json(provider);
     } catch (error) {
       res.status(400).json({ message: "Invalid provider data" });
@@ -350,7 +383,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.createUser(validatedData);
-      res.status(201).json({ user });
+      
+      // Generate secure provider setup token if user is registering as provider
+      let providerSetupToken = null;
+      if (validatedData.isProvider) {
+        providerSetupToken = randomBytes(32).toString('hex');
+        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
+        providerSetupTokens.set(providerSetupToken, { 
+          userId: user.id, 
+          expiresAt 
+        });
+      }
+      
+      res.status(201).json({ 
+        user,
+        providerSetupToken // Only included if user is a provider
+      });
     } catch (error) {
       res.status(400).json({ message: "Invalid user data" });
     }

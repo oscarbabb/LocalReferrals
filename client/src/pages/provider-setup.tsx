@@ -34,17 +34,17 @@ export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Get current user ID from session storage (set during registration)
-  const userId = sessionStorage.getItem('newUserId');
+  // Get provider setup token from session storage (set during registration)
+  const providerSetupToken = sessionStorage.getItem('providerSetupToken');
   
-  // Redirect to auth if no user ID (using useEffect to avoid render-time side effects)
+  // Redirect to auth if no setup token (using useEffect to avoid render-time side effects)
   useEffect(() => {
-    if (!userId) {
+    if (!providerSetupToken) {
       setLocation('/auth');
     }
-  }, [userId, setLocation]);
+  }, [providerSetupToken, setLocation]);
   
-  if (!userId) {
+  if (!providerSetupToken) {
     return null;
   }
 
@@ -67,7 +67,7 @@ export default function ProviderSetup() {
     mutationFn: async (providerData: ProviderSetupForm) => {
       return await apiRequest("POST", "/api/providers", {
         ...providerData,
-        userId: userId
+        providerSetupToken: providerSetupToken
       });
     },
     onSuccess: () => {
@@ -79,8 +79,8 @@ export default function ProviderSetup() {
       // Invalidate providers cache to refresh listings
       queryClient.invalidateQueries({ queryKey: ["/api/providers"] });
       
-      // Clear the user ID from session storage
-      sessionStorage.removeItem('newUserId');
+      // Clear the provider setup token from session storage
+      sessionStorage.removeItem('providerSetupToken');
       
       // Redirect to home or provider dashboard
       setLocation("/");
@@ -273,7 +273,7 @@ export default function ProviderSetup() {
           <Button 
             variant="ghost" 
             onClick={() => {
-              sessionStorage.removeItem('newUserId');
+              sessionStorage.removeItem('providerSetupToken');
               setLocation('/');
             }}
             className="text-gray-600 hover:text-gray-800"

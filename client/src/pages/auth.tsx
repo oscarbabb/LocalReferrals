@@ -43,9 +43,9 @@ export default function Auth() {
         description: "Bienvenido a Referencias Locales. Ya puedes empezar a explorar servicios.",
       });
       
-      // Store user ID for provider setup if needed
-      if (data.user && isProviderRegistration) {
-        sessionStorage.setItem('newUserId', data.user.id);
+      // Store provider setup token for secure provider creation
+      if (data.user && isProviderRegistration && data.providerSetupToken) {
+        sessionStorage.setItem('providerSetupToken', data.providerSetupToken);
         setLocation("/provider-setup");
       } else {
         setLocation("/");
