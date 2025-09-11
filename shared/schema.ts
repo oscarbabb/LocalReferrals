@@ -183,6 +183,10 @@ export const paymentMethods = pgTable("payment_methods", {
   jobDescription: text("job_description"),
   estimatedDuration: integer("estimated_duration"), // in minutes
   
+  // For per-event payments
+  eventRate: decimal("event_rate", { precision: 10, scale: 2 }),
+  eventDescription: text("event_description"),
+  
   // Configuration options
   requiresDeposit: boolean("requires_deposit").default(false),
   depositPercentage: integer("deposit_percentage").default(0), // 0-100%

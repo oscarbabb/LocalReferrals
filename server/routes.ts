@@ -658,11 +658,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/providers/:providerId/payment-methods", async (req, res) => {
     try {
       const insertPaymentMethodSchema = z.object({
-        paymentType: z.enum(["hourly", "fixed_job", "menu_based"]),
+        paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]),
         isActive: z.boolean().default(true),
-        hourlyRate: z.string().nullable().optional(),
-        minimumHours: z.string().nullable().optional(),
-        fixedJobRate: z.string().nullable().optional(),
+        hourlyRate: z.coerce.number().nullable().optional(),
+        minimumHours: z.coerce.number().nullable().optional(),
+        fixedJobRate: z.coerce.number().nullable().optional(),
+        eventRate: z.coerce.number().nullable().optional(),
+        eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
         estimatedDuration: z.number().nullable().optional(),
         requiresDeposit: z.boolean().default(false),
@@ -685,11 +687,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/providers/:providerId/payment-methods/:id", async (req, res) => {
     try {
       const updatePaymentMethodSchema = z.object({
-        paymentType: z.enum(["hourly", "fixed_job", "menu_based"]).optional(),
+        paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]).optional(),
         isActive: z.boolean().optional(),
-        hourlyRate: z.string().nullable().optional(),
-        minimumHours: z.string().nullable().optional(),
-        fixedJobRate: z.string().nullable().optional(),
+        hourlyRate: z.coerce.number().nullable().optional(),
+        minimumHours: z.coerce.number().nullable().optional(),
+        fixedJobRate: z.coerce.number().nullable().optional(),
+        eventRate: z.coerce.number().nullable().optional(),
+        eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
         estimatedDuration: z.number().nullable().optional(),
         requiresDeposit: z.boolean().optional(),

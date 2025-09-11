@@ -14,20 +14,61 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ObjectUploader } from "@/components/ObjectUploader";
-import { Briefcase, DollarSign, Star, Clock, Camera, User } from "lucide-react";
+import { Briefcase, DollarSign, Star, Clock, Camera, User, Menu, FileText, Timer } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
 
-// Provider setup form schema
+// Provider setup form schema with conditional payment method fields
 const providerSetupSchema = z.object({
   categoryId: z.string().min(1, "Selecciona una categoría de servicio"),
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
-  hourlyRate: z.string().min(1, "Ingresa tu tarifa por hora").refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num > 0;
-  }, "La tarifa debe ser un número válido mayor a 0"),
-  experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)")
+  experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
+  
+  // Payment method selection
+  paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"], {
+    required_error: "Selecciona un método de pago"
+  }),
+  
+  // Hourly payment fields
+  hourlyRate: z.coerce.number().positive("La tarifa debe ser mayor a 0").optional(),
+  minimumHours: z.coerce.number().positive("Las horas mínimas deben ser mayor a 0").optional(),
+  
+  // Fixed job payment fields
+  fixedJobRate: z.coerce.number().positive("El precio debe ser mayor a 0").optional(),
+  jobDescription: z.string().optional(),
+  estimatedDuration: z.coerce.number().positive("La duración debe ser mayor a 0").optional(),
+  
+  // Per-event payment fields
+  eventRate: z.coerce.number().positive("El precio del evento debe ser mayor a 0").optional(),
+  eventDescription: z.string().optional(),
+}).refine((data) => {
+  // Validate hourly payment fields when paymentType is hourly
+  if (data.paymentType === "hourly") {
+    return data.hourlyRate && data.hourlyRate > 0 && data.minimumHours && data.minimumHours > 0;
+  }
+  return true;
+}, {
+  message: "Para pago por hora, ingresa una tarifa válida y horas mínimas",
+  path: ["hourlyRate"]
+}).refine((data) => {
+  // Validate fixed job payment fields when paymentType is fixed_job
+  if (data.paymentType === "fixed_job") {
+    return data.fixedJobRate && data.fixedJobRate > 0 && data.estimatedDuration && data.estimatedDuration > 0 && data.jobDescription && data.jobDescription.length >= 10;
+  }
+  return true;
+}, {
+  message: "Para trabajo fijo, completa todos los campos requeridos",
+  path: ["fixedJobRate"]
+}).refine((data) => {
+  // Validate per-event payment fields when paymentType is per_event
+  if (data.paymentType === "per_event") {
+    return data.eventRate && data.eventRate > 0 && data.eventDescription && data.eventDescription.length >= 10 && data.estimatedDuration && data.estimatedDuration > 0;
+  }
+  return true;
+}, {
+  message: "Para pago por evento, completa todos los campos requeridos",
+  path: ["eventRate"]
 });
 
 type ProviderSetupForm = z.infer<typeof providerSetupSchema>;
@@ -100,18 +141,58 @@ export default function ProviderSetup() {
       categoryId: "",
       title: "",
       description: "",
-      hourlyRate: "",
-      experience: ""
+      experience: "",
+      paymentType: "hourly",
+      hourlyRate: undefined,
+      minimumHours: undefined,
+      fixedJobRate: undefined,
+      jobDescription: "",
+      estimatedDuration: undefined,
+      eventRate: undefined,
+      eventDescription: ""
     }
   });
+  
+  // Watch payment type to show conditional fields
+  const selectedPaymentType = form.watch("paymentType");
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
+      // Create provider first
       const response = await apiRequest("POST", "/api/providers", {
-        ...providerData,
+        categoryId: providerData.categoryId,
+        title: providerData.title,
+        description: providerData.description,
+        experience: providerData.experience,
         providerSetupToken: providerSetupToken
       });
-      return await response.json();
+      const createdProvider = await response.json();
+      
+      // Create payment method based on selected type
+      const paymentMethodData: any = {
+        paymentType: providerData.paymentType,
+        isActive: true,
+        requiresDeposit: false,
+        depositPercentage: 0
+      };
+      
+      if (providerData.paymentType === "hourly") {
+        paymentMethodData.hourlyRate = providerData.hourlyRate;
+        paymentMethodData.minimumHours = providerData.minimumHours;
+      } else if (providerData.paymentType === "fixed_job") {
+        paymentMethodData.fixedJobRate = providerData.fixedJobRate;
+        paymentMethodData.jobDescription = providerData.jobDescription;
+        paymentMethodData.estimatedDuration = providerData.estimatedDuration;
+      } else if (providerData.paymentType === "per_event") {
+        paymentMethodData.eventRate = providerData.eventRate;
+        paymentMethodData.eventDescription = providerData.eventDescription;
+        paymentMethodData.estimatedDuration = providerData.estimatedDuration;
+      }
+      
+      // Create payment method
+      await apiRequest("POST", `/api/providers/${createdProvider.id}/payment-methods`, paymentMethodData);
+      
+      return createdProvider;
     },
     onSuccess: async (createdProvider) => {
       // If a profile picture was uploaded, set it for the user
@@ -127,9 +208,16 @@ export default function ProviderSetup() {
         }
       }
       
+      const paymentTypeLabels = {
+        hourly: "pago por hora",
+        fixed_job: "trabajo fijo",
+        menu_based: "menú de servicios",
+        per_event: "pago por evento"
+      };
+      
       toast({
         title: "¡Perfil de proveedor creado exitosamente!",
-        description: "Ya puedes empezar a ofrecer tus servicios a la comunidad.",
+        description: `Tu perfil con ${paymentTypeLabels[form.getValues().paymentType]} está listo. Ya puedes empezar a ofrecer servicios.`,
       });
       
       // Invalidate providers cache to refresh listings
@@ -300,31 +388,432 @@ export default function ProviderSetup() {
                   )}
                 />
 
-                {/* Hourly Rate */}
+                {/* Payment Method Selection */}
                 <FormField
                   control={form.control}
-                  name="hourlyRate"
+                  name="paymentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center space-x-2">
-                        <DollarSign className="w-4 h-4" />
-                        <span>Tarifa por Hora (MXN)</span>
-                      </FormLabel>
+                      <FormLabel className="text-base font-medium">Método de Pago</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="250"
-                          {...field}
-                          data-testid="input-hourly-rate"
-                        />
+                        <div className="grid grid-cols-1 gap-4 mt-3">
+                          {/* Hourly Payment Option */}
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              id="hourly"
+                              value="hourly"
+                              checked={field.value === "hourly"}
+                              onChange={() => field.onChange("hourly")}
+                              className="sr-only"
+                              data-testid="radio-payment-hourly"
+                            />
+                            <label
+                              htmlFor="hourly"
+                              className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+                                field.value === "hourly"
+                                  ? "border-orange-500 bg-orange-50"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className={`flex-shrink-0 p-2 rounded-lg ${
+                                  field.value === "hourly" ? "bg-orange-100" : "bg-gray-100"
+                                }`}>
+                                  <Clock className={`w-5 h-5 ${
+                                    field.value === "hourly" ? "text-orange-600" : "text-gray-600"
+                                  }`} />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900">Pago por Hora</h3>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Cobra por tiempo trabajado con una tarifa por hora y mínimo de horas.
+                                  </p>
+                                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                                    Ideal para: Limpieza, tutoring, cuidado de mascotas
+                                  </p>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+
+                          {/* Fixed Job Payment Option */}
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              id="fixed_job"
+                              value="fixed_job"
+                              checked={field.value === "fixed_job"}
+                              onChange={() => field.onChange("fixed_job")}
+                              className="sr-only"
+                              data-testid="radio-payment-fixed"
+                            />
+                            <label
+                              htmlFor="fixed_job"
+                              className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+                                field.value === "fixed_job"
+                                  ? "border-orange-500 bg-orange-50"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className={`flex-shrink-0 p-2 rounded-lg ${
+                                  field.value === "fixed_job" ? "bg-orange-100" : "bg-gray-100"
+                                }`}>
+                                  <FileText className={`w-5 h-5 ${
+                                    field.value === "fixed_job" ? "text-orange-600" : "text-gray-600"
+                                  }`} />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900">Trabajo Fijo</h3>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Precio fijo por un trabajo específico con descripción clara del servicio.
+                                  </p>
+                                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                                    Ideal para: Reparaciones, instalaciones, proyectos específicos
+                                  </p>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+
+                          {/* Menu-based Payment Option */}
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              id="menu_based"
+                              value="menu_based"
+                              checked={field.value === "menu_based"}
+                              onChange={() => field.onChange("menu_based")}
+                              className="sr-only"
+                              data-testid="radio-payment-menu"
+                            />
+                            <label
+                              htmlFor="menu_based"
+                              className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+                                field.value === "menu_based"
+                                  ? "border-orange-500 bg-orange-50"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className={`flex-shrink-0 p-2 rounded-lg ${
+                                  field.value === "menu_based" ? "bg-orange-100" : "bg-gray-100"
+                                }`}>
+                                  <Menu className={`w-5 h-5 ${
+                                    field.value === "menu_based" ? "text-orange-600" : "text-gray-600"
+                                  }`} />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900">Menú de Servicios</h3>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Ofrece múltiples servicios con precios individuales desde un menú.
+                                  </p>
+                                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                                    Ideal para: Salón de belleza, restaurant, servicios variados
+                                  </p>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+
+                          {/* Per-Event Payment Option */}
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              id="per_event"
+                              value="per_event"
+                              checked={field.value === "per_event"}
+                              onChange={() => field.onChange("per_event")}
+                              className="sr-only"
+                              data-testid="radio-payment-event"
+                            />
+                            <label
+                              htmlFor="per_event"
+                              className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+                                field.value === "per_event"
+                                  ? "border-orange-500 bg-orange-50"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className={`flex-shrink-0 p-2 rounded-lg ${
+                                  field.value === "per_event" ? "bg-orange-100" : "bg-gray-100"
+                                }`}>
+                                  <Star className={`w-5 h-5 ${
+                                    field.value === "per_event" ? "text-orange-600" : "text-gray-600"
+                                  }`} />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900">Pago por Evento</h3>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Precio fijo por evento específico con descripción detallada del servicio.
+                                  </p>
+                                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                                    Ideal para: Fiestas, eventos, servicios especiales, celebraciones
+                                  </p>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
                       </FormControl>
-                      <p className="text-sm text-gray-600">
-                        Ingresa tu tarifa por hora en pesos mexicanos. Puedes cambiarla después.
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* Conditional Payment Method Fields */}
+                {selectedPaymentType === "hourly" && (
+                  <div className="space-y-4 border rounded-lg p-4 bg-orange-50">
+                    <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+                      <Clock className="w-5 h-5 text-orange-600" />
+                      <span>Configuración de Pago por Hora</span>
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="hourlyRate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <DollarSign className="w-4 h-4" />
+                              <span>Tarifa por Hora (MXN)</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="250"
+                                {...field}
+                                data-testid="input-hourly-rate"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="minimumHours"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center space-x-2">
+                              <Timer className="w-4 h-4" />
+                              <span>Horas Mínimas</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger data-testid="select-minimum-hours">
+                                  <SelectValue placeholder="Selecciona" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="0.5">0.5 horas (30 min)</SelectItem>
+                                  <SelectItem value="1">1 hora</SelectItem>
+                                  <SelectItem value="1.5">1.5 horas</SelectItem>
+                                  <SelectItem value="2">2 horas</SelectItem>
+                                  <SelectItem value="3">3 horas</SelectItem>
+                                  <SelectItem value="4">4 horas</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Define tu tarifa por hora y el mínimo de horas que cobrarás por servicio.
+                    </p>
+                  </div>
+                )}
+                
+                {selectedPaymentType === "fixed_job" && (
+                  <div className="space-y-4 border rounded-lg p-4 bg-blue-50">
+                    <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      <span>Configuración de Trabajo Fijo</span>
+                    </h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="fixedJobRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <DollarSign className="w-4 h-4" />
+                            <span>Precio del Trabajo (MXN)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="500"
+                              {...field}
+                              data-testid="input-fixed-job-rate"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="jobDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descripción del Trabajo</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Ej: Limpieza completa de apartamento de 2 habitaciones, incluye cocina, baños y sala. No incluye limpieza de alfombras."
+                              className="min-h-[80px]"
+                              {...field}
+                              data-testid="textarea-job-description"
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-600">
+                            Describe exactamente qué incluye el trabajo y qué no.
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="estimatedDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Timer className="w-4 h-4" />
+                            <span>Duración Estimada (minutos)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="120"
+                              {...field}
+                              data-testid="input-estimated-duration"
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-600">
+                            ¿Cuánto tiempo tomará completar este trabajo?
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+                
+                {selectedPaymentType === "menu_based" && (
+                  <div className="space-y-4 border rounded-lg p-4 bg-green-50">
+                    <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+                      <Menu className="w-5 h-5 text-green-600" />
+                      <span>Menú de Servicios</span>
+                    </h3>
+                    <div className="bg-white rounded-lg p-4 border border-green-200">
+                      <div className="flex items-start space-x-3">
+                        <div className="bg-green-100 p-2 rounded-full">
+                          <Menu className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">Configurarás tu menú después</h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Una vez que completes el registro, podrás acceder a la sección de 
+                            "Gestión de Menú" donde podrás agregar tus servicios, precios, 
+                            categorías y opciones.
+                          </p>
+                          <ul className="text-sm text-gray-600 mt-2 space-y-1">
+                            <li>• Añade múltiples servicios</li>
+                            <li>• Organiza por categorías</li>
+                            <li>• Define precios individuales</li>
+                            <li>• Añade descripciones e imágenes</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {selectedPaymentType === "per_event" && (
+                  <div className="space-y-4 border rounded-lg p-4 bg-purple-50">
+                    <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+                      <Star className="w-5 h-5 text-purple-600" />
+                      <span>Configuración de Pago por Evento</span>
+                    </h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="eventRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <DollarSign className="w-4 h-4" />
+                            <span>Precio por Evento (MXN)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="1500"
+                              {...field}
+                              data-testid="input-event-rate"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="eventDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descripción del Evento</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Ej: Fiesta de cumpleaños para 20 personas, incluye decoración, música, animación por 4 horas. No incluye comida ni bebidas."
+                              className="min-h-[80px]"
+                              {...field}
+                              data-testid="textarea-event-description"
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-600">
+                            Describe exactamente qué incluye el evento y qué no.
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="estimatedDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center space-x-2">
+                            <Timer className="w-4 h-4" />
+                            <span>Duración Estimada (minutos)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="240"
+                              {...field}
+                              data-testid="input-event-duration"
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-600">
+                            ¿Cuánto tiempo durará el evento?
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
 
                 {/* Experience */}
                 <FormField
