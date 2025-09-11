@@ -283,6 +283,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/profile-photos", async (req, res) => {
+    if (!req.body.photoURL) {
+      return res.status(400).json({ error: "photoURL is required" });
+    }
+
+    if (!req.body.providerSetupToken) {
+      return res.status(401).json({ error: "Provider setup token is required" });
+    }
+
+    try {
+      // Security: Validate the setup token and get userId server-side
+      const tokenData = providerSetupTokens.get(req.body.providerSetupToken);
+      if (!tokenData) {
+        return res.status(401).json({ error: "Invalid or expired setup token" });
+      }
+
+      // Check if token has expired
+      if (Date.now() > tokenData.expiresAt) {
+        providerSetupTokens.delete(req.body.providerSetupToken);
+        return res.status(401).json({ error: "Setup token has expired" });
+      }
+
+      const userId = tokenData.userId; // Get userId from server-side token, not client
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.photoURL,
+        {
+          owner: "system",
+          visibility: "public" // Profile photos are public
+        }
+      );
+
+      // Update user's avatar field in database
+      await storage.updateUser(userId, { avatar: objectPath });
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting profile photo:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.get("/api/providers/:id", async (req, res) => {
     try {
       const provider = await storage.getProvider(req.params.id);

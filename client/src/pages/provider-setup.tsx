@@ -13,8 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Briefcase, DollarSign, Star, Clock } from "lucide-react";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { Briefcase, DollarSign, Star, Clock, Camera, User } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
+import type { UploadResult } from "@uppy/core";
 
 // Provider setup form schema
 const providerSetupSchema = z.object({
@@ -33,6 +35,8 @@ type ProviderSetupForm = z.infer<typeof providerSetupSchema>;
 export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
 
   // Get provider setup token from session storage (set during registration)
   const providerSetupToken = sessionStorage.getItem('providerSetupToken');
@@ -52,6 +56,44 @@ export default function ProviderSetup() {
     queryKey: ["/api/categories"],
   });
 
+  // Profile picture upload functions
+  const handleProfilePictureUpload = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload");
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL as string,
+    };
+  };
+
+  const handleProfilePictureComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      setIsUploadingPicture(true);
+      try {
+        const uploadedFile = result.successful[0];
+        const photoURL = uploadedFile.uploadURL as string;
+        
+        // We'll get the userId after the provider is created
+        // For now, just store the photoURL to update later
+        setProfilePicture(photoURL);
+        
+        toast({
+          title: "Foto de perfil subida exitosamente",
+          description: "Tu foto de perfil se aplicará cuando complete el registro.",
+        });
+      } catch (error) {
+        console.error("Error processing profile picture:", error);
+        toast({
+          title: "Error al procesar la foto",
+          description: "Hubo un problema al procesar tu foto de perfil.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingPicture(false);
+      }
+    }
+  };
+
   const form = useForm<ProviderSetupForm>({
     resolver: zodResolver(providerSetupSchema),
     defaultValues: {
@@ -65,12 +107,26 @@ export default function ProviderSetup() {
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
-      return await apiRequest("POST", "/api/providers", {
+      const response = await apiRequest("POST", "/api/providers", {
         ...providerData,
         providerSetupToken: providerSetupToken
       });
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: async (createdProvider) => {
+      // If a profile picture was uploaded, set it for the user
+      if (profilePicture && providerSetupToken) {
+        try {
+          await apiRequest("PUT", "/api/profile-photos", { 
+            photoURL: profilePicture, 
+            providerSetupToken: providerSetupToken 
+          });
+        } catch (error) {
+          console.error("Error setting profile picture:", error);
+          // Don't fail the whole flow for profile picture errors
+        }
+      }
+      
       toast({
         title: "¡Perfil de proveedor creado exitosamente!",
         description: "Ya puedes empezar a ofrecer tus servicios a la comunidad.",
@@ -157,6 +213,53 @@ export default function ProviderSetup() {
                     </FormItem>
                   )}
                 />
+
+                {/* Profile Picture Upload */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Foto de Perfil (Opcional)</Label>
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        {profilePicture ? (
+                          <div className="relative">
+                            <img 
+                              src={profilePicture} 
+                              alt="Vista previa de foto de perfil" 
+                              className="w-16 h-16 rounded-full object-cover border-2 border-orange-200"
+                              data-testid="img-profile-preview"
+                            />
+                            <div className="absolute -top-1 -right-1 bg-green-100 rounded-full p-1">
+                              <User className="w-3 h-3 text-green-600" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                            <Camera className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5 * 1024 * 1024} // 5MB
+                          onGetUploadParameters={handleProfilePictureUpload}
+                          onComplete={handleProfilePictureComplete}
+                          buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          {profilePicture ? 'Cambiar Foto' : 'Subir Foto de Perfil'}
+                        </ObjectUploader>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Una foto de perfil profesional ayuda a generar confianza con tus clientes. 
+                      Tamaño máximo: 5MB. Formatos: JPG, PNG.
+                    </p>
+                    {isUploadingPicture && (
+                      <p className="text-sm text-orange-600">Procesando foto...</p>
+                    )}
+                  </div>
+                </div>
 
                 {/* Service Title */}
                 <FormField
