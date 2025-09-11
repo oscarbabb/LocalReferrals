@@ -428,7 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/providers", async (req, res) => {
     try {
-      const { providerSetupToken, ...providerData } = req.body;
+      const { providerSetupToken, profilePicture, ...providerData } = req.body;
       
       // Security: Validate the setup token instead of trusting client-supplied userId
       if (!providerSetupToken) {
@@ -465,6 +465,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Provider profile already exists for this user" });
       }
       
+      // Handle profile picture upload BEFORE consuming token
+      let profilePhotoPath = null;
+      if (profilePicture) {
+        try {
+          const objectStorageService = new ObjectStorageService();
+          profilePhotoPath = await objectStorageService.trySetObjectEntityAclPolicy(
+            profilePicture,
+            {
+              owner: "system",
+              visibility: "public" // Profile photos are public
+            }
+          );
+          
+          // Update user's avatar field in database
+          await storage.updateUser(userId, { avatar: profilePhotoPath });
+        } catch (error) {
+          console.error("Error setting profile picture during provider creation:", error);
+          // Don't fail provider creation if photo upload fails, just log it
+          // The provider can upload a photo later
+        }
+      }
+      
       // Validate provider data and include the server-determined userId
       const validatedData = insertProviderSchema.parse({
         ...providerData,
@@ -476,8 +498,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Consume the token (invalidate it after successful use)
       providerSetupTokens.delete(providerSetupToken);
       
-      res.status(201).json(provider);
+      res.status(201).json({ 
+        ...provider,
+        profilePhotoPath: profilePhotoPath // Include photo path in response for confirmation
+      });
     } catch (error) {
+      console.error("Error creating provider:", error);
       res.status(400).json({ message: "Invalid provider data" });
     }
   });

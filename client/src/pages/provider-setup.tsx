@@ -158,12 +158,13 @@ export default function ProviderSetup() {
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
-      // Create provider first
+      // Create provider with profile picture included
       const response = await apiRequest("POST", "/api/providers", {
         categoryId: providerData.categoryId,
         title: providerData.title,
         description: providerData.description,
         experience: providerData.experience,
+        profilePicture: profilePicture, // Include profile picture in provider creation
         providerSetupToken: providerSetupToken
       });
       const createdProvider = await response.json();
@@ -195,19 +196,6 @@ export default function ProviderSetup() {
       return createdProvider;
     },
     onSuccess: async (createdProvider) => {
-      // If a profile picture was uploaded, set it for the user
-      if (profilePicture && providerSetupToken) {
-        try {
-          await apiRequest("PUT", "/api/profile-photos", { 
-            photoURL: profilePicture, 
-            providerSetupToken: providerSetupToken 
-          });
-        } catch (error) {
-          console.error("Error setting profile picture:", error);
-          // Don't fail the whole flow for profile picture errors
-        }
-      }
-      
       const paymentTypeLabels = {
         hourly: "pago por hora",
         fixed_job: "trabajo fijo",
@@ -215,9 +203,16 @@ export default function ProviderSetup() {
         per_event: "pago por evento"
       };
       
+      let description = `Tu perfil con ${paymentTypeLabels[form.getValues().paymentType]} está listo. Ya puedes empezar a ofrecer servicios.`;
+      
+      // Add confirmation if profile picture was uploaded
+      if (profilePicture && createdProvider.profilePhotoPath) {
+        description += " Tu foto de perfil también fue configurada correctamente.";
+      }
+      
       toast({
         title: "¡Perfil de proveedor creado exitosamente!",
-        description: `Tu perfil con ${paymentTypeLabels[form.getValues().paymentType]} está listo. Ya puedes empezar a ofrecer servicios.`,
+        description: description,
       });
       
       // Invalidate providers cache to refresh listings
