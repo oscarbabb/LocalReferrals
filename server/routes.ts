@@ -333,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.createUser(validatedData);
-      res.status(201).json(user);
+      res.status(201).json({ user });
     } catch (error) {
       res.status(400).json({ message: "Invalid user data" });
     }

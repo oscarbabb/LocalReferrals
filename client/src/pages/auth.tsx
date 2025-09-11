@@ -18,6 +18,7 @@ export default function Auth() {
   const { toast } = useToast();
   const [buildingValue, setBuildingValue] = useState("");
   const [addressValue, setAddressValue] = useState("");
+  const [isProviderRegistration, setIsProviderRegistration] = useState(false);
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -36,12 +37,23 @@ export default function Auth() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "¡Cuenta creada exitosamente!",
         description: "Bienvenido a Referencias Locales. Ya puedes empezar a explorar servicios.",
       });
-      setLocation("/");
+      
+      // Store user ID for provider setup if needed
+      if (data.user) {
+        sessionStorage.setItem('newUserId', data.user.id);
+      }
+      
+      // Check if this was a provider registration and redirect accordingly
+      if (isProviderRegistration) {
+        setLocation("/provider-setup");
+      } else {
+        setLocation("/");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -114,6 +126,9 @@ export default function Auth() {
       return;
     }
 
+    const isProvider = formData.get("isProvider") === "on";
+    setIsProviderRegistration(isProvider);
+
     const userData = {
       username: formData.get("username") as string,
       email: formData.get("email") as string,
@@ -124,7 +139,7 @@ export default function Auth() {
       phone: formData.get("phone") as string,
       building: buildingValue,
       apartment: formData.get("apartment") as string,
-      isProvider: formData.get("isProvider") === "on",
+      isProvider: isProvider,
     };
 
     registerMutation.mutate(userData);
@@ -217,7 +232,7 @@ export default function Auth() {
                     Únete a tu comunidad de servicios locales
                   </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleRegister} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4" data-provider-form="true">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="first-name">Nombre</Label>

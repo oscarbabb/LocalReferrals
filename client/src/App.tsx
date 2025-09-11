@@ -18,6 +18,7 @@ import PaymentMethods from "@/pages/payment-methods";
 import Testimonials from "@/pages/testimonials";
 import HowItWorks from "@/pages/how-it-works";
 import ProviderVerification from "@/pages/provider-verification";
+import ProviderSetup from "@/pages/provider-setup";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding } from "@/hooks/use-onboarding";
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/testimonials" component={Testimonials} />
         <Route path="/como-funciona" component={HowItWorks} />
         <Route path="/verification" component={ProviderVerification} />
+        <Route path="/provider-setup" component={ProviderSetup} />
         <Route path="/bookings" component={Bookings} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/payment-success" component={PaymentSuccess} />
