@@ -314,6 +314,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/providers", async (req, res) => {
     try {
       const validatedData = insertProviderSchema.parse(req.body);
+      
+      // Security: Validate that the userId exists and is a provider
+      const user = await storage.getUser(validatedData.userId);
+      if (!user) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      if (!user.isProvider) {
+        return res.status(400).json({ message: "User is not registered as a provider" });
+      }
+      
+      // Check if provider already exists for this user
+      const existingProvider = await storage.getProviderByUserId(validatedData.userId);
+      if (existingProvider) {
+        return res.status(400).json({ message: "Provider profile already exists for this user" });
+      }
+      
       const provider = await storage.createProvider(validatedData);
       res.status(201).json(provider);
     } catch (error) {

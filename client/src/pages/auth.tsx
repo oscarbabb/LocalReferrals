@@ -44,12 +44,8 @@ export default function Auth() {
       });
       
       // Store user ID for provider setup if needed
-      if (data.user) {
+      if (data.user && isProviderRegistration) {
         sessionStorage.setItem('newUserId', data.user.id);
-      }
-      
-      // Check if this was a provider registration and redirect accordingly
-      if (isProviderRegistration) {
         setLocation("/provider-setup");
       } else {
         setLocation("/");

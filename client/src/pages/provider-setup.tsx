@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,14 +33,18 @@ type ProviderSetupForm = z.infer<typeof providerSetupSchema>;
 export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get current user ID from session storage (set during registration)
   const userId = sessionStorage.getItem('newUserId');
   
+  // Redirect to auth if no user ID (using useEffect to avoid render-time side effects)
+  useEffect(() => {
+    if (!userId) {
+      setLocation('/auth');
+    }
+  }, [userId, setLocation]);
+  
   if (!userId) {
-    // If no user ID, redirect to auth
-    setLocation('/auth');
     return null;
   }
 
@@ -61,29 +65,19 @@ export default function ProviderSetup() {
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
-      const response = await fetch("/api/providers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...providerData,
-          userId: userId
-        }),
+      return await apiRequest("POST", "/api/providers", {
+        ...providerData,
+        userId: userId
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Error creating provider profile");
-      }
-      
-      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "¡Perfil de proveedor creado exitosamente!",
         description: "Ya puedes empezar a ofrecer tus servicios a la comunidad.",
       });
+      
+      // Invalidate providers cache to refresh listings
+      queryClient.invalidateQueries({ queryKey: ["/api/providers"] });
       
       // Clear the user ID from session storage
       sessionStorage.removeItem('newUserId');
@@ -101,7 +95,6 @@ export default function ProviderSetup() {
   });
 
   const onSubmit = (data: ProviderSetupForm) => {
-    setIsSubmitting(true);
     createProviderMutation.mutate(data);
   };
 
@@ -260,10 +253,10 @@ export default function ProviderSetup() {
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white"
-                    disabled={isSubmitting || createProviderMutation.isPending}
+                    disabled={createProviderMutation.isPending}
                     data-testid="button-create-provider"
                   >
-                    {isSubmitting || createProviderMutation.isPending ? (
+                    {createProviderMutation.isPending ? (
                       "Creando perfil..."
                     ) : (
                       "Crear Perfil de Proveedor"
