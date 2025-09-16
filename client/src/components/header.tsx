@@ -2,16 +2,40 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn, Sparkles } from "lucide-react";
+import { Menu, User, LogIn, LogOut, Sparkles } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { startOnboarding } = useOnboarding();
   const { t } = useLanguage();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout");
+      // Clear all cached data
+      queryClient.clear();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente.",
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Error al cerrar sesión",
+        description: "Hubo un problema al cerrar tu sesión.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const navItems = [
     { href: "/services", label: t('nav.services') },
@@ -63,17 +87,40 @@ export default function Header() {
               <Sparkles className="w-4 h-4 mr-2 transition-transform hover:rotate-12" />
               Tour
             </Button>
-            <Link href="/auth">
-              <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-login">
-                <LogIn className="w-4 h-4 mr-2 transition-transform hover:translate-x-1" />
-                {t('nav.login')}
-              </Button>
-            </Link>
-            <Link href="/auth">
-              <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-enhance hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300" data-testid="button-register">
-                {t('auth.register')}
-              </Button>
-            </Link>
+            
+            {isAuthenticated ? (
+              <>
+                <Link href="/profile">
+                  <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-profile">
+                    <User className="w-4 h-4 mr-2" />
+                    {user?.fullName || user?.username || 'Perfil'}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-600 hover:bg-red-50 btn-enhance transition-all duration-300" 
+                  data-testid="button-logout"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('nav.logout')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth">
+                  <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-login">
+                    <LogIn className="w-4 h-4 mr-2 transition-transform hover:translate-x-1" />
+                    {t('nav.login')}
+                  </Button>
+                </Link>
+                <Link href="/auth">
+                  <Button className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md btn-enhance hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300" data-testid="button-register">
+                    {t('auth.register')}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -120,17 +167,43 @@ export default function Header() {
                   <Sparkles className="w-4 h-4 mr-2" />
                   Ver Tour de la Plataforma
                 </Button>
-                <Link href="/auth" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    {t('nav.login')}
-                  </Button>
-                </Link>
-                <Link href="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full bg-primary text-white">
-                    {t('auth.register')}
-                  </Button>
-                </Link>
+                
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/profile" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start" data-testid="button-profile-mobile">
+                        <User className="w-4 h-4 mr-2" />
+                        {user?.fullName || user?.username || 'Perfil'}
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
+                        setIsOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full justify-start text-red-600 hover:text-red-700" 
+                      data-testid="button-logout-mobile"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {t('nav.logout')}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <LogIn className="w-4 h-4 mr-2" />
+                        {t('nav.login')}
+                      </Button>
+                    </Link>
+                    <Link href="/auth" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-primary text-white">
+                        {t('auth.register')}
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>

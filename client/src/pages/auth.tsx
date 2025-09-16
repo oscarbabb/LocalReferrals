@@ -181,10 +181,12 @@ export default function Auth() {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="login-email"
+                        name="email"
                         type="email"
                         placeholder="tu@email.com"
                         className="pl-10"
                         required
+                        data-testid="input-email"
                       />
                     </div>
                   </div>
@@ -194,9 +196,11 @@ export default function Auth() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="login-password"
+                        name="password"
                         type="password"
                         className="pl-10"
                         required
+                        data-testid="input-password"
                       />
                     </div>
                   </div>
@@ -214,8 +218,10 @@ export default function Auth() {
                   <Button 
                     type="submit" 
                     className="w-full bg-primary text-white hover:bg-blue-700"
+                    disabled={loginMutation.isPending}
+                    data-testid="button-login"
                   >
-                    Iniciar Sesión
+                    {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
                 </form>
               </TabsContent>
