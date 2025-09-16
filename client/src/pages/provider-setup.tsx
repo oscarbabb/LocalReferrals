@@ -158,7 +158,7 @@ export default function ProviderSetup() {
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
-      // Create provider with profile picture included
+      // Create provider with only essential fields - let backend defaults handle the rest
       const response = await apiRequest("POST", "/api/providers", {
         categoryId: providerData.categoryId,
         title: providerData.title,
@@ -599,7 +599,7 @@ export default function ProviderSetup() {
                               <span>Horas Mínimas</span>
                             </FormLabel>
                             <FormControl>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select onValueChange={(value) => field.onChange(parseFloat(value))} defaultValue={field.value?.toString()}>
                                 <SelectTrigger data-testid="select-minimum-hours">
                                   <SelectValue placeholder="Selecciona" />
                                 </SelectTrigger>
