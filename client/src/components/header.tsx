@@ -93,7 +93,7 @@ export default function Header() {
                 <Link href="/profile">
                   <Button variant="ghost" className="text-gray-700 hover:text-accent hover:bg-orange-50 btn-enhance transition-all duration-300" data-testid="button-profile">
                     <User className="w-4 h-4 mr-2" />
-                    {user?.fullName || user?.username || 'Perfil'}
+                    {(user as any)?.fullName || (user as any)?.username || 'Perfil'}
                   </Button>
                 </Link>
                 <Button 
@@ -173,7 +173,7 @@ export default function Header() {
                     <Link href="/profile" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start" data-testid="button-profile-mobile">
                         <User className="w-4 h-4 mr-2" />
-                        {user?.fullName || user?.username || 'Perfil'}
+                        {(user as any)?.fullName || (user as any)?.username || 'Perfil'}
                       </Button>
                     </Link>
                     <Button 
