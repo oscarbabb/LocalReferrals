@@ -114,9 +114,15 @@ export default function ProviderSetup() {
         const uploadedFile = result.successful[0];
         const photoURL = uploadedFile.uploadURL as string;
         
-        // We'll get the userId after the provider is created
-        // For now, just store the photoURL to update later
-        setProfilePicture(photoURL);
+        // Make the uploaded photo public and get the display URL
+        const response = await apiRequest("PUT", "/api/profile-photos", {
+          photoURL: photoURL,
+          providerSetupToken: providerSetupToken
+        });
+        const data = await response.json();
+        
+        // Use the public objectPath for display
+        setProfilePicture(data.objectPath);
         
         toast({
           title: "Foto de perfil subida exitosamente",

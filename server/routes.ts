@@ -349,6 +349,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Set profile photo for authenticated users (consumer profile photos are public)
+  app.put("/api/consumer-profile-photos", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.body.photoURL) {
+        return res.status(400).json({ error: "photoURL is required" });
+      }
+      
+      const userId = (req.user as any).claims.sub;
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.photoURL,
+        {
+          owner: "system",
+          visibility: "public" // Profile photos are public
+        }
+      );
+
+      // Update user's profilePicture field in database
+      await storage.updateUser(userId, { avatar: objectPath });
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting consumer profile photo:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.put("/api/profile-photos", async (req, res) => {
     if (!req.body.photoURL) {
       return res.status(400).json({ error: "photoURL is required" });
@@ -592,12 +622,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden - You can only update your own profile" });
       }
       
-      // Input validation: Only allow isProvider field updates
-      const roleUpdateSchema = z.object({
-        isProvider: z.boolean()
+      // Input validation: Allow profile updates and role changes
+      const profileUpdateSchema = z.object({
+        // Role switching
+        isProvider: z.boolean().optional(),
+        
+        // Profile fields
+        fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres").optional(),
+        username: z.string().min(3, "El nombre de usuario debe tener al menos 3 caracteres").optional(),
+        email: z.string().email("Email inválido").optional(),
+        phone: z.string().min(10, "Teléfono debe tener al menos 10 dígitos").optional(),
+        building: z.string().min(1, "El edificio es requerido").optional(),
+        apartment: z.string().min(1, "El apartamento es requerido").optional(),
+        address: z.string().min(10, "La dirección debe ser más específica").optional(),
+        profilePicture: z.string().optional(),
       }).strict(); // .strict() rejects extra keys
       
-      const validatedData = roleUpdateSchema.parse(req.body);
+      const validatedData = profileUpdateSchema.parse(req.body);
       
       // Validate that user exists
       const existingUser = await storage.getUser(id);

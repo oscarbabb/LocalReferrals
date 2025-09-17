@@ -1,31 +1,96 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Settings, Star, Calendar, MessageCircle, Briefcase, Users } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { User, Settings, Star, Calendar, MessageCircle, Briefcase, Users, Camera, Menu as MenuIcon, Plus } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { ObjectUploader } from "@/components/ObjectUploader";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
+import type { UploadResult } from "@uppy/core";
+import type { MenuItem } from "@shared/schema";
+
+// Profile form schema
+const profileSchema = z.object({
+  fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  username: z.string().min(3, "El nombre de usuario debe tener al menos 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().min(10, "Teléfono debe tener al menos 10 dígitos"),
+  building: z.string().min(1, "El edificio es requerido"),
+  apartment: z.string().min(1, "El apartamento es requerido"),
+  address: z.string().min(10, "La dirección debe ser más específica")
+});
+
+type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
 
   // Get current user data
   const { data: user, isLoading } = useQuery<any>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
+
+  // Get provider data if user is a provider
+  const { data: provider } = useQuery<any>({
+    queryKey: ["/api/auth/provider"],
+    enabled: !!user?.isProvider,
+    retry: false,
+  });
+
+  // Get menu items for providers
+  const { data: menuItems = [] } = useQuery<MenuItem[]>({
+    queryKey: ["/api/providers", provider?.id, "menu-items"],
+    enabled: !!provider?.id,
+  });
+
+  // Profile form
+  const profileForm = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: user?.fullName || "",
+      username: user?.username || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      building: user?.building || "",
+      apartment: user?.apartment || "",
+      address: user?.address || ""
+    }
+  });
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        fullName: user.fullName || "",
+        username: user.username || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        building: user.building || "",
+        apartment: user.apartment || "",
+        address: user.address || ""
+      });
+      setProfilePicture(user.avatar || null);
+    }
+  }, [user, profileForm]);
 
   // Role switching mutation
   const roleSwitchMutation = useMutation({
@@ -66,6 +131,77 @@ export default function Profile() {
 
   const handleRoleSwitch = (isProvider: boolean) => {
     roleSwitchMutation.mutate(isProvider);
+  };
+
+  // Profile photo upload functions
+  const handleProfilePictureUpload = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload");
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL as string,
+    };
+  };
+
+  const handleProfilePictureComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      setIsUploadingPicture(true);
+      try {
+        const uploadedFile = result.successful[0];
+        const photoURL = uploadedFile.uploadURL as string;
+        
+        // Make the uploaded photo public and get the display URL
+        const response = await apiRequest("PUT", "/api/consumer-profile-photos", {
+          photoURL: photoURL
+        });
+        const data = await response.json();
+        
+        // Use the public objectPath for display
+        setProfilePicture(data.objectPath);
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        
+        toast({
+          title: "Foto de perfil actualizada",
+          description: "Tu foto de perfil se ha actualizado exitosamente.",
+        });
+      } catch (error) {
+        console.error("Error updating profile picture:", error);
+        toast({
+          title: "Error al actualizar foto",
+          description: "Hubo un problema al actualizar tu foto de perfil.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingPicture(false);
+      }
+    }
+  };
+
+  // Profile update mutation  
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: ProfileForm) => {
+      if (!user?.id) throw new Error("User not found");
+      
+      return await apiRequest("PATCH", `/api/users/${user.id}`, profileData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Perfil actualizado",
+        description: "Tus cambios han sido guardados exitosamente.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al actualizar perfil",
+        description: error.message || "No se pudo actualizar tu perfil. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmitProfile = (data: ProfileForm) => {
+    updateProfileMutation.mutate(data);
   };
 
   const getInitials = (name: string) => {
@@ -199,55 +335,143 @@ export default function Profile() {
                   <CardContent className="space-y-6">
                     <div className="flex items-center space-x-6">
                       <Avatar className="w-20 h-20">
-                        <AvatarFallback className="bg-primary text-white text-xl">
-                          {getInitials(user?.fullName)}
-                        </AvatarFallback>
+                        {(profilePicture || user?.avatar) ? (
+                          <AvatarImage src={profilePicture || user?.avatar} alt="Foto de perfil" />
+                        ) : (
+                          <AvatarFallback className="bg-primary text-white text-xl">
+                            {getInitials(user?.fullName)}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
-                      <div>
-                        <Button variant="outline">Cambiar Foto</Button>
-                        <p className="text-sm text-gray-500 mt-2">JPG, PNG. Máximo 2MB.</p>
+                      <div className="space-y-2">
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={2 * 1024 * 1024} // 2MB
+                          onGetUploadParameters={handleProfilePictureUpload}
+                          onComplete={handleProfilePictureComplete}
+                          buttonClassName="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          {profilePicture ? 'Cambiar Foto' : 'Subir Foto'}
+                        </ObjectUploader>
+                        <p className="text-sm text-gray-500">JPG, PNG. Máximo 2MB.</p>
+                        {isUploadingPicture && (
+                          <p className="text-sm text-blue-600">Subiendo foto...</p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="fullName">Nombre Completo</Label>
-                        <Input id="fullName" defaultValue={user?.fullName} />
-                      </div>
-                      <div>
-                        <Label htmlFor="username">Nombre de Usuario</Label>
-                        <Input id="username" defaultValue={user?.username} />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={user?.email} />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Teléfono</Label>
-                        <Input id="phone" defaultValue={user?.phone} />
-                      </div>
-                      <div>
-                        <Label htmlFor="building">Edificio</Label>
-                        <Input id="building" defaultValue={user?.building} />
-                      </div>
-                      <div>
-                        <Label htmlFor="apartment">Apartamento</Label>
-                        <Input id="apartment" defaultValue={user?.apartment} />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="address">Dirección</Label>
-                        <AppleMapsAddressInput
-                          id="address"
-                          value={user?.address}
-                          onChange={() => {}} // In real app, this would update user state
-                          placeholder="Dirección completa"
-                        />
-                      </div>
-                    </div>
+                    <Form {...profileForm}>
+                      <form onSubmit={profileForm.handleSubmit(onSubmitProfile)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={profileForm.control}
+                            name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nombre Completo</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-fullname" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="username"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nombre de Usuario</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-username" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} data-testid="input-email" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Teléfono</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-phone" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="building"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Edificio</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-building" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="apartment"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Apartamento</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-apartment" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="address"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Dirección</FormLabel>
+                                <FormControl>
+                                  <AppleMapsAddressInput
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Dirección completa"
+                                    data-testid="input-address"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
 
-                    <Button className="bg-primary text-white hover:bg-blue-700">
-                      Guardar Cambios
-                    </Button>
+                        <Button 
+                          type="submit" 
+                          className="bg-primary text-white hover:bg-blue-700"
+                          disabled={updateProfileMutation.isPending}
+                          data-testid="button-save-profile"
+                        >
+                          {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+                        </Button>
+                      </form>
+                    </Form>
                   </CardContent>
                 </Card>
               </div>
@@ -313,77 +537,158 @@ export default function Profile() {
 
           {/* Provider Tab */}
           <TabsContent value="provider">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuración de Proveedor</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium">Modo Proveedor</h3>
-                    <p className="text-sm text-gray-600">
-                      Habilita esta opción para ofrecer servicios a otros residentes
-                    </p>
-                  </div>
-                  <Switch defaultChecked={user?.isProvider} />
-                </div>
-
-                {user?.isProvider && (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="serviceTitle">Título del Servicio</Label>
-                        <Input id="serviceTitle" placeholder="ej. Limpieza profesional de apartamentos" />
+            {!user?.isProvider ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Configuración de Proveedor</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center py-8">
+                  <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No eres un proveedor actualmente
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Activa el modo proveedor en la parte superior para empezar a ofrecer servicios
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {/* Provider Profile Summary */}
+                {provider && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Tu Perfil de Proveedor</span>
+                        <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
+                          {provider.profilePicture ? (
+                            <img 
+                              src={provider.profilePicture} 
+                              alt="Foto de proveedor" 
+                              className="w-16 h-16 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <Briefcase className="w-8 h-8 text-orange-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{provider.title}</h3>
+                          <p className="text-gray-600">{provider.description}</p>
+                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                            <span>⭐ 4.9 (12 reseñas)</span>
+                            <span>📍 {user.building}</span>
+                            <span>🕒 Activo desde {new Date(provider.createdAt).getFullYear()}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="category">Categoría</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una categoría" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="cleaning">Limpieza</SelectItem>
-                            <SelectItem value="repairs">Reparaciones</SelectItem>
-                            <SelectItem value="tutoring">Tutorías</SelectItem>
-                            <SelectItem value="childcare">Cuidado</SelectItem>
-                            <SelectItem value="cooking">Cocina</SelectItem>
-                            <SelectItem value="tech">Tecnología</SelectItem>
-                            <SelectItem value="beauty">Belleza</SelectItem>
-                            <SelectItem value="fitness">Fitness</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="hourlyRate">Tarifa por Hora (MXN $)</Label>
-                        <Input id="hourlyRate" type="number" placeholder="1500" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="serviceDescription">Descripción del Servicio</Label>
-                      <Textarea 
-                        id="serviceDescription" 
-                        placeholder="Describe tu servicio, experiencia y lo que incluye..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="experience">Experiencia</Label>
-                      <Textarea 
-                        id="experience" 
-                        placeholder="Describe tu experiencia, certificaciones o antecedentes relevantes..."
-                        className="min-h-[80px]"
-                      />
-                    </div>
-
-                    <Button className="bg-primary text-white hover:bg-blue-700">
-                      Actualizar Servicio
-                    </Button>
-                  </>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
+
+                {/* Menu Management */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <MenuIcon className="w-5 h-5" />
+                        <span>Menú de Servicios</span>
+                      </div>
+                      <Button 
+                        onClick={() => setLocation('/menu-management')}
+                        className="bg-orange-600 hover:bg-orange-700"
+                        data-testid="button-manage-menu"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Gestionar Menú
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {menuItems.length === 0 ? (
+                      <div className="text-center py-8">
+                        <MenuIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <h4 className="font-medium text-gray-900 mb-2">
+                          No tienes servicios en tu menú
+                        </h4>
+                        <p className="text-gray-600 mb-4">
+                          Agrega servicios para que los clientes puedan encontrarte
+                        </p>
+                        <Button 
+                          onClick={() => setLocation('/menu-management')}
+                          variant="outline"
+                          data-testid="button-add-first-service"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Agregar Primer Servicio
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-600 mb-4">
+                          Tienes {menuItems.length} servicio{menuItems.length !== 1 ? 's' : ''} en tu menú:
+                        </p>
+                        <div className="grid gap-3">
+                          {menuItems.slice(0, 3).map((item) => (
+                            <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex-1">
+                                <h5 className="font-medium">{item.itemName}</h5>
+                                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                                  <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">
+                                    {item.categoryName}
+                                  </span>
+                                  <span>MXN ${item.price}</span>
+                                  {item.duration && <span>{item.duration} min</span>}
+                                </div>
+                              </div>
+                              <Badge variant={item.isAvailable ? "default" : "secondary"}>
+                                {item.isAvailable ? 'Disponible' : 'No disponible'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                        {menuItems.length > 3 && (
+                          <p className="text-sm text-gray-500 text-center">
+                            ... y {menuItems.length - 3} más
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Quick Stats */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Estadísticas Rápidas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{menuItems.length}</div>
+                        <div className="text-sm text-gray-600">Servicios</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">12</div>
+                        <div className="text-sm text-gray-600">Completados</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-600">4.9</div>
+                        <div className="text-sm text-gray-600">Calificación</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">MXN 2.4k</div>
+                        <div className="text-sm text-gray-600">Este mes</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* Requests Tab */}

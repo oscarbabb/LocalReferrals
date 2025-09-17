@@ -50,23 +50,25 @@ export default function MenuManagement() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
   // Get current user's provider profile - CRITICAL SECURITY FIX
-  const { data: provider, isLoading: providerLoading, error: providerError } = useQuery({
+  const { data: provider, isLoading: providerLoading, error: providerError } = useQuery<any>({
     queryKey: ["/api/auth/provider"],
     enabled: isAuthenticated,
-    retry: false,
-    onError: (error: any) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to manage your menu.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-      }
-    }
+    retry: false
   });
+
+  // Handle authentication errors in useEffect to avoid side effects during render
+  useEffect(() => {
+    if (providerError && isUnauthorizedError(providerError)) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to manage your menu.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 1000);
+    }
+  }, [providerError, toast]);
 
   const providerId = provider?.id;
 
