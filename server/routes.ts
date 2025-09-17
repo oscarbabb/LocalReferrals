@@ -21,6 +21,7 @@ import {
   insertMenuItemSchema,
   insertMenuItemVariationSchema
 } from "@shared/schema";
+import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail } from "./email.js";
 
 // Initialize Stripe
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -577,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Use Passport's login method to establish session for auto-login
-      req.login(sessionUser, (err) => {
+      req.login(sessionUser, async (err) => {
         if (err) {
           console.error("Auto-login session creation error:", err);
           // Still return success for user creation even if session fails
@@ -586,6 +587,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             providerSetupToken, // Only included if user is a provider
             message: "Account created successfully, but session failed. Please log in manually."
           });
+        }
+
+        // Send welcome email after successful registration
+        try {
+          await sendProfileConfirmationEmail(user.email, user.fullName);
+          console.log(`Welcome email sent to ${user.email}`);
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't fail registration if email fails
         }
 
         res.status(201).json({ 
@@ -729,6 +739,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const requestData = insertServiceRequestSchema.parse(req.body);
       const serviceRequest = await storage.createServiceRequest(requestData);
+      
+      // Send service request emails
+      try {
+        // Get user and provider details for emails
+        const user = await storage.getUser(serviceRequest.requesterId);
+        const provider = await storage.getProvider(serviceRequest.providerId);
+        
+        if (user && provider) {
+          // Get provider user details for email
+          const providerUser = await storage.getUser(provider.userId);
+          
+          if (providerUser) {
+            const requestDate = new Date().toLocaleDateString('es-MX');
+            
+            // Send confirmation to user
+            await sendBookingConfirmationEmail(
+              user.email,
+              user.fullName,
+              provider.businessName,
+              serviceRequest.serviceType || 'Servicio solicitado',
+              requestDate,
+              'Por coordinar'
+            );
+            
+            // Send notification to provider
+            await sendBookingNotificationEmail(
+              providerUser.email,
+              provider.businessName,
+              user.fullName,
+              serviceRequest.serviceType || 'Servicio solicitado',
+              requestDate,
+              'Por coordinar'
+            );
+            
+            console.log(`Service request emails sent for request ${serviceRequest.id}`);
+          }
+        }
+      } catch (emailError) {
+        console.error("Failed to send service request emails:", emailError);
+        // Don't fail service request creation if email fails
+      }
+      
       res.status(201).json(serviceRequest);
     } catch (error) {
       console.error("Service request creation error:", error);
@@ -773,6 +825,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const appointmentData = insertAppointmentSchema.parse(req.body);
       const appointment = await storage.createAppointment(appointmentData);
+      
+      // Send booking confirmation and notification emails
+      try {
+        // Get user and provider details for emails
+        const user = await storage.getUser(appointment.userId);
+        const provider = await storage.getProvider(appointment.providerId);
+        
+        if (user && provider) {
+          // Get provider user details for email
+          const providerUser = await storage.getUser(provider.userId);
+          
+          if (providerUser) {
+            const bookingDate = new Date(appointment.appointmentDate).toLocaleDateString('es-MX');
+            const bookingTime = appointment.appointmentTime;
+            
+            // Send confirmation to user
+            await sendBookingConfirmationEmail(
+              user.email,
+              user.fullName,
+              provider.businessName,
+              provider.category || 'Servicio',
+              bookingDate,
+              bookingTime
+            );
+            
+            // Send notification to provider
+            await sendBookingNotificationEmail(
+              providerUser.email,
+              provider.businessName,
+              user.fullName,
+              provider.category || 'Servicio',
+              bookingDate,
+              bookingTime
+            );
+            
+            console.log(`Booking emails sent for appointment ${appointment.id}`);
+          }
+        }
+      } catch (emailError) {
+        console.error("Failed to send booking emails:", emailError);
+        // Don't fail appointment creation if email fails
+      }
+      
       res.status(201).json(appointment);
     } catch (error) {
       res.status(400).json({ message: "Invalid appointment data" });
