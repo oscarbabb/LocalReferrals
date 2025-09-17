@@ -757,8 +757,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await sendBookingConfirmationEmail(
               user.email,
               user.fullName,
-              provider.businessName,
-              serviceRequest.serviceType || 'Servicio solicitado',
+              provider.title,
+              serviceRequest.title || 'Servicio solicitado',
               requestDate,
               'Por coordinar'
             );
@@ -766,9 +766,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Send notification to provider
             await sendBookingNotificationEmail(
               providerUser.email,
-              provider.businessName,
+              provider.title,
               user.fullName,
-              serviceRequest.serviceType || 'Servicio solicitado',
+              serviceRequest.title || 'Servicio solicitado',
               requestDate,
               'Por coordinar'
             );
@@ -829,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send booking confirmation and notification emails
       try {
         // Get user and provider details for emails
-        const user = await storage.getUser(appointment.userId);
+        const user = await storage.getUser(appointment.requesterId);
         const provider = await storage.getProvider(appointment.providerId);
         
         if (user && provider) {
@@ -838,14 +838,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (providerUser) {
             const bookingDate = new Date(appointment.appointmentDate).toLocaleDateString('es-MX');
-            const bookingTime = appointment.appointmentTime;
+            const bookingTime = appointment.startTime;
             
             // Send confirmation to user
             await sendBookingConfirmationEmail(
               user.email,
               user.fullName,
-              provider.businessName,
-              provider.category || 'Servicio',
+              provider.title,
+              'Cita programada',
               bookingDate,
               bookingTime
             );
@@ -853,9 +853,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Send notification to provider
             await sendBookingNotificationEmail(
               providerUser.email,
-              provider.businessName,
+              provider.title,
               user.fullName,
-              provider.category || 'Servicio',
+              'Cita programada',
               bookingDate,
               bookingTime
             );

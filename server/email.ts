@@ -33,7 +33,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 }
 
 // Email templates for Referencias Locales
-const FROM_EMAIL = "noreply@referenciaslocales.com"; // You may need to verify this domain in SendGrid
+const FROM_EMAIL = "noreply@test.com"; // You may need to verify this domain in SendGrid
 
 export async function sendProfileConfirmationEmail(userEmail: string, userName: string): Promise<boolean> {
   const subject = "¡Bienvenido a Referencias Locales!";
