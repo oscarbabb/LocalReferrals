@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,21 +9,63 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Settings, Star, Calendar, MessageCircle } from "lucide-react";
+import { User, Settings, Star, Calendar, MessageCircle, Briefcase, Users } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Profile() {
-  // Mock user data - in a real app, this would come from authentication context
-  const user = {
-    id: "1",
-    fullName: "Juan Pérez",
-    username: "juan.perez",
-    email: "juan@example.com",
-    phone: "+1234567890",
-    building: "Edificio A",
-    apartment: "305",
-    address: "Condominio Las Flores, Av. Principal 123, Colonia Centro",
-    isProvider: true,
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Get current user data
+  const { data: user, isLoading } = useQuery<any>({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
+
+  // Role switching mutation
+  const roleSwitchMutation = useMutation({
+    mutationFn: async (newRole: boolean) => {
+      if (!user?.id) throw new Error("User not found");
+      
+      return await apiRequest("PATCH", `/api/users/${user.id}`, {
+        isProvider: newRole
+      });
+    },
+    onSuccess: async (response) => {
+      const data = await response.json();
+      
+      toast({
+        title: "Rol actualizado",
+        description: data.user?.isProvider 
+          ? "Ahora puedes ofrecer servicios como proveedor" 
+          : "Has cambiado a modo consumidor",
+      });
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      // If switching to provider and setup token is provided, redirect to setup
+      if (data.providerSetupToken) {
+        sessionStorage.setItem('providerSetupToken', data.providerSetupToken);
+        setLocation('/provider-setup');
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al cambiar rol",
+        description: "No se pudo actualizar tu rol. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRoleSwitch = (isProvider: boolean) => {
+    roleSwitchMutation.mutate(isProvider);
   };
 
   const getInitials = (name: string) => {
@@ -33,12 +76,97 @@ export default function Profile() {
       .toUpperCase();
   };
 
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4 w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded mb-8 w-1/2"></div>
+          <div className="bg-white rounded-xl p-8">
+            <div className="h-6 bg-gray-200 rounded mb-6 w-1/4"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Acceso Requerido</h1>
+          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tu perfil.</p>
+          <Button onClick={() => setLocation('/auth')} data-testid="button-login-redirect">
+            Iniciar Sesión
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Mi Perfil</h1>
           <p className="text-gray-600">Gestiona tu información personal y configuración</p>
         </div>
+
+        {/* Role Status Card */}
+        <Card className="mb-8 border-2 border-orange-100 bg-gradient-to-r from-orange-50 to-yellow-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className={`p-3 rounded-full ${
+                  user?.isProvider 
+                    ? 'bg-orange-100 text-orange-600' 
+                    : 'bg-blue-100 text-blue-600'
+                }`}>
+                  {user?.isProvider ? (
+                    <Briefcase className="w-6 h-6" />
+                  ) : (
+                    <Users className="w-6 h-6" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {user?.isProvider ? 'Modo Proveedor' : 'Modo Consumidor'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {user?.isProvider 
+                      ? 'Puedes ofrecer servicios y gestionar tus clientes'
+                      : 'Puedes buscar y contratar servicios locales'
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.isProvider ? 'Proveedor' : 'Consumidor'}
+                </span>
+                <Switch
+                  checked={user?.isProvider}
+                  onCheckedChange={handleRoleSwitch}
+                  disabled={roleSwitchMutation.isPending}
+                  data-testid="switch-role"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.isProvider ? 'Consumidor' : 'Proveedor'}
+                </span>
+              </div>
+            </div>
+            {roleSwitchMutation.isPending && (
+              <div className="mt-4 flex items-center space-x-2 text-sm text-gray-600">
+                <div className="animate-spin w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                <span>Actualizando rol...</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="profile" className="space-y-8">
           <TabsList className="grid w-full grid-cols-4">
@@ -72,7 +200,7 @@ export default function Profile() {
                     <div className="flex items-center space-x-6">
                       <Avatar className="w-20 h-20">
                         <AvatarFallback className="bg-primary text-white text-xl">
-                          {getInitials(user.fullName)}
+                          {getInitials(user?.fullName)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -84,33 +212,33 @@ export default function Profile() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="fullName">Nombre Completo</Label>
-                        <Input id="fullName" defaultValue={user.fullName} />
+                        <Input id="fullName" defaultValue={user?.fullName} />
                       </div>
                       <div>
                         <Label htmlFor="username">Nombre de Usuario</Label>
-                        <Input id="username" defaultValue={user.username} />
+                        <Input id="username" defaultValue={user?.username} />
                       </div>
                       <div>
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={user.email} />
+                        <Input id="email" type="email" defaultValue={user?.email} />
                       </div>
                       <div>
                         <Label htmlFor="phone">Teléfono</Label>
-                        <Input id="phone" defaultValue={user.phone} />
+                        <Input id="phone" defaultValue={user?.phone} />
                       </div>
                       <div>
                         <Label htmlFor="building">Edificio</Label>
-                        <Input id="building" defaultValue={user.building} />
+                        <Input id="building" defaultValue={user?.building} />
                       </div>
                       <div>
                         <Label htmlFor="apartment">Apartamento</Label>
-                        <Input id="apartment" defaultValue={user.apartment} />
+                        <Input id="apartment" defaultValue={user?.apartment} />
                       </div>
                       <div className="md:col-span-2">
                         <Label htmlFor="address">Dirección</Label>
                         <AppleMapsAddressInput
                           id="address"
-                          value={user.address}
+                          value={user?.address}
                           onChange={() => {}} // In real app, this would update user state
                           placeholder="Dirección completa"
                         />
@@ -139,7 +267,7 @@ export default function Profile() {
                         <span className="text-gray-600">Servicios solicitados</span>
                         <span className="font-medium">12</span>
                       </div>
-                      {user.isProvider && (
+                      {user?.isProvider && (
                         <>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Servicios ofrecidos</span>
@@ -197,10 +325,10 @@ export default function Profile() {
                       Habilita esta opción para ofrecer servicios a otros residentes
                     </p>
                   </div>
-                  <Switch defaultChecked={user.isProvider} />
+                  <Switch defaultChecked={user?.isProvider} />
                 </div>
 
-                {user.isProvider && (
+                {user?.isProvider && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -288,7 +416,7 @@ export default function Profile() {
                   </CardContent>
                 </Card>
 
-                {user.isProvider && (
+                {user?.isProvider && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Solicitudes Recibidas</CardTitle>

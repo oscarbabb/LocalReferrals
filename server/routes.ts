@@ -582,6 +582,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user (including role switching) - PROTECTED ENDPOINT
+  app.patch("/api/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Authorization: Users can only update their own profile
+      if (!(req.user as any)?.claims?.sub || (req.user as any).claims.sub !== id) {
+        return res.status(403).json({ message: "Forbidden - You can only update your own profile" });
+      }
+      
+      // Input validation: Only allow isProvider field updates
+      const roleUpdateSchema = z.object({
+        isProvider: z.boolean()
+      }).strict(); // .strict() rejects extra keys
+      
+      const validatedData = roleUpdateSchema.parse(req.body);
+      
+      // Validate that user exists
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update user data with only validated fields
+      const updatedUser = await storage.updateUser(id, validatedData);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+      
+      // If switching to provider role, generate provider setup token
+      let providerSetupToken = null;
+      if (validatedData.isProvider && !existingUser.isProvider) {
+        providerSetupToken = randomBytes(32).toString('hex');
+        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
+        providerSetupTokens.set(providerSetupToken, { 
+          userId: id, 
+          expiresAt 
+        });
+      }
+      
+      res.json({ 
+        user: updatedUser,
+        providerSetupToken // Only included when switching to provider
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(422).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      console.error("User update error:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // Reviews
   app.post("/api/reviews", async (req, res) => {
     try {
