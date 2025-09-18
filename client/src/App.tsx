@@ -20,6 +20,7 @@ import Testimonials from "@/pages/testimonials";
 import HowItWorks from "@/pages/how-it-works";
 import ProviderVerification from "@/pages/provider-verification";
 import ProviderSetup from "@/pages/provider-setup";
+import ReviewDemo from "@/pages/review-demo";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding } from "@/hooks/use-onboarding";
@@ -35,6 +36,7 @@ function Router() {
         <Route path="/services" component={Services} />
         <Route path="/providers" component={Providers} />
         <Route path="/providers/:id" component={ProviderDetail} />
+        <Route path="/review-demo" component={ReviewDemo} />
         <Route path="/testimonials" component={Testimonials} />
         <Route path="/como-funciona" component={HowItWorks} />
         <Route path="/verification" component={ProviderVerification} />
