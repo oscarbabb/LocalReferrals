@@ -2,7 +2,9 @@ import {
   type User, 
   type InsertUser, 
   type ServiceCategory, 
-  type InsertServiceCategory, 
+  type InsertServiceCategory,
+  type ServiceSubcategory,
+  type InsertServiceSubcategory, 
   type Provider, 
   type InsertProvider, 
   type Review, 
@@ -31,6 +33,7 @@ import {
   type InsertMenuItemVariation,
   users,
   serviceCategories,
+  serviceSubcategories,
   providers,
   reviews,
   serviceRequests,
@@ -93,6 +96,25 @@ export class DatabaseStorage implements IStorage {
   async createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory> {
     const [newCategory] = await db.insert(serviceCategories).values(category).returning();
     return newCategory;
+  }
+
+  // Service Subcategories
+  async getServiceSubcategories(): Promise<ServiceSubcategory[]> {
+    return await db.select().from(serviceSubcategories);
+  }
+
+  async getServiceSubcategoriesByCategory(categoryId: string): Promise<ServiceSubcategory[]> {
+    return await db.select().from(serviceSubcategories).where(eq(serviceSubcategories.categoryId, categoryId));
+  }
+
+  async getServiceSubcategory(id: string): Promise<ServiceSubcategory | undefined> {
+    const [subcategory] = await db.select().from(serviceSubcategories).where(eq(serviceSubcategories.id, id));
+    return subcategory || undefined;
+  }
+
+  async createServiceSubcategory(subcategory: InsertServiceSubcategory): Promise<ServiceSubcategory> {
+    const [newSubcategory] = await db.insert(serviceSubcategories).values(subcategory).returning();
+    return newSubcategory;
   }
 
   // Providers

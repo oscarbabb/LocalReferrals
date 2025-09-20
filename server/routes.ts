@@ -217,6 +217,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Service Subcategories
+  app.get("/api/subcategories", async (req, res) => {
+    try {
+      const subcategories = await storage.getServiceSubcategories();
+      res.json(subcategories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subcategories" });
+    }
+  });
+
+  app.get("/api/categories/:categoryId/subcategories", async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+      const subcategories = await storage.getServiceSubcategoriesByCategory(categoryId);
+      res.json(subcategories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subcategories for category" });
+    }
+  });
+
   // Providers
   app.get("/api/providers", async (req, res) => {
     try {

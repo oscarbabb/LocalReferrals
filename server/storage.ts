@@ -2,7 +2,9 @@ import {
   type User, 
   type InsertUser, 
   type ServiceCategory, 
-  type InsertServiceCategory, 
+  type InsertServiceCategory,
+  type ServiceSubcategory,
+  type InsertServiceSubcategory, 
   type Provider, 
   type InsertProvider, 
   type Review, 
@@ -31,6 +33,7 @@ import {
   type InsertMenuItemVariation,
   users,
   serviceCategories,
+  serviceSubcategories,
   providers,
   reviews,
   serviceRequests,
@@ -62,6 +65,12 @@ export interface IStorage {
   getServiceCategories(): Promise<ServiceCategory[]>;
   getServiceCategory(id: string): Promise<ServiceCategory | undefined>;
   createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory>;
+
+  // Service Subcategories
+  getServiceSubcategories(): Promise<ServiceSubcategory[]>;
+  getServiceSubcategoriesByCategory(categoryId: string): Promise<ServiceSubcategory[]>;
+  getServiceSubcategory(id: string): Promise<ServiceSubcategory | undefined>;
+  createServiceSubcategory(subcategory: InsertServiceSubcategory): Promise<ServiceSubcategory>;
 
   // Providers
   getProviders(): Promise<Provider[]>;
