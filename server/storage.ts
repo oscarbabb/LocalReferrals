@@ -144,6 +144,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private serviceCategories: Map<string, ServiceCategory>;
+  private serviceSubcategories: Map<string, ServiceSubcategory>;
   private providers: Map<string, Provider>;
   private reviews: Map<string, Review>;
   private serviceRequests: Map<string, ServiceRequest>;
@@ -162,6 +163,7 @@ export class MemStorage implements IStorage {
     console.log("🏗️  Initializing MemStorage...");
     this.users = new Map();
     this.serviceCategories = new Map();
+    this.serviceSubcategories = new Map();
     this.providers = new Map();
     this.reviews = new Map();
     this.serviceRequests = new Map();
@@ -395,6 +397,30 @@ export class MemStorage implements IStorage {
     const category: ServiceCategory = { ...insertCategory, id };
     this.serviceCategories.set(id, category);
     return category;
+  }
+
+  // Service Subcategories
+  async getServiceSubcategories(): Promise<ServiceSubcategory[]> {
+    return Array.from(this.serviceSubcategories.values());
+  }
+
+  async getServiceSubcategoriesByCategory(categoryId: string): Promise<ServiceSubcategory[]> {
+    return Array.from(this.serviceSubcategories.values()).filter(sub => sub.categoryId === categoryId);
+  }
+
+  async getServiceSubcategory(id: string): Promise<ServiceSubcategory | undefined> {
+    return this.serviceSubcategories.get(id);
+  }
+
+  async createServiceSubcategory(insertSubcategory: InsertServiceSubcategory): Promise<ServiceSubcategory> {
+    const id = randomUUID();
+    const subcategory: ServiceSubcategory = { 
+      ...insertSubcategory, 
+      id,
+      createdAt: new Date()
+    };
+    this.serviceSubcategories.set(id, subcategory);
+    return subcategory;
   }
 
   // Providers
@@ -1181,6 +1207,28 @@ export class DatabaseStorage implements IStorage {
       .values(insertCategory)
       .returning();
     return category;
+  }
+
+  // Service Subcategories
+  async getServiceSubcategories(): Promise<ServiceSubcategory[]> {
+    return await db.select().from(serviceSubcategories);
+  }
+
+  async getServiceSubcategoriesByCategory(categoryId: string): Promise<ServiceSubcategory[]> {
+    return await db.select().from(serviceSubcategories).where(eq(serviceSubcategories.categoryId, categoryId));
+  }
+
+  async getServiceSubcategory(id: string): Promise<ServiceSubcategory | undefined> {
+    const [subcategory] = await db.select().from(serviceSubcategories).where(eq(serviceSubcategories.id, id));
+    return subcategory || undefined;
+  }
+
+  async createServiceSubcategory(insertSubcategory: InsertServiceSubcategory): Promise<ServiceSubcategory> {
+    const [subcategory] = await db
+      .insert(serviceSubcategories)
+      .values(insertSubcategory)
+      .returning();
+    return subcategory;
   }
 
   // Providers

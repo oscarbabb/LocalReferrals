@@ -1,12 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { ArrowRight } from "lucide-react";
-import type { ServiceCategory } from "@shared/schema";
+import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 
 interface ServiceCardProps {
   category: ServiceCategory;
   providerCount?: number;
+  showSubcategories?: boolean;
 }
 
 const gradientMap: Record<string, string> = {
@@ -67,46 +70,105 @@ const hoverGradientMap: Record<string, string> = {
   "#DC2626": "group-hover:from-red-700 group-hover:via-red-800 group-hover:to-rose-900",
 };
 
-export default function ServiceCard({ category, providerCount = 0 }: ServiceCardProps) {
+export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const gradientClass = gradientMap[category.color] || "from-gray-400 to-gray-600";
   const hoverGradientClass = hoverGradientMap[category.color] || "group-hover:from-gray-500 group-hover:to-gray-700";
 
+  // Fetch subcategories for this category
+  const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
+    queryKey: ['/api/categories', category.id, 'subcategories'],
+    enabled: showSubcategories,
+  });
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (showSubcategories && subcategories.length > 0) {
+      e.preventDefault();
+      setIsExpanded(!isExpanded);
+    }
+  };
+
+  const handleSubcategoryClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Link href={`/providers?category=${category.id}`}>
-      <Card className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm">
-        <CardContent className="p-8 text-center relative">
-          {/* Enhanced background decorations */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          
-          {/* Icon container with improved design */}
-          <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
-            {/* Shine effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
+    <div className="relative">
+      <Link href={`/providers?category=${category.id}`}>
+        <Card 
+          className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm"
+          onClick={handleCardClick}
+        >
+          <CardContent className="p-8 text-center relative">
+            {/* Enhanced background decorations */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            
+            {/* Icon container with improved design */}
+            <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
+              {/* Shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
+            </div>
+            
+            {/* Content */}
+            <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
+              {category.name}
+            </h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
+              {category.description}
+            </p>
+            
+            {/* Provider count badge and expand button */}
+            <div className="flex items-center justify-center gap-3">
+              <Badge 
+                variant="secondary" 
+                className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
+              >
+                {providerCount} proveedores
+              </Badge>
+              {showSubcategories && subcategories.length > 0 ? (
+                <div className="flex items-center gap-2">
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-all duration-300" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-all duration-300" />
+                  )}
+                </div>
+              ) : (
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      {/* Subcategories dropdown */}
+      {showSubcategories && subcategories.length > 0 && (
+        <div className={`absolute top-full left-0 right-0 z-10 bg-white rounded-lg shadow-lg border border-gray-200 mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'}`}>
+          <div className="p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
+            <div className="grid grid-cols-1 gap-2">
+              {subcategories.map((subcategory) => (
+                <Link 
+                  key={subcategory.id} 
+                  href={`/providers?category=${category.id}&subcategory=${subcategory.id}`}
+                  onClick={handleSubcategoryClick}
+                >
+                  <div 
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+                    data-testid={`subcategory-${subcategory.id}`}
+                  >
+                    <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
+                    <ArrowRight className="w-3 h-3 text-gray-400" />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-          
-          {/* Content */}
-          <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-            {category.name}
-          </h3>
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
-            {category.description}
-          </p>
-          
-          {/* Provider count badge */}
-          <div className="flex items-center justify-center gap-3">
-            <Badge 
-              variant="secondary" 
-              className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
-            >
-              {providerCount} proveedores
-            </Badge>
-            <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      )}
+    </div>
   );
 }
