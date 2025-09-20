@@ -841,7 +841,9 @@ export class MemStorage implements IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    this.seedDatabase();
+    // DISABLED AUTO-SEEDING FOR USER'S CUSTOM CATEGORIES
+    // this.seedDatabase();
+    console.log("🚫 Auto-seeding disabled - using user's custom categories only");
   }
 
   private async seedDatabase() {
@@ -1476,4 +1478,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
+// Always use DatabaseStorage for consistent data source
+console.log("🔧 Using DatabaseStorage as primary storage backend");
 export const storage = new DatabaseStorage();
