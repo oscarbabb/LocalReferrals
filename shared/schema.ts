@@ -22,9 +22,17 @@ export const users = pgTable("users", {
 export const serviceCategories = pgTable("service_categories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  description: text("description").notNull(),
-  icon: text("icon").notNull(),
-  color: text("color").notNull(),
+  description: text("description"),
+  icon: text("icon"),
+  color: text("color"),
+});
+
+export const serviceSubcategories = pgTable("service_subcategories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
+  name: text("name").notNull(),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 export const providers = pgTable("providers", {
@@ -238,6 +246,11 @@ export const insertServiceCategorySchema = createInsertSchema(serviceCategories)
   id: true,
 });
 
+export const insertServiceSubcategorySchema = createInsertSchema(serviceSubcategories).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertProviderSchema = createInsertSchema(providers).omit({
   id: true,
   isVerified: true,
@@ -313,6 +326,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
 export type InsertServiceCategory = z.infer<typeof insertServiceCategorySchema>;
+export type ServiceSubcategory = typeof serviceSubcategories.$inferSelect;
+export type InsertServiceSubcategory = z.infer<typeof insertServiceSubcategorySchema>;
 export type Provider = typeof providers.$inferSelect;
 export type InsertProvider = z.infer<typeof insertProviderSchema>;
 export type Review = typeof reviews.$inferSelect;
