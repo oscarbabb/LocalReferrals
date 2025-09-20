@@ -857,10 +857,11 @@ export class DatabaseStorage implements IStorage {
         const existingProviders = await db.select().from(providers);
         console.log(`🔍 Found ${existingProviders.length} existing providers`);
         
-        if (existingProviders.length === 0) {
-          console.log(`📦 Seeding sample providers...`);
-          await this.seedSampleProviders();
-        }
+        // DISABLED FOR BETA TESTING - No automatic provider seeding
+        // if (existingProviders.length === 0) {
+        //   console.log(`📦 Seeding sample providers...`);
+        //   await this.seedSampleProviders();
+        // }
         
         return; // Comprehensive categories already seeded
       }
