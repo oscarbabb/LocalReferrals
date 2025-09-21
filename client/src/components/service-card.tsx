@@ -72,8 +72,8 @@ const hoverGradientMap: Record<string, string> = {
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const gradientClass = gradientMap[category.color] || "from-gray-400 to-gray-600";
-  const hoverGradientClass = hoverGradientMap[category.color] || "group-hover:from-gray-500 group-hover:to-gray-700";
+  const gradientClass = gradientMap[category.color || "#3B82F6"] || "from-gray-400 to-gray-600";
+  const hoverGradientClass = hoverGradientMap[category.color || "#3B82F6"] || "group-hover:from-gray-500 group-hover:to-gray-700";
 
   // Fetch subcategories for this category
   const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
