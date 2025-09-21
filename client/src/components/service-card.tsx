@@ -98,6 +98,9 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
       }
       
       setIsExpanded(!isExpanded);
+    } else {
+      // Navigate to providers page if no subcategories
+      window.location.href = `/providers?category=${category.id}`;
     }
   };
 
@@ -108,11 +111,10 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   return (
     <>
       <div className="relative" ref={cardRef}>
-        <Link href={`/providers?category=${category.id}`}>
-          <Card 
-            className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm"
-            onClick={handleCardClick}
-          >
+        <Card 
+          className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm"
+          onClick={handleCardClick}
+        >
           <CardContent className="p-8 text-center relative">
             {/* Enhanced background decorations */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
@@ -156,7 +158,6 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
             </div>
           </CardContent>
         </Card>
-      </Link>
       </div>
 
       {/* Subcategories dropdown - fixed positioned to escape grid stacking context */}
