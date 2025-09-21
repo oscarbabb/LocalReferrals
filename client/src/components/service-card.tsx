@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 
@@ -72,6 +72,8 @@ const hoverGradientMap: Record<string, string> = {
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
   const gradientClass = gradientMap[category.color || "#6B7280"] || "from-gray-400 to-gray-600";
   const hoverGradientClass = hoverGradientMap[category.color || "#6B7280"] || "group-hover:from-gray-500 group-hover:to-gray-700";
 
@@ -84,6 +86,17 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const handleCardClick = (e: React.MouseEvent) => {
     if (showSubcategories && subcategories.length > 0) {
       e.preventDefault();
+      
+      if (!isExpanded && cardRef.current) {
+        // Calculate dropdown position relative to viewport
+        const rect = cardRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
+      
       setIsExpanded(!isExpanded);
     }
   };
@@ -93,12 +106,13 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   return (
-    <div className="relative">
-      <Link href={`/providers?category=${category.id}`}>
-        <Card 
-          className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm"
-          onClick={handleCardClick}
-        >
+    <>
+      <div className="relative" ref={cardRef}>
+        <Link href={`/providers?category=${category.id}`}>
+          <Card 
+            className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-hidden relative backdrop-blur-sm"
+            onClick={handleCardClick}
+          >
           <CardContent className="p-8 text-center relative">
             {/* Enhanced background decorations */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
@@ -143,10 +157,18 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           </CardContent>
         </Card>
       </Link>
+      </div>
 
-      {/* Subcategories dropdown */}
+      {/* Subcategories dropdown - fixed positioned to escape grid stacking context */}
       {showSubcategories && subcategories.length > 0 && (
-        <div className={`absolute top-full left-0 right-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'}`}>
+        <div 
+          className={`fixed z-50 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 ${isExpanded ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2 pointer-events-none'}`}
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`
+          }}
+        >
           <div className="p-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
             <div className="grid grid-cols-1 gap-2">
@@ -169,6 +191,6 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
