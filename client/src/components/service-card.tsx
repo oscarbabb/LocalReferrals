@@ -90,22 +90,30 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   });
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if (showSubcategories && subcategories.length > 0) {
+    if (showSubcategories) {
       e.preventDefault();
       
-      if (!isExpanded && cardRef.current) {
-        // Calculate dropdown position relative to viewport
-        const rect = cardRef.current.getBoundingClientRect();
-        setDropdownPosition({
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX,
-          width: rect.width
-        });
-      }
+      // Don't do anything while loading
+      if (subcategoriesLoading) return;
       
-      setIsExpanded(!isExpanded);
+      if (subcategories.length > 0) {
+        // Show subcategories dropdown
+        if (!isExpanded && cardRef.current) {
+          // Calculate dropdown position relative to viewport (for fixed positioning)
+          const rect = cardRef.current.getBoundingClientRect();
+          setDropdownPosition({
+            top: rect.bottom + 8,
+            left: rect.left,
+            width: rect.width
+          });
+        }
+        setIsExpanded(!isExpanded);
+      } else {
+        // Navigate to providers page if no subcategories
+        window.location.href = `/providers?category=${category.id}`;
+      }
     } else {
-      // Navigate to providers page if no subcategories
+      // Navigate to providers page if subcategories disabled
       window.location.href = `/providers?category=${category.id}`;
     }
   };
