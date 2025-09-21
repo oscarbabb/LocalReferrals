@@ -84,6 +84,13 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   });
 
   const handleCardClick = (e: React.MouseEvent) => {
+    console.log('🔍 Card clicked!', {
+      categoryName: category.name,
+      subcategoriesLength: subcategories.length,
+      showSubcategories,
+      isExpanded
+    });
+    
     if (showSubcategories && subcategories.length > 0) {
       e.preventDefault();
       
@@ -95,10 +102,13 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           left: rect.left + window.scrollX,
           width: rect.width
         });
+        console.log('📍 Setting dropdown position:', { top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX, width: rect.width });
       }
       
       setIsExpanded(!isExpanded);
+      console.log('🔄 Setting isExpanded to:', !isExpanded);
     } else {
+      console.log('➡️ Navigating to providers page (no subcategories)');
       // Navigate to providers page if no subcategories
       window.location.href = `/providers?category=${category.id}`;
     }
