@@ -146,7 +146,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
       {/* Subcategories dropdown */}
       {showSubcategories && subcategories.length > 0 && (
-        <div className={`absolute top-full left-0 right-0 z-10 bg-white rounded-lg shadow-lg border border-gray-200 mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'}`}>
+        <div className={`absolute top-full left-0 right-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'}`}>
           <div className="p-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
             <div className="grid grid-cols-1 gap-2">
