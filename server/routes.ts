@@ -12,6 +12,7 @@ import { randomBytes } from "crypto";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { serviceCategories, serviceSubcategories } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { 
   insertUserSchema, 
   insertProviderSchema, 
@@ -306,91 +307,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // FORCE IMPORT complete category dataset (for production sync)
   app.post("/api/admin/force-import-categories", async (req, res) => {
     try {
-      console.log("🚀 FORCE IMPORT: Starting complete category import...");
+      console.log("🚀 FORCE IMPORT: Starting safe category import...");
       
-      // Use hardcoded comprehensive Mexican categories data
-      const comprehensiveCategories = {
-        totalCategories: 55,
-        totalSubcategories: 28,
-        categories: [
-          { name: "Administración Condominal", description: "Servicios de administración de condominios y gestión comunitaria", icon: "🏢", color: "#1f2937" },
-          { name: "Agencias de Viajes y Tours", description: "Servicios integrales de viajes, tours y experiencias turísticas", icon: "✈️", color: "#0ea5e9" },
-          { name: "Agua y Tratamiento", description: "Servicios especializados en tratamiento y purificación de agua", icon: "💧", color: "#0891b2" },
-          { name: "Albercas y Jacuzzis", description: "Mantenimiento, limpieza y construcción de albercas y jacuzzis", icon: "🏊", color: "#0284c7" },
-          { name: "Altas de Servicios y Gestoría Domiciliaria", description: "Gestión de trámites y altas de servicios públicos", icon: "📋", color: "#0f766e" },
-          { name: "Arte y Manualidades", description: "Clases de arte, manualidades y talleres creativos", icon: "🎨", color: "#c2410c" },
-          { name: "Asesoría Legal", description: "Servicios legales y asesoría jurídica especializada", icon: "⚖️", color: "#1e40af" },
-          { name: "Automotriz y Movilidad", description: "Servicios automotrices y soluciones de movilidad", icon: "🚗", color: "#b91c1c" },
-          { name: "Belleza y Cuidado Personal", description: "Servicios de belleza, estética y cuidado personal", icon: "💄", color: "#e11d48" },
-          { name: "Bienes Raíces y Property Management", description: "Servicios inmobiliarios y gestión de propiedades", icon: "🏠", color: "#047857" },
-          { name: "Capacitación Empresarial y Desarrollo Humano", description: "Capacitación profesional y desarrollo de recursos humanos", icon: "📊", color: "#7c3aed" },
-          { name: "Clases Particulares y Coaching Académico", description: "Clases particulares y apoyo académico personalizado", icon: "📚", color: "#1d4ed8" },
-          { name: "Cocina y Catering", description: "Servicios de cocina, catering y eventos gastronómicos", icon: "👨‍🍳", color: "#ea580c" },
-          { name: "Construcción, Remodelación y Arquitectura", description: "Servicios de construcción, remodelación y diseño arquitectónico", icon: "🏗️", color: "#a16207" },
-          { name: "Contabilidad e Impuestos", description: "Servicios contables, fiscales y de declaración de impuestos", icon: "💰", color: "#059669" },
-          { name: "Cuidado de Niños, Niñeras y Estimulación", description: "Servicios de cuidado infantil y estimulación temprana", icon: "👶", color: "#db2777" },
-          { name: "Cuidado de Plantas e Invernaderos", description: "Jardinería, mantenimiento de plantas e invernaderos", icon: "🌱", color: "#16a34a" },
-          { name: "Decoración de Eventos y Wedding Planning", description: "Planificación y decoración de eventos y bodas", icon: "🎉", color: "#be185d" },
-          { name: "Deportes y Acondicionamiento Físico", description: "Entrenamiento personal y actividades deportivas", icon: "🏋️", color: "#dc2626" },
-          { name: "Diseño Gráfico y Marketing Digital", description: "Servicios de diseño gráfico y marketing digital", icon: "🎨", color: "#7c2d12" },
-          { name: "Electricidad y Sistemas Eléctricos", description: "Instalaciones eléctricas y mantenimiento de sistemas", icon: "⚡", color: "#facc15" },
-          { name: "Entretenimiento y Animación de Eventos", description: "Servicios de entretenimiento y animación para eventos", icon: "🎭", color: "#f59e0b" },
-          { name: "Estética Facial y Tratamientos de Belleza", description: "Tratamientos faciales y servicios de estética avanzada", icon: "✨", color: "#ec4899" },
-          { name: "Fotografía y Video Profesional", description: "Servicios profesionales de fotografía y videografía", icon: "📸", color: "#6366f1" },
-          { name: "Herrería, Soldadura y Estructuras Metálicas", description: "Trabajos de herrería, soldadura y estructuras metálicas", icon: "🔧", color: "#374151" },
-          { name: "Idiomas y Interpretación", description: "Clases de idiomas, traducción e interpretación", icon: "🗣️", color: "#2563eb" },
-          { name: "Informática y Desarrollo de Software", description: "Servicios informáticos y desarrollo de software", icon: "💻", color: "#1f2937" },
-          { name: "Instrumentos Musicales y Audio", description: "Venta, reparación y mantenimiento de instrumentos musicales", icon: "🎵", color: "#7c3aed" },
-          { name: "Limpieza y Sanitización", description: "Servicios de limpieza residencial y sanitización", icon: "🧽", color: "#0ea5e9" },
-          { name: "Mascotas y Veterinaria", description: "Cuidado veterinario y servicios para mascotas", icon: "🐕", color: "#f97316" },
-          { name: "Medicina y Enfermería", description: "Servicios médicos y de enfermería profesional", icon: "🏥", color: "#dc2626" },
-          { name: "Mudanzas y Logística", description: "Servicios de mudanzas y logística especializada", icon: "📦", color: "#a16207" },
-          { name: "Música y Entretenimiento", description: "Clases de música y servicios de entretenimiento", icon: "🎶", color: "#8b5cf6" },
-          { name: "Nutrición y Medicina Alternativa", description: "Consultoría nutricional y medicina alternativa", icon: "🥗", color: "#10b981" },
-          { name: "Organización y Consultoría", description: "Servicios de organización y consultoría empresarial", icon: "📋", color: "#6366f1" },
-          { name: "Peluquería y Barbería", description: "Servicios de peluquería y barbería profesional", icon: "💇", color: "#f59e0b" },
-          { name: "Plomería y Sanitarios", description: "Instalaciones de plomería y mantenimiento sanitario", icon: "🚿", color: "#0891b2" },
-          { name: "Psicología y Salud Mental", description: "Servicios de psicología y apoyo en salud mental", icon: "🧠", color: "#8b5cf6" },
-          { name: "Quiroprácticos, Fisioterapia y Rehabilitación", description: "Servicios de quiropráctica, fisioterapia y rehabilitación", icon: "🏥", color: "#059669" },
-          { name: "Rentas Vacacionales y Co-Hosting", description: "Gestión de rentas vacacionales y servicios de co-hosting", icon: "🏖️", color: "#0ea5e9" },
-          { name: "Reparación de Dispositivos y Electrónica", description: "Reparación de dispositivos electrónicos y equipos", icon: "🔧", color: "#374151" },
-          { name: "Reparación de Electrodomésticos", description: "Reparación y mantenimiento de electrodomésticos", icon: "🔨", color: "#6b7280" },
-          { name: "Restaurantes y Comida a Domicilio", description: "Servicios de restaurantes y entrega de comida", icon: "🍽️", color: "#f97316" },
-          { name: "Rifas, Sorteos y Promociones", description: "Organización de rifas, sorteos y promociones", icon: "🎰", color: "#eab308" },
-          { name: "Salud, Medicina y Enfermería", description: "Servicios integrales de salud y medicina", icon: "⚕️", color: "#dc2626" },
-          { name: "Seguridad (CCTV y Accesos)", description: "Sistemas de seguridad, CCTV y control de accesos", icon: "🔒", color: "#1f2937" },
-          { name: "Servicios Funerarios", description: "Servicios funerarios y ceremonias conmemorativas", icon: "🕊️", color: "#374151" },
-          { name: "Servicios Legales y Notariales", description: "Servicios legales, notariales y jurídicos", icon: "📜", color: "#1e40af" },
-          { name: "Servicios Náuticos y Marina", description: "Servicios náuticos, marina y embarcaciones", icon: "⛵", color: "#0284c7" },
-          { name: "Servicios para Comercios y Oficinas", description: "Servicios especializados para comercios y oficinas", icon: "🏢", color: "#6366f1" },
-          { name: "Tecnología, Redes y Smart Home", description: "Instalación de redes, tecnología y automatización del hogar", icon: "📡", color: "#1f2937" },
-          { name: "Telecomunicaciones e Internet", description: "Servicios de telecomunicaciones e internet", icon: "📶", color: "#2563eb" },
-          { name: "Traducción e Interpretación", description: "Servicios profesionales de traducción e interpretación", icon: "🗣️", color: "#7c3aed" },
-          { name: "Transporte Terrestre y Conductores", description: "Servicios de transporte terrestre y conductores", icon: "🚐", color: "#b91c1c" },
-          { name: "Servicios de Entretenimiento y Recreación", description: "Servicios diversos de entretenimiento y recreación", icon: "🎊", color: "#ec4899" }
-        ]
-      };
+      const comprehensiveCategories = [
+        { name: "Administración Condominal", description: "Servicios de administración de condominios y gestión comunitaria", icon: "🏢", color: "#1f2937" },
+        { name: "Agencias de Viajes y Tours", description: "Servicios integrales de viajes, tours y experiencias turísticas", icon: "✈️", color: "#0ea5e9" },
+        { name: "Agua y Tratamiento", description: "Servicios especializados en tratamiento y purificación de agua", icon: "💧", color: "#0891b2" },
+        { name: "Albercas y Jacuzzis", description: "Mantenimiento, limpieza y construcción de albercas y jacuzzis", icon: "🏊", color: "#0284c7" },
+        { name: "Altas de Servicios y Gestoría Domiciliaria", description: "Gestión de trámites y altas de servicios públicos", icon: "📋", color: "#0f766e" },
+        { name: "Arte y Manualidades", description: "Clases de arte, manualidades y talleres creativos", icon: "🎨", color: "#c2410c" },
+        { name: "Asesoría Legal", description: "Servicios legales y asesoría jurídica especializada", icon: "⚖️", color: "#1e40af" },
+        { name: "Automotriz y Movilidad", description: "Servicios automotrices y soluciones de movilidad", icon: "🚗", color: "#b91c1c" },
+        { name: "Belleza y Cuidado Personal", description: "Servicios de belleza, estética y cuidado personal", icon: "💄", color: "#e11d48" },
+        { name: "Bienes Raíces y Property Management", description: "Servicios inmobiliarios y gestión de propiedades", icon: "🏠", color: "#047857" },
+        { name: "Capacitación Empresarial y Desarrollo Humano", description: "Capacitación profesional y desarrollo de recursos humanos", icon: "📊", color: "#7c3aed" },
+        { name: "Clases Particulares y Coaching Académico", description: "Clases particulares y apoyo académico personalizado", icon: "📚", color: "#1d4ed8" },
+        { name: "Cocina y Catering", description: "Servicios de cocina, catering y eventos gastronómicos", icon: "👨‍🍳", color: "#ea580c" },
+        { name: "Construcción, Remodelación y Arquitectura", description: "Servicios de construcción, remodelación y diseño arquitectónico", icon: "🏗️", color: "#a16207" },
+        { name: "Contabilidad e Impuestos", description: "Servicios contables, fiscales y de declaración de impuestos", icon: "💰", color: "#059669" },
+        { name: "Cuidado de Niños, Niñeras y Estimulación", description: "Servicios de cuidado infantil y estimulación temprana", icon: "👶", color: "#db2777" },
+        { name: "Cuidado de Plantas e Invernaderos", description: "Jardinería, mantenimiento de plantas e invernaderos", icon: "🌱", color: "#16a34a" },
+        { name: "Decoración de Eventos y Wedding Planning", description: "Planificación y decoración de eventos y bodas", icon: "🎉", color: "#be185d" },
+        { name: "Deportes y Acondicionamiento Físico", description: "Entrenamiento personal y actividades deportivas", icon: "🏋️", color: "#dc2626" },
+        { name: "Diseño Gráfico y Marketing Digital", description: "Servicios de diseño gráfico y marketing digital", icon: "🎨", color: "#7c2d12" },
+        { name: "Electricidad y Sistemas Eléctricos", description: "Instalaciones eléctricas y mantenimiento de sistemas", icon: "⚡", color: "#facc15" },
+        { name: "Entretenimiento y Animación de Eventos", description: "Servicios de entretenimiento y animación para eventos", icon: "🎭", color: "#f59e0b" },
+        { name: "Estética Facial y Tratamientos de Belleza", description: "Tratamientos faciales y servicios de estética avanzada", icon: "✨", color: "#ec4899" },
+        { name: "Fotografía y Video Profesional", description: "Servicios profesionales de fotografía y videografía", icon: "📸", color: "#6366f1" },
+        { name: "Herrería, Soldadura y Estructuras Metálicas", description: "Trabajos de herrería, soldadura y estructuras metálicas", icon: "🔧", color: "#374151" },
+        { name: "Idiomas y Interpretación", description: "Clases de idiomas, traducción e interpretación", icon: "🗣️", color: "#2563eb" },
+        { name: "Informática y Desarrollo de Software", description: "Servicios informáticos y desarrollo de software", icon: "💻", color: "#1f2937" },
+        { name: "Instrumentos Musicales y Audio", description: "Venta, reparación y mantenimiento de instrumentos musicales", icon: "🎵", color: "#7c3aed" },
+        { name: "Limpieza y Sanitización", description: "Servicios de limpieza residencial y sanitización", icon: "🧽", color: "#0ea5e9" },
+        { name: "Mascotas y Veterinaria", description: "Cuidado veterinario y servicios para mascotas", icon: "🐕", color: "#f97316" },
+        { name: "Medicina y Enfermería", description: "Servicios médicos y de enfermería profesional", icon: "🏥", color: "#dc2626" },
+        { name: "Mudanzas y Logística", description: "Servicios de mudanzas y logística especializada", icon: "📦", color: "#a16207" },
+        { name: "Música y Entretenimiento", description: "Clases de música y servicios de entretenimiento", icon: "🎶", color: "#8b5cf6" },
+        { name: "Nutrición y Medicina Alternativa", description: "Consultoría nutricional y medicina alternativa", icon: "🥗", color: "#10b981" },
+        { name: "Organización y Consultoría", description: "Servicios de organización y consultoría empresarial", icon: "📋", color: "#6366f1" },
+        { name: "Peluquería y Barbería", description: "Servicios de peluquería y barbería profesional", icon: "💇", color: "#f59e0b" },
+        { name: "Plomería y Sanitarios", description: "Instalaciones de plomería y mantenimiento sanitario", icon: "🚿", color: "#0891b2" },
+        { name: "Psicología y Salud Mental", description: "Servicios de psicología y apoyo en salud mental", icon: "🧠", color: "#8b5cf6" },
+        { name: "Quiroprácticos, Fisioterapia y Rehabilitación", description: "Servicios de quiropráctica, fisioterapia y rehabilitación", icon: "🏥", color: "#059669" },
+        { name: "Rentas Vacacionales y Co-Hosting", description: "Gestión de rentas vacacionales y servicios de co-hosting", icon: "🏖️", color: "#0ea5e9" },
+        { name: "Reparación de Dispositivos y Electrónica", description: "Reparación de dispositivos electrónicos y equipos", icon: "🔧", color: "#374151" },
+        { name: "Reparación de Electrodomésticos", description: "Reparación y mantenimiento de electrodomésticos", icon: "🔨", color: "#6b7280" },
+        { name: "Restaurantes y Comida a Domicilio", description: "Servicios de restaurantes y entrega de comida", icon: "🍽️", color: "#f97316" },
+        { name: "Rifas, Sorteos y Promociones", description: "Organización de rifas, sorteos y promociones", icon: "🎰", color: "#eab308" },
+        { name: "Salud, Medicina y Enfermería", description: "Servicios integrales de salud y medicina", icon: "⚕️", color: "#dc2626" },
+        { name: "Seguridad (CCTV y Accesos)", description: "Sistemas de seguridad, CCTV y control de accesos", icon: "🔒", color: "#1f2937" },
+        { name: "Servicios Funerarios", description: "Servicios funerarios y ceremonias conmemorativas", icon: "🕊️", color: "#374151" },
+        { name: "Servicios Legales y Notariales", description: "Servicios legales, notariales y jurídicos", icon: "📜", color: "#1e40af" },
+        { name: "Servicios Náuticos y Marina", description: "Servicios náuticos, marina y embarcaciones", icon: "⛵", color: "#0284c7" },
+        { name: "Servicios para Comercios y Oficinas", description: "Servicios especializados para comercios y oficinas", icon: "🏢", color: "#6366f1" },
+        { name: "Tecnología, Redes y Smart Home", description: "Instalación de redes, tecnología y automatización del hogar", icon: "📡", color: "#1f2937" },
+        { name: "Telecomunicaciones e Internet", description: "Servicios de telecomunicaciones e internet", icon: "📶", color: "#2563eb" },
+        { name: "Traducción e Interpretación", description: "Servicios profesionales de traducción e interpretación", icon: "🗣️", color: "#7c3aed" },
+        { name: "Transporte Terrestre y Conductores", description: "Servicios de transporte terrestre y conductores", icon: "🚐", color: "#b91c1c" },
+        { name: "Servicios de Entretenimiento y Recreación", description: "Servicios diversos de entretenimiento y recreación", icon: "🎊", color: "#ec4899" }
+      ];
 
-      // Clear existing categories and subcategories using direct Drizzle operations
-      console.log("🗑️ Clearing existing categories and subcategories...");
-      await db.delete(serviceSubcategories);
-      await db.delete(serviceCategories);
-
-      // Import all comprehensive categories
-      const importedCategories = [];
-      for (const category of comprehensiveCategories.categories) {
-        const imported = await storage.createServiceCategory(category);
-        importedCategories.push(imported);
-        console.log(`➕ Imported: ${category.name}`);
+      // Get existing categories to check what already exists
+      const existingCategories = await storage.getServiceCategories();
+      console.log(`📊 Found ${existingCategories.length} existing categories`);
+      
+      // Create a map of existing categories by name for quick lookup
+      const existingCategoryMap = new Map(existingCategories.map(cat => [cat.name, cat]));
+      
+      let importedCount = 0;
+      let updatedCount = 0;
+      
+      // Process each comprehensive category
+      for (const category of comprehensiveCategories) {
+        const existing = existingCategoryMap.get(category.name);
+        
+        if (existing) {
+          // Update existing category with new data
+          await db.update(serviceCategories)
+            .set({
+              description: category.description,
+              icon: category.icon,
+              color: category.color
+            })
+            .where(eq(serviceCategories.id, existing.id));
+          console.log(`🔄 Updated: ${category.name}`);
+          updatedCount++;
+        } else {
+          // Create new category
+          await storage.createServiceCategory(category);
+          console.log(`➕ Imported: ${category.name}`);
+          importedCount++;
+        }
       }
 
-      console.log(`✅ FORCE IMPORT COMPLETE: ${importedCategories.length} categories imported`);
+      console.log(`✅ SAFE IMPORT COMPLETE: ${importedCount} new categories imported, ${updatedCount} categories updated`);
       
       res.json({
         success: true,
-        message: "Complete category import successful",
-        importedCategories: importedCategories.length,
-        totalCategories: comprehensiveCategories.totalCategories
+        message: "Safe category import successful",
+        importedCategories: importedCount,
+        updatedCategories: updatedCount,
+        totalCategories: comprehensiveCategories.length
       });
       
     } catch (error) {
