@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { syncCategoriesToProduction } from "./production-sync";
 import {
   ObjectStorageService,
   ObjectNotFoundError,
@@ -237,6 +238,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("❌ Error fetching subcategories:", error);
       res.status(500).json({ message: "Failed to fetch subcategories for category", error: error.message });
+    }
+  });
+
+  // Production sync endpoint - syncs categories from dev to production database
+  app.post("/api/admin/sync-production", async (req, res) => {
+    try {
+      console.log("🚀 Production sync requested");
+      const result = await syncCategoriesToProduction();
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(500).json(result);
+      }
+    } catch (error) {
+      console.error("❌ Production sync failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Production sync failed", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   });
 
