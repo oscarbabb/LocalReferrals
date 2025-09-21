@@ -28,7 +28,7 @@ export default function Services() {
 
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         category.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (category.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || selectedCategory === "all" || category.id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
