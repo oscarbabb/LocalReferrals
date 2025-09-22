@@ -27,16 +27,46 @@ import {
 } from "@shared/schema";
 import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail } from "./email.js";
 
-// Initialize Stripe
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+// Lazy initialize Stripe - only when needed
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+    }
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+  return stripe;
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Temporary storage for provider setup tokens (in production, use Redis or database)
 const providerSetupTokens = new Map<string, { userId: string, expiresAt: number }>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Health check endpoints
+  app.get('/api/health', (req, res) => {
+    const envVars = {
+      DATABASE_URL: !!process.env.DATABASE_URL,
+      STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
+      NODE_ENV: process.env.NODE_ENV || 'development'
+    };
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      environment: envVars,
+      version: Date.now() // Simple version based on deployment time
+    });
+  });
+
+  app.get('/api/version', (req, res) => {
+    res.json({ 
+      deployed: new Date().toISOString(),
+      build: Date.now()
+    });
+  });
+
   // Auth middleware
   await setupAuth(app);
 
@@ -153,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid amount" });
       }
 
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripe().paymentIntents.create({
         amount: Math.round(amount * 100), // Convert pesos to centavos
         currency: "mxn",
         description: description || "Servicio Referencias Locales",
@@ -183,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // For development, if no webhook secret is set, skip verification
       if (process.env.STRIPE_WEBHOOK_SECRET) {
-        event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+        event = getStripe().webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
       } else {
         event = req.body;
       }
