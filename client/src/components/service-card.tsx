@@ -103,7 +103,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   return (
-    <div className="relative" ref={cardRef}>
+    <div className={`relative ${isExpanded ? 'z-50' : 'z-auto'}`} ref={cardRef}>
       <Card 
         className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
         onClick={handleCardClick}
@@ -154,7 +154,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
       {/* Subcategories dropdown - fixed positioning */}
       {showSubcategories && subcategories.length > 0 && isExpanded && (
-        <div className="absolute top-full left-0 right-0 z-[9999] bg-white rounded-lg shadow-2xl border border-gray-200 mt-2 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 mt-2 overflow-hidden">
           <div className="p-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
             <div className="grid grid-cols-1 gap-2">
