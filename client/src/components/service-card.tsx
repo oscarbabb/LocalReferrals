@@ -74,7 +74,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
   // Fetch subcategories for this category
   const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
-    queryKey: ['/api/categories', category.id, 'subcategories'],
+    queryKey: [`/api/categories/${category.id}/subcategories`],
     enabled: showSubcategories,
   });
 
