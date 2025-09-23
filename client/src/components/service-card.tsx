@@ -78,8 +78,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     if (isExpanded && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8, // 8px margin
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 4, // Just 4px below the card
+        left: rect.left,
         width: rect.width
       });
     }
