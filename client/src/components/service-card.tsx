@@ -135,8 +135,11 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     }
   };
 
-  const handleSubcategoryClick = (e: React.MouseEvent) => {
+  const handleSubcategoryClick = (e: React.MouseEvent, subcategoryId: string) => {
     e.stopPropagation();
+    setIsExpanded(false); // Close dropdown
+    // Direct navigation since Link might not work in portal
+    window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
   // Portal dropdown component
@@ -158,19 +161,15 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
           <div className="grid grid-cols-1 gap-2">
             {subcategories.map((subcategory) => (
-              <Link 
-                key={subcategory.id} 
-                href={`/providers?category=${category.id}&subcategory=${subcategory.id}`}
-                onClick={handleSubcategoryClick}
+              <div 
+                key={subcategory.id}
+                className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+                data-testid={`subcategory-${subcategory.id}`}
+                onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
               >
-                <div 
-                  className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
-                  data-testid={`subcategory-${subcategory.id}`}
-                >
-                  <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
-                  <ArrowRight className="w-3 h-3 text-gray-400" />
-                </div>
-              </Link>
+                <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
+                <ArrowRight className="w-3 h-3 text-gray-400" />
+              </div>
             ))}
           </div>
         </div>
