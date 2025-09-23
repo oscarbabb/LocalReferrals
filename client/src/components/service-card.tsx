@@ -136,6 +136,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   const handleSubcategoryClick = (e: React.MouseEvent, subcategoryId: string) => {
+    console.log('Subcategory clicked:', subcategoryId);
     e.stopPropagation();
     setIsExpanded(false); // Close dropdown
     // Direct navigation since Link might not work in portal
@@ -150,11 +151,15 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
     return createPortal(
       <div 
-        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden"
+        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden pointer-events-auto"
         style={{
           top: dropdownPosition.top,
           left: dropdownPosition.left,
           width: dropdownPosition.width,
+        }}
+        onClick={(e) => {
+          console.log('Dropdown container clicked');
+          e.stopPropagation();
         }}
       >
         <div className="p-4">
