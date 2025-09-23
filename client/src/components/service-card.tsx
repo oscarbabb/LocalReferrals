@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { createPortal } from "react-dom";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 
 interface ServiceCardProps {
@@ -72,6 +73,42 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
 
+  // Calculate dropdown position when expanded
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px margin
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [isExpanded]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsExpanded(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [isExpanded]);
+
   // Fetch subcategories for this category
   const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
     queryKey: [`/api/categories/${category.id}/subcategories`],
@@ -102,8 +139,48 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     e.stopPropagation();
   };
 
+  // Portal dropdown component
+  const PortalDropdown = () => {
+    if (!showSubcategories || subcategories.length === 0 || !isExpanded) {
+      return null;
+    }
+
+    return createPortal(
+      <div 
+        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden"
+        style={{
+          top: dropdownPosition.top,
+          left: dropdownPosition.left,
+          width: dropdownPosition.width,
+        }}
+      >
+        <div className="p-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
+          <div className="grid grid-cols-1 gap-2">
+            {subcategories.map((subcategory) => (
+              <Link 
+                key={subcategory.id} 
+                href={`/providers?category=${category.id}&subcategory=${subcategory.id}`}
+                onClick={handleSubcategoryClick}
+              >
+                <div 
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+                  data-testid={`subcategory-${subcategory.id}`}
+                >
+                  <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
+                  <ArrowRight className="w-3 h-3 text-gray-400" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   return (
-    <div className={`relative ${isExpanded ? 'z-50' : 'z-auto'}`} ref={cardRef}>
+    <div className="relative" ref={cardRef}>
       <Card 
         className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
         onClick={handleCardClick}
@@ -152,31 +229,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
         </CardContent>
       </Card>
 
-      {/* Subcategories dropdown - fixed positioning */}
-      {showSubcategories && subcategories.length > 0 && isExpanded && (
-        <div className="absolute top-full left-0 right-0 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 mt-2 overflow-hidden">
-          <div className="p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
-            <div className="grid grid-cols-1 gap-2">
-              {subcategories.map((subcategory) => (
-                <Link 
-                  key={subcategory.id} 
-                  href={`/providers?category=${category.id}&subcategory=${subcategory.id}`}
-                  onClick={handleSubcategoryClick}
-                >
-                  <div 
-                    className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
-                    data-testid={`subcategory-${subcategory.id}`}
-                  >
-                    <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
-                    <ArrowRight className="w-3 h-3 text-gray-400" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Portal dropdown component */}
+      <PortalDropdown />
     </div>
   );
 }
