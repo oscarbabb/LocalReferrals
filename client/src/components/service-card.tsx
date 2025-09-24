@@ -70,6 +70,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const [isExpanded, setIsExpanded] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
 
@@ -88,7 +89,11 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isInCard = cardRef.current && cardRef.current.contains(target);
+      const isInDropdown = dropdownRef.current && dropdownRef.current.contains(target);
+      
+      if (!isInCard && !isInDropdown) {
         setIsExpanded(false);
       }
     };
@@ -136,10 +141,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   const handleSubcategoryClick = (e: React.MouseEvent, subcategoryId: string) => {
-    console.log('Subcategory clicked:', subcategoryId);
     e.stopPropagation();
     setIsExpanded(false); // Close dropdown
-    // Direct navigation since Link might not work in portal
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
@@ -151,16 +154,14 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
     return createPortal(
       <div 
+        ref={dropdownRef}
         className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden pointer-events-auto"
         style={{
           top: dropdownPosition.top,
           left: dropdownPosition.left,
           width: dropdownPosition.width,
         }}
-        onClick={(e) => {
-          console.log('Dropdown container clicked');
-          e.stopPropagation();
-        }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
