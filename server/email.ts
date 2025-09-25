@@ -1,14 +1,15 @@
-// SendGrid integration for Referencias Locales - blueprint:javascript_sendgrid
-import { MailService } from '@sendgrid/mail';
+// MailerSend integration for Referencias Locales
+import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
+if (!process.env.MAILERSEND_API_KEY) {
+  throw new Error("MAILERSEND_API_KEY environment variable must be set");
 }
 
-const mailService = new MailService();
-mailService.setApiKey(process.env.SENDGRID_API_KEY);
+const mailerSend = new MailerSend({
+  apiKey: process.env.MAILERSEND_API_KEY,
+});
 
-interface EmailParams {
+interface CustomEmailParams {
   to: string;
   from: string;
   subject: string;
@@ -16,24 +17,33 @@ interface EmailParams {
   html?: string;
 }
 
-export async function sendEmail(params: EmailParams): Promise<boolean> {
+export async function sendEmail(params: CustomEmailParams): Promise<boolean> {
   try {
-    await mailService.send({
-      to: params.to,
-      from: params.from,
-      subject: params.subject,
-      text: params.text,
-      html: params.html,
-    });
+    const sentFrom = new Sender(params.from, "Referencias Locales");
+    const recipients = [new Recipient(params.to)];
+    
+    const emailParams = new EmailParams()
+      .setFrom(sentFrom)
+      .setTo(recipients)
+      .setSubject(params.subject);
+
+    if (params.html) {
+      emailParams.setHtml(params.html);
+    }
+    if (params.text) {
+      emailParams.setText(params.text);
+    }
+
+    await mailerSend.email.send(emailParams);
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error('MailerSend email error:', error);
     return false;
   }
 }
 
 // Email templates for Referencias Locales
-const FROM_EMAIL = "noreply@test.com"; // You may need to verify this domain in SendGrid
+const FROM_EMAIL = "noreply@test.com"; // You may need to verify this domain in MailerSend
 
 export async function sendProfileConfirmationEmail(userEmail: string, userName: string): Promise<boolean> {
   const subject = "¡Bienvenido a Referencias Locales!";
