@@ -98,9 +98,15 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
       }
     };
 
-    const handleScroll = () => {
+    const handleScroll = (event: Event) => {
       if (isExpanded) {
-        setIsExpanded(false);
+        const target = event.target as Node;
+        // Only close if scroll is outside the dropdown
+        const isScrollInDropdown = dropdownRef.current && dropdownRef.current.contains(target);
+        
+        if (!isScrollInDropdown) {
+          setIsExpanded(false);
+        }
       }
     };
 
