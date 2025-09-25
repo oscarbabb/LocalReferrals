@@ -1794,6 +1794,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email endpoint
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      const { email, name } = req.body;
+      
+      if (!email || !name) {
+        return res.status(400).json({ message: "Email and name are required" });
+      }
+
+      console.log(`🧪 Testing email to: ${email} for: ${name}`);
+      const success = await sendProfileConfirmationEmail(email, name);
+      
+      if (success) {
+        console.log(`✅ Test email sent successfully to ${email}`);
+        res.json({ message: "Test email sent successfully", email, name });
+      } else {
+        console.log(`❌ Failed to send test email to ${email}`);
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    } catch (error: any) {
+      console.error("Test email error:", error);
+      res.status(500).json({ message: "Error sending test email", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
