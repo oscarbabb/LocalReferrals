@@ -22,6 +22,7 @@ import ProviderVerification from "@/pages/provider-verification";
 import ProviderSetup from "@/pages/provider-setup";
 import ReviewDemo from "@/pages/review-demo";
 import EmergencyFix from "@/pages/emergency-fix";
+import TestPayments from "@/pages/test-payments";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding } from "@/hooks/use-onboarding";
@@ -41,6 +42,7 @@ function Router() {
         <Route path="/testimonials" component={Testimonials} />
         <Route path="/como-funciona" component={HowItWorks} />
         <Route path="/emergency-fix" component={EmergencyFix} />
+        <Route path="/test-payments" component={TestPayments} />
         <Route path="/verification" component={ProviderVerification} />
         <Route path="/provider-setup" component={ProviderSetup} />
         <Route path="/bookings" component={Bookings} />
