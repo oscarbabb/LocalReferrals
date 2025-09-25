@@ -32,10 +32,20 @@ let stripe: Stripe | null = null;
 
 function getStripe(): Stripe {
   if (!stripe) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+    // Use test keys in development mode for better testing experience
+    const isTestMode = process.env.NODE_ENV === 'development';
+    const secretKey = isTestMode ? process.env.TESTING_STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY;
+    
+    if (!secretKey) {
+      const keyType = isTestMode ? 'TESTING_STRIPE_SECRET_KEY' : 'STRIPE_SECRET_KEY';
+      throw new Error(`Missing required Stripe secret: ${keyType}`);
     }
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    
+    stripe = new Stripe(secretKey, {
+      apiVersion: "2025-07-30.basil",
+    });
+    
+    console.log(`🔑 Stripe initialized in ${isTestMode ? 'TEST' : 'LIVE'} mode`);
   }
   return stripe;
 }
@@ -206,6 +216,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Stripe public key based on environment
+  app.get("/api/stripe/public-key", (req, res) => {
+    try {
+      const isTestMode = process.env.NODE_ENV === 'development';
+      const publicKey = isTestMode 
+        ? process.env.TESTING_VITE_STRIPE_PUBLIC_KEY 
+        : process.env.VITE_STRIPE_PUBLIC_KEY;
+      
+      if (!publicKey) {
+        const keyType = isTestMode ? 'TESTING_VITE_STRIPE_PUBLIC_KEY' : 'VITE_STRIPE_PUBLIC_KEY';
+        throw new Error(`Missing Stripe public key: ${keyType}`);
+      }
+
+      console.log(`🔑 Serving ${isTestMode ? 'TEST' : 'LIVE'} Stripe public key: ${publicKey.substring(0, 12)}...`);
+      
+      res.json({ 
+        publicKey,
+        isTestMode,
+        keyType: publicKey.startsWith('pk_test_') ? 'test' : 'live'
+      });
+    } catch (error) {
+      console.error('Error serving Stripe public key:', error);
+      res.status(500).json({ 
+        message: 'Failed to get Stripe public key', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   app.post("/api/webhook/stripe", async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
@@ -270,7 +309,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(subcategories);
     } catch (error) {
       console.error("❌ Error fetching subcategories:", error);
-      res.status(500).json({ message: "Failed to fetch subcategories for category", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: "Failed to fetch subcategories for category", error: errorMessage });
     }
   });
 

@@ -9,11 +9,43 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { CreditCard, CheckCircle, XCircle, AlertTriangle, Clock, User, MapPin } from 'lucide-react';
 
-// Load Stripe with test keys
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// Initialize Stripe - fetch public key from backend to ensure correct environment
+let stripePromise: Promise<any> | null = null;
+
+const initializeStripe = async () => {
+  try {
+    console.log('🔑 Fetching Stripe public key from backend...');
+    const response = await fetch('/api/stripe/public-key');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Stripe public key: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('🔍 Stripe key info:', {
+      keyType: data.keyType,
+      isTestMode: data.isTestMode,
+      keyStart: data.publicKey?.substring(0, 12) + '...'
+    });
+    
+    if (!data.publicKey) {
+      throw new Error('No public key received from backend');
+    }
+    
+    if (!data.publicKey.startsWith('pk_test_')) {
+      throw new Error('Test payments page requires a test key (pk_test_...), received: ' + data.publicKey.substring(0, 12) + '...');
+    }
+    
+    console.log('✅ Loading Stripe with TEST public key');
+    return loadStripe(data.publicKey);
+  } catch (error) {
+    console.error('❌ Failed to initialize Stripe:', error);
+    throw error;
+  }
+};
+
+// Initialize Stripe promise
+stripePromise = initializeStripe();
 
 // Test scenarios for local services marketplace
 const testScenarios = [
@@ -86,13 +118,15 @@ function PaymentForm({ scenario, onSuccess, onError }: PaymentFormProps) {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      console.log('❌ Stripe or elements not ready');
       return;
     }
 
+    console.log('💳 Starting payment confirmation for scenario:', scenario.id);
     setIsLoading(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
+      const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/test-payments?success=true&scenario=${scenario.id}`,
@@ -100,12 +134,17 @@ function PaymentForm({ scenario, onSuccess, onError }: PaymentFormProps) {
         redirect: 'if_required',
       });
 
-      if (error) {
-        onError(error.message || 'Error en el pago');
+      console.log('💳 Payment confirmation result:', result);
+
+      if (result.error) {
+        console.log('❌ Payment error:', result.error);
+        onError(result.error.message || 'Error en el pago');
       } else {
+        console.log('✅ Payment successful!');
         onSuccess();
       }
     } catch (err) {
+      console.error('❌ Payment exception:', err);
       onError('Error inesperado durante el pago');
     } finally {
       setIsLoading(false);
@@ -148,6 +187,7 @@ function PaymentTest({ scenario }: PaymentTestProps) {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('💳 Initializing payment for scenario:', scenario.id);
     // Create payment intent for this test scenario
     apiRequest('POST', '/api/create-payment-intent', {
       amount: scenario.amount,
@@ -162,13 +202,16 @@ function PaymentTest({ scenario }: PaymentTestProps) {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log('💳 Payment intent response:', data);
         if (data.clientSecret) {
+          console.log('✅ Client secret received, setting up payment form');
           setClientSecret(data.clientSecret);
         } else {
           throw new Error('No client secret received');
         }
       })
       .catch((error) => {
+        console.error('❌ Payment initialization error:', error);
         toast({
           title: 'Error',
           description: 'No se pudo inicializar el pago: ' + error.message,
@@ -178,6 +221,7 @@ function PaymentTest({ scenario }: PaymentTestProps) {
   }, [scenario]);
 
   const handleSuccess = () => {
+    console.log('🎉 handleSuccess called - payment was successful!');
     setPaymentStatus('success');
     setStatusMessage('¡Pago exitoso! La reserva ha sido confirmada.');
     toast({
@@ -187,6 +231,7 @@ function PaymentTest({ scenario }: PaymentTestProps) {
   };
 
   const handleError = (error: string) => {
+    console.log('❌ handleError called with:', error);
     setPaymentStatus('error');
     setStatusMessage(error);
     toast({
