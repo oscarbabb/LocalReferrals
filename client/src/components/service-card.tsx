@@ -166,23 +166,31 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           top: dropdownPosition.top,
           left: dropdownPosition.left,
           width: dropdownPosition.width,
+          maxHeight: '320px', // Limit height to prevent very tall dropdowns
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Subcategorías:</h4>
-          <div className="grid grid-cols-1 gap-2">
-            {subcategories.map((subcategory) => (
-              <div 
-                key={subcategory.id}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
-                data-testid={`subcategory-${subcategory.id}`}
-                onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
-              >
-                <span className="text-sm text-gray-600 hover:text-gray-800">{subcategory.name}</span>
-                <ArrowRight className="w-3 h-3 text-gray-400" />
-              </div>
-            ))}
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <span>Subcategorías:</span>
+            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
+              {subcategories.length}
+            </Badge>
+          </h4>
+          <div className="max-h-64 overflow-y-auto pr-2 -mr-2 scroll-smooth">
+            <div className="grid grid-cols-1 gap-2">
+              {subcategories.map((subcategory) => (
+                <div 
+                  key={subcategory.id}
+                  className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
+                  data-testid={`subcategory-${subcategory.id}`}
+                  onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
+                >
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{subcategory.name}</span>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>,
@@ -228,13 +236,13 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
             {showSubcategories && subcategories.length > 0 ? (
               <div className="flex items-center gap-2">
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-all duration-300" />
+                  <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-all duration-300" />
+                  <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
                 )}
               </div>
             ) : (
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
             )}
           </div>
         </CardContent>
