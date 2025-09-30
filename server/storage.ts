@@ -876,9 +876,10 @@ export class MemStorage implements IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    // AUTO-SEEDING ENABLED FOR PRODUCTION DATABASE
-    this.seedDatabase();
+    // AUTO-SEEDING DISABLED - Use CSV import API endpoint instead
+    // Call POST /api/admin/import-csv-categories once to populate production
     console.log("🔧 Using DatabaseStorage as primary storage backend");
+    console.log("💡 To seed production database, call: POST /api/admin/import-csv-categories");
   }
 
   private async seedDatabase() {
