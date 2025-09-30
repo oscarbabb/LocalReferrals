@@ -876,9 +876,9 @@ export class MemStorage implements IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    // DISABLED AUTO-SEEDING FOR USER'S CUSTOM CATEGORIES
-    // this.seedDatabase();
-    console.log("🚫 Auto-seeding disabled - using user's custom categories only");
+    // AUTO-SEEDING ENABLED FOR PRODUCTION DATABASE
+    this.seedDatabase();
+    console.log("🔧 Using DatabaseStorage as primary storage backend");
   }
 
   private async seedDatabase() {
