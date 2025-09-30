@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { autoSeedFromCSV } from "./auto-seed";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,23 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Automatically seed database from CSV on startup if needed
+  // This runs BEFORE the server starts to ensure database is populated
+  try {
+    const result = await autoSeedFromCSV();
+    if (result.success) {
+      if (result.skipped) {
+        log('✅ Database seeding check complete (already seeded)');
+      } else {
+        log(`✅ Database auto-seeded: ${result.importedCategories} categories, ${result.importedSubcategories} subcategories`);
+      }
+    } else {
+      log(`⚠️  Auto-seed warning: ${result.error || 'Unknown error'}`);
+    }
+  } catch (error: any) {
+    log(`❌ Auto-seed error: ${error?.message || 'Unknown error'}`);
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
