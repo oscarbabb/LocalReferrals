@@ -3,12 +3,14 @@
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
 **Recent Changes (January 2025):**
-- **Production Database Seeding Solution (January 15, 2025):**
-  - Created `/production-seed` page for one-click production database population
-  - Production and development databases are separate - changes must be explicitly deployed
-  - To populate production database: Deploy app, then visit `https://[app].replit.app/production-seed`
-  - Uses existing CSV import system to safely import 54 categories and 400+ subcategories
+- **Self-Healing Production Seeding System (October 1, 2025):**
+  - Implemented bundled TypeScript seed module with all 54 categories and 400+ subcategories
+  - Added on-demand seeding in GET /api/categories endpoint - automatically seeds if database is empty
+  - Production database self-heals on first page visit - guaranteed never to be empty
+  - Seed data bundled with deployment (not file-system dependent) for 100% reliability
+  - Added /api/admin/seed-status endpoint for production observability
   - Idempotent operation - safe to run multiple times without duplicating data
+  - Next deployment will automatically seed production database on first user visit
 - **Animated Navigation Micro-interactions (January 15, 2025):**
   - Implemented sophisticated tab navigation animations with smooth underline effects
   - Added hover micro-interactions with translateY animations and color transitions
