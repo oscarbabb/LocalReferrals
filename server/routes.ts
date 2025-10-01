@@ -280,12 +280,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ received: true });
   });
 
-  // Service Categories
+  // Service Categories with on-demand seeding
   app.get("/api/categories", async (req, res) => {
     try {
-      const categories = await storage.getServiceCategories();
+      let categories = await storage.getServiceCategories();
+      
+      // Self-healing: If database is empty, seed it on-demand
+      // This guarantees production will never show empty categories
+      if (categories.length === 0) {
+        console.log("🌱 Database empty - seeding on-demand...");
+        const { seedCategoriesFromJSON } = await import("./seed-data");
+        const seedResult = await seedCategoriesFromJSON();
+        
+        if (seedResult.success) {
+          console.log(`✅ On-demand seeding successful: ${seedResult.importedCategories} categories`);
+          // Re-fetch categories after seeding
+          categories = await storage.getServiceCategories();
+        } else {
+          console.error("❌ On-demand seeding failed:", seedResult.error);
+        }
+      }
+      
       res.json(categories);
     } catch (error) {
+      console.error("❌ Error in /api/categories:", error);
       res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
@@ -330,6 +348,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: "Production sync failed", 
         error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Seed status endpoint for observability
+  app.get("/api/admin/seed-status", async (req, res) => {
+    try {
+      const categories = await storage.getServiceCategories();
+      const subcategories = await storage.getServiceSubcategories();
+      
+      res.json({
+        categoryCount: categories.length,
+        subcategoryCount: subcategories.length,
+        seeded: categories.length > 0,
+        environment: process.env.NODE_ENV || 'development',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to fetch seed status",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
