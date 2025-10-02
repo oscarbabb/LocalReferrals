@@ -284,16 +284,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (req, res) => {
     try {
       let categories = await storage.getServiceCategories();
+      const subcategories = await storage.getServiceSubcategories();
       
-      // Self-healing: If database is empty, seed it on-demand
-      // This guarantees production will never show empty categories
-      if (categories.length === 0) {
-        console.log("🌱 Database empty - seeding on-demand...");
+      // Self-healing: Seed if categories OR subcategories are missing
+      // This handles both empty databases and partial/corrupted data
+      const needsSeeding = categories.length === 0 || subcategories.length === 0;
+      
+      if (needsSeeding) {
+        console.log("🌱 Database incomplete - seeding on-demand...");
+        console.log(`📊 Current state: ${categories.length} categories, ${subcategories.length} subcategories`);
+        
+        // Clear existing data to prevent duplicates
+        if (categories.length > 0) {
+          console.log("🧹 Clearing old categories before reseed...");
+          await db.delete(serviceSubcategories);
+          await db.delete(serviceCategories);
+        }
+        
         const { seedCategoriesFromJSON } = await import("./seed-data");
         const seedResult = await seedCategoriesFromJSON();
         
         if (seedResult.success) {
-          console.log(`✅ On-demand seeding successful: ${seedResult.importedCategories} categories`);
+          console.log(`✅ On-demand seeding successful: ${seedResult.importedCategories} categories, ${seedResult.importedSubcategories} subcategories`);
           // Re-fetch categories after seeding
           categories = await storage.getServiceCategories();
         } else {
