@@ -3,6 +3,11 @@
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
 **Recent Changes (January 2025):**
+- **Subcategory Dropdown UX Fix (October 2, 2025):**
+  - Fixed subcategory dropdown scrolling issue - now fully scrollable and visible
+  - Implemented smart positioning that opens upward/downward based on viewport space
+  - Dynamic height calculation prevents dropdown overflow beyond screen bounds
+  - Improved flexbox layout with fixed header and scrollable content area
 - **Production Database Management & Launch Readiness (October 2, 2025):**
   - Fixed production seeding system to handle 55 categories and 431 subcategories
   - Added POST /api/admin/force-reseed endpoint for manual database reseeding

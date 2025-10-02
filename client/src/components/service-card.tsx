@@ -68,7 +68,7 @@ const getHoverColorForCategory = (categoryId: string): string => {
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 400 });
   const cardRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const gradientClass = getColorForCategory(category.id);
@@ -78,11 +78,33 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   useEffect(() => {
     if (isExpanded && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 4, // Just 4px below the card
-        left: rect.left,
-        width: rect.width
-      });
+      const viewportHeight = window.innerHeight;
+      const dropdownMaxHeight = 400; // Maximum dropdown height
+      const spaceBelow = viewportHeight - rect.bottom - 20; // 20px padding from bottom
+      const spaceAbove = rect.top - 20; // 20px padding from top
+      
+      // Check if dropdown should open upward or downward
+      const shouldOpenUpward = spaceBelow < dropdownMaxHeight && spaceAbove > spaceBelow;
+      
+      if (shouldOpenUpward) {
+        // Open upward
+        const availableHeight = Math.min(dropdownMaxHeight, spaceAbove);
+        setDropdownPosition({
+          top: rect.top - availableHeight - 4,
+          left: rect.left,
+          width: rect.width,
+          maxHeight: availableHeight
+        });
+      } else {
+        // Open downward (default)
+        const availableHeight = Math.min(dropdownMaxHeight, spaceBelow);
+        setDropdownPosition({
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: rect.width,
+          maxHeight: availableHeight
+        });
+      }
     }
   }, [isExpanded]);
 
@@ -161,36 +183,36 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     return createPortal(
       <div 
         ref={dropdownRef}
-        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden pointer-events-auto"
+        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 pointer-events-auto flex flex-col"
         style={{
           top: dropdownPosition.top,
           left: dropdownPosition.left,
           width: dropdownPosition.width,
-          maxHeight: '320px', // Limit height to prevent very tall dropdowns
+          maxHeight: `${dropdownPosition.maxHeight}px`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <div className="p-4 flex-shrink-0 border-b border-gray-100">
+          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <span>Subcategorías:</span>
             <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
               {subcategories.length}
             </Badge>
           </h4>
-          <div className="max-h-64 overflow-y-auto pr-2 -mr-2 scroll-smooth">
-            <div className="grid grid-cols-1 gap-2">
-              {subcategories.map((subcategory) => (
-                <div 
-                  key={subcategory.id}
-                  className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
-                  data-testid={`subcategory-${subcategory.id}`}
-                  onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
-                >
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{subcategory.name}</span>
-                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
-                </div>
-              ))}
-            </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 pt-2">
+          <div className="grid grid-cols-1 gap-2">
+            {subcategories.map((subcategory) => (
+              <div 
+                key={subcategory.id}
+                className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
+                data-testid={`subcategory-${subcategory.id}`}
+                onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
+              >
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{subcategory.name}</span>
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
+              </div>
+            ))}
           </div>
         </div>
       </div>,
