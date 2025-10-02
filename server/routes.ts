@@ -12,7 +12,7 @@ import { randomBytes } from "crypto";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { serviceCategories, serviceSubcategories } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { 
   insertUserSchema, 
   insertProviderSchema, 
@@ -380,6 +380,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         message: "Failed to fetch seed status",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Force reseed endpoint - clears and rebuilds category data from JSON
+  app.post("/api/admin/force-reseed", async (req, res) => {
+    try {
+      console.log("🔄 FORCE RESEED REQUESTED");
+      
+      // Get current counts
+      const oldCategories = await storage.getServiceCategories();
+      const oldSubcategories = await storage.getServiceSubcategories();
+      console.log(`📊 Current database: ${oldCategories.length} categories, ${oldSubcategories.length} subcategories`);
+      
+      // Step 1: Clear subcategories (safe - no FK constraints on this table)
+      console.log("🧹 Clearing all subcategories...");
+      await db.delete(serviceSubcategories);
+      
+      // Step 2: Clear all categories and providers to start fresh
+      // This is the only safe way to reseed without FK constraint issues
+      console.log("🧹 Clearing providers and categories for clean reseed...");
+      const { providers: providersTable } = await import("@shared/schema");
+      await db.delete(providersTable);
+      await db.delete(serviceCategories);
+      
+      // Step 3: Reseed categories and subcategories from JSON
+      console.log("🌱 Reseeding categories from JSON...");
+      const { seedCategoriesFromJSON } = await import("./seed-data");
+      const seedResult = await seedCategoriesFromJSON();
+      
+      if (!seedResult.success) {
+        throw new Error(seedResult.error || 'Seeding failed');
+      }
+      
+      console.log(`✅ FORCE RESEED COMPLETE: ${seedResult.importedCategories} categories, ${seedResult.importedSubcategories} subcategories`);
+      res.json({
+        success: true,
+        message: "Database reseeded successfully - providers cleared to avoid FK conflicts",
+        before: {
+          categories: oldCategories.length,
+          subcategories: oldSubcategories.length
+        },
+        after: {
+          categories: seedResult.importedCategories,
+          subcategories: seedResult.importedSubcategories
+        },
+        note: "Providers were cleared to enable clean category reseed. Users can re-register as providers.",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("❌ Force reseed failed:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Force reseed failed",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
