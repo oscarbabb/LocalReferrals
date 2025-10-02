@@ -39,6 +39,7 @@ export const providers = pgTable("providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
   categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
+  subcategoryId: varchar("subcategory_id").references(() => serviceSubcategories.id),
   title: text("title").notNull(),
   description: text("description").notNull(),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),

@@ -15,12 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { Briefcase, DollarSign, Star, Clock, Camera, User, Menu, FileText, Timer } from "lucide-react";
-import type { ServiceCategory } from "@shared/schema";
+import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
 
 // Provider setup form schema with conditional payment method fields
 const providerSetupSchema = z.object({
   categoryId: z.string().min(1, "Selecciona una categoría de servicio"),
+  subcategoryId: z.string().optional(),
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
   experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
@@ -145,6 +146,7 @@ export default function ProviderSetup() {
     resolver: zodResolver(providerSetupSchema),
     defaultValues: {
       categoryId: "",
+      subcategoryId: "",
       title: "",
       description: "",
       experience: "",
@@ -159,14 +161,22 @@ export default function ProviderSetup() {
     }
   });
   
-  // Watch payment type to show conditional fields
+  // Watch payment type and category to show conditional fields
   const selectedPaymentType = form.watch("paymentType");
+  const selectedCategoryId = form.watch("categoryId");
+  
+  // Fetch subcategories when category is selected
+  const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
+    queryKey: [`/api/categories/${selectedCategoryId}/subcategories`],
+    enabled: !!selectedCategoryId,
+  });
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
       // Create provider with only essential fields - let backend defaults handle the rest
       const response = await apiRequest("POST", "/api/providers", {
         categoryId: providerData.categoryId,
+        subcategoryId: providerData.subcategoryId || null,
         title: providerData.title,
         description: providerData.description,
         experience: providerData.experience,
@@ -281,7 +291,14 @@ export default function ProviderSetup() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoría de Servicio</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Reset subcategory when category changes
+                          form.setValue("subcategoryId", "");
+                        }} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger data-testid="select-category">
                             <SelectValue placeholder="Selecciona el tipo de servicio que ofreces" />
@@ -302,6 +319,43 @@ export default function ProviderSetup() {
                     </FormItem>
                   )}
                 />
+
+                {/* Service Subcategory - shown when category has subcategories */}
+                {selectedCategoryId && subcategories.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="subcategoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Subcategoría (Opcional)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-subcategory">
+                              <SelectValue placeholder="Selecciona una subcategoría específica" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-[300px]">
+                            {subcategoriesLoading ? (
+                              <div className="p-4 text-center text-sm text-gray-500">
+                                Cargando subcategorías...
+                              </div>
+                            ) : (
+                              subcategories.map((subcategory) => (
+                                <SelectItem key={subcategory.id} value={subcategory.id}>
+                                  {subcategory.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Especifica tu área de especialización para ayudar a los clientes a encontrarte más fácilmente
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {/* Profile Picture Upload */}
                 <div className="space-y-3">
