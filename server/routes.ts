@@ -386,18 +386,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const oldSubcategories = await storage.getServiceSubcategories();
       console.log(`📊 Current database: ${oldCategories.length} categories, ${oldSubcategories.length} subcategories`);
       
-      // Step 1: Clear subcategories (safe - no FK constraints on this table)
+      // Import all schema tables
+      const { 
+        providers: providersTable,
+        reviews,
+        serviceRequests,
+        providerAvailability,
+        appointments,
+        verificationDocuments,
+        backgroundChecks,
+        verificationReviews,
+        paymentMethods,
+        menuItems,
+        menuItemVariations
+      } = await import("@shared/schema");
+      
+      // Step 1: Clear all dependent tables (in correct order based on FK constraints)
+      console.log("🧹 Clearing all dependent tables...");
+      await db.delete(menuItemVariations); // No FK dependencies
+      await db.delete(menuItems); // References providers
+      await db.delete(paymentMethods); // References providers
+      await db.delete(verificationReviews); // References providers
+      await db.delete(backgroundChecks); // References providers
+      await db.delete(verificationDocuments); // References providers
+      await db.delete(appointments); // References providers and service_requests
+      await db.delete(providerAvailability); // References providers
+      await db.delete(reviews); // References providers
+      await db.delete(serviceRequests); // References providers and categories
+      
+      // Step 2: Clear subcategories
       console.log("🧹 Clearing all subcategories...");
       await db.delete(serviceSubcategories);
       
-      // Step 2: Clear all categories and providers to start fresh
-      // This is the only safe way to reseed without FK constraint issues
-      console.log("🧹 Clearing providers and categories for clean reseed...");
-      const { providers: providersTable } = await import("@shared/schema");
+      // Step 3: Clear providers
+      console.log("🧹 Clearing providers...");
       await db.delete(providersTable);
+      
+      // Step 4: Clear categories
+      console.log("🧹 Clearing categories...");
       await db.delete(serviceCategories);
       
-      // Step 3: Reseed categories and subcategories from JSON
+      // Step 5: Reseed categories and subcategories from JSON
       console.log("🌱 Reseeding categories from JSON...");
       const { seedCategoriesFromJSON } = await import("./seed-data");
       const seedResult = await seedCategoriesFromJSON();
@@ -409,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ FORCE RESEED COMPLETE: ${seedResult.importedCategories} categories, ${seedResult.importedSubcategories} subcategories`);
       res.json({
         success: true,
-        message: "Database reseeded successfully - providers cleared to avoid FK conflicts",
+        message: "Database completely cleared and reseeded with fresh categories",
         before: {
           categories: oldCategories.length,
           subcategories: oldSubcategories.length
@@ -418,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           categories: seedResult.importedCategories,
           subcategories: seedResult.importedSubcategories
         },
-        note: "Providers were cleared to enable clean category reseed. Users can re-register as providers.",
+        note: "All provider data and related records were cleared to enable clean reseed. This is a fresh start for the database.",
         timestamp: new Date().toISOString()
       });
     } catch (error) {
