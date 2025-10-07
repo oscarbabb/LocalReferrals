@@ -21,6 +21,7 @@ export default function Auth() {
   const [isProviderRegistration, setIsProviderRegistration] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -202,11 +203,19 @@ export default function Auth() {
                       <Input
                         id="login-password"
                         name="password"
-                        type="password"
-                        className="pl-10"
+                        type={showLoginPassword ? "text" : "password"}
+                        className="pl-10 pr-10"
                         required
                         data-testid="input-password"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        data-testid="toggle-login-password-visibility"
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
