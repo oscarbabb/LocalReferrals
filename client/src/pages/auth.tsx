@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Mail, Lock, User, Phone, Building, MapPin, Briefcase } from "lucide-react";
+import { Mail, Lock, User, Phone, Building, MapPin, Briefcase, Eye, EyeOff } from "lucide-react";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Auth() {
@@ -19,6 +19,8 @@ export default function Auth() {
   const [buildingValue, setBuildingValue] = useState("");
   const [addressValue, setAddressValue] = useState("");
   const [isProviderRegistration, setIsProviderRegistration] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -358,10 +360,18 @@ export default function Auth() {
                       <Input
                         id="register-password"
                         name="password"
-                        type="password"
-                        className="pl-10"
+                        type={showPassword ? "text" : "password"}
+                        className="pl-10 pr-10"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        data-testid="toggle-password-visibility"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -371,10 +381,18 @@ export default function Auth() {
                       <Input
                         id="confirm-password"
                         name="confirmPassword"
-                        type="password"
-                        className="pl-10"
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="pl-10 pr-10"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        data-testid="toggle-confirm-password-visibility"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                   {/* Provider Option - Enhanced */}
