@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { User, Settings, Star, Calendar, MessageCircle, Briefcase, Users, Camera, Menu as MenuIcon, Plus } from "lucide-react";
+import { User, Settings, Star, Calendar, MessageCircle, Briefcase, Users, Camera, Menu as MenuIcon, Plus, FileText, Download, X } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -586,6 +586,59 @@ export default function Profile() {
                           </div>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Menu Document Section */}
+                {provider?.menuDocumentUrl && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <FileText className="w-5 h-5" />
+                        <span>Menú Completo</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') ? (
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <FileText className="w-8 h-8 text-red-600" />
+                            <div>
+                              <p className="font-medium text-gray-900">Menú en PDF</p>
+                              <p className="text-sm text-gray-500">Documento del menú</p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                            size="sm"
+                            className="bg-orange-600 hover:bg-orange-700"
+                            data-testid="button-view-menu-pdf"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Ver
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <img 
+                            src={`/objects/${provider.menuDocumentUrl}`} 
+                            alt="Menú Completo" 
+                            className="w-full h-auto rounded-lg border"
+                            data-testid="img-menu-document"
+                          />
+                          <Button
+                            onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            data-testid="button-view-menu-image"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Ver en tamaño completo
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}

@@ -24,9 +24,15 @@ import {
   DollarSign, 
   Clock,
   Image,
-  ShoppingCart
+  ShoppingCart,
+  FileText,
+  Upload,
+  Download,
+  X
 } from "lucide-react";
 import type { MenuItem, InsertMenuItem } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 // Menu item form schema
 const menuItemSchema = z.object({
@@ -48,6 +54,7 @@ export default function MenuManagement() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   // Get current user's provider profile - CRITICAL SECURITY FIX
   const { data: provider, isLoading: providerLoading, error: providerError } = useQuery<any>({
@@ -201,6 +208,77 @@ export default function MenuManagement() {
       });
     },
   });
+
+  // Menu document upload mutation
+  const updateMenuDocumentMutation = useMutation({
+    mutationFn: async (menuDocumentUrl: string | null) => {
+      if (!providerId) throw new Error("Provider not found");
+      const response = await apiRequest("PATCH", `/api/providers/${providerId}/menu-document`, {
+        menuDocumentUrl
+      });
+      return await response.json();
+    },
+    onSuccess: (_, menuDocumentUrl) => {
+      toast({
+        title: menuDocumentUrl ? "Menú actualizado" : "Menú eliminado",
+        description: menuDocumentUrl 
+          ? "Tu documento de menú se ha subido exitosamente." 
+          : "El documento de menú ha sido eliminado.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema al actualizar el menú.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Menu document upload handlers
+  const handleMenuDocumentUpload = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload");
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL as string,
+    };
+  };
+
+  const handleMenuDocumentComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      setIsUploadingDocument(true);
+      try {
+        const uploadedFile = result.successful[0];
+        const documentURL = uploadedFile.uploadURL as string;
+        
+        // Make the uploaded document public
+        const response = await apiRequest("PUT", "/api/menu-documents", {
+          documentURL: documentURL
+        });
+        const data = await response.json();
+        
+        // Update provider with the document URL
+        updateMenuDocumentMutation.mutate(data.objectPath);
+      } catch (error) {
+        console.error("Error uploading menu document:", error);
+        toast({
+          title: "Error al subir documento",
+          description: "Hubo un problema al subir el documento del menú.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingDocument(false);
+      }
+    }
+  };
+
+  const handleDeleteMenuDocument = () => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar el documento del menú?")) {
+      updateMenuDocumentMutation.mutate(null);
+    }
+  };
 
   const onSubmit = (data: MenuItemForm) => {
     if (editingItem) {
@@ -376,7 +454,7 @@ export default function MenuManagement() {
                         name="duration"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Duración (minutos)</FormLabel>
+                            <FormLabel>Duración (minutos) - Opcional</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -385,6 +463,7 @@ export default function MenuManagement() {
                                 data-testid="input-menu-duration"
                               />
                             </FormControl>
+                            <p className="text-xs text-gray-500 mt-1">Solo para servicios con tiempo específico</p>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -421,6 +500,101 @@ export default function MenuManagement() {
             </Dialog>
           </div>
         </div>
+
+        {/* Upload Full Menu Document Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-100 p-2 rounded-full">
+                <FileText className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle>Documento de Menú Completo</CardTitle>
+                <CardDescription>
+                  Sube un PDF o imagen de tu menú completo (opcional)
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {provider?.menuDocumentUrl ? (
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') ? (
+                        <>
+                          <FileText className="w-8 h-8 text-red-600" />
+                          <div>
+                            <p className="font-medium text-gray-900">Menú en PDF</p>
+                            <p className="text-sm text-gray-500">Documento del menú subido</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Image className="w-8 h-8 text-blue-600" />
+                          <div>
+                            <p className="font-medium text-gray-900">Menú en Imagen</p>
+                            <p className="text-sm text-gray-500">Imagen del menú subida</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                        data-testid="button-view-menu-document"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Ver/Descargar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDeleteMenuDocument}
+                        className="text-red-600 hover:text-red-700"
+                        data-testid="button-delete-menu-document"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                {!provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') && (
+                  <div className="mt-4">
+                    <img 
+                      src={`/objects/${provider.menuDocumentUrl}`} 
+                      alt="Menú" 
+                      className="max-w-full h-auto rounded-lg border"
+                      data-testid="img-menu-preview"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">
+                  Puedes subir una imagen (JPG, PNG) o PDF de tu menú completo para que tus clientes lo vean.
+                </p>
+                <ObjectUploader
+                  onGetUploadParameters={handleMenuDocumentUpload}
+                  onComplete={handleMenuDocumentComplete}
+                  maxFileSize={10 * 1024 * 1024}
+                  buttonClassName="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Subir Menú (PDF/Imagen)
+                </ObjectUploader>
+                {isUploadingDocument && (
+                  <p className="text-sm text-gray-500">Subiendo documento...</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Menu Items List */}
         <div className="space-y-6">

@@ -1553,6 +1553,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update provider's menu document URL
+  app.patch("/api/providers/:id/menu-document", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.id, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status!).json({ error: ownership.error });
+      }
+
+      const updateMenuDocumentSchema = z.object({
+        menuDocumentUrl: z.string().nullable(),
+      });
+
+      const validatedData = updateMenuDocumentSchema.parse(req.body);
+      const provider = await storage.updateProvider(req.params.id, validatedData);
+      
+      if (!provider) {
+        return res.status(404).json({ error: "Provider not found" });
+      }
+
+      res.json(provider);
+    } catch (error: any) {
+      console.error("Failed to update menu document:", error);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
   // Messages
   app.post("/api/messages", async (req, res) => {
     try {
@@ -1585,7 +1617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/review-photos", async (req, res) => {
+  app.put("/api/review-photos", isAuthenticated, async (req: any, res) => {
     if (!req.body.photoURL) {
       return res.status(400).json({ error: "photoURL is required" });
     }
@@ -1610,6 +1642,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error setting review photo:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/menu-documents", isAuthenticated, async (req: any, res) => {
+    if (!req.body.documentURL) {
+      return res.status(400).json({ error: "documentURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(
+        req.body.documentURL,
+      );
+
+      // Set public visibility for menu documents so they can be viewed by everyone
+      await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.documentURL,
+        {
+          owner: "system",
+          visibility: "public",
+        }
+      );
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting menu document:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

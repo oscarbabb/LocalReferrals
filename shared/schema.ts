@@ -64,6 +64,7 @@ export const providers = pgTable("providers", {
   documentsSubmitted: boolean("documents_submitted").default(false),
   lastVerificationDate: timestamp("last_verification_date"),
   verificationNotes: text("verification_notes"),
+  menuDocumentUrl: text("menu_document_url"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 

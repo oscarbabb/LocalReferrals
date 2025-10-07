@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit } from "lucide-react";
+import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit, FileText, Download } from "lucide-react";
 import { Provider, User, Review, MenuItem, MenuItemVariation } from "@shared/schema";
 
 // Extended types for API responses
@@ -199,6 +199,59 @@ export default function ProviderDetail() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Menu Document Section */}
+            {provider.menuDocumentUrl && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Menú Completo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-8 h-8 text-red-600" />
+                          <div>
+                            <p className="font-medium text-gray-900">Menú en PDF</p>
+                            <p className="text-sm text-gray-500">Haz clic para ver o descargar</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                          className="bg-orange-600 hover:bg-orange-700"
+                          data-testid="button-view-pdf-menu"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Ver PDF
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <img 
+                        src={`/objects/${provider.menuDocumentUrl}`} 
+                        alt="Menú Completo" 
+                        className="w-full h-auto rounded-lg border shadow-sm"
+                        data-testid="img-full-menu"
+                      />
+                      <Button
+                        onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                        variant="outline"
+                        className="w-full"
+                        data-testid="button-view-image-menu"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Ver en tamaño completo
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Menu Items Section */}
             {menuItems && menuItems.length > 0 && (
