@@ -858,7 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/providers", async (req, res) => {
     try {
-      const { providerSetupToken, profilePicture, ...providerData } = req.body;
+      const { providerSetupToken, profilePicture, categories, ...providerData } = req.body;
       
       // Security: Validate the setup token instead of trusting client-supplied userId
       if (!providerSetupToken) {
@@ -917,13 +917,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Validate provider data and include the server-determined userId
-      const validatedData = insertProviderSchema.parse({
-        ...providerData,
-        userId: userId
-      });
-      
-      const provider = await storage.createProvider(validatedData);
+      // Create provider with multiple categories if provided
+      let provider;
+      if (categories && Array.isArray(categories) && categories.length > 0) {
+        console.log(`🏷️  Creating provider with ${categories.length} categories`);
+        
+        // For multi-category creation, categoryId and subcategoryId are optional (set automatically)
+        const validatedData = insertProviderSchema.partial({ categoryId: true, subcategoryId: true }).parse({
+          ...providerData,
+          userId: userId
+        });
+        
+        provider = await storage.createProviderWithCategories(validatedData, categories);
+      } else {
+        // Fallback to single category creation for backwards compatibility
+        const validatedData = insertProviderSchema.parse({
+          ...providerData,
+          userId: userId
+        });
+        provider = await storage.createProvider(validatedData);
+      }
       
       // Consume the token (invalidate it after successful use)
       providerSetupTokens.delete(providerSetupToken);
@@ -1343,23 +1356,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insertPaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]),
         isActive: z.boolean().default(true),
-        hourlyRate: z.string().nullable().optional(),
-        minimumHours: z.string().nullable().optional(),
-        fixedJobRate: z.string().nullable().optional(),
-        eventRate: z.string().nullable().optional(),
+        hourlyRate: z.coerce.number().positive().nullable().optional(),
+        minimumHours: z.coerce.number().positive().nullable().optional(),
+        fixedJobRate: z.coerce.number().positive().nullable().optional(),
+        eventRate: z.coerce.number().positive().nullable().optional(),
         eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
-        estimatedDuration: z.number().nullable().optional(),
+        estimatedDuration: z.coerce.number().positive().nullable().optional(),
         requiresDeposit: z.boolean().default(false),
         depositPercentage: z.number().default(0),
         cancellationPolicy: z.string().nullable().optional()
       });
       
       const validatedData = insertPaymentMethodSchema.parse(req.body);
+      
+      // Convert numbers to strings for decimal fields in database
       const paymentMethod = await storage.createPaymentMethod({
         ...validatedData,
-        providerId: req.params.providerId
-      });
+        providerId: req.params.providerId,
+        hourlyRate: validatedData.hourlyRate != null ? String(validatedData.hourlyRate) : null,
+        minimumHours: validatedData.minimumHours != null ? String(validatedData.minimumHours) : null,
+        fixedJobRate: validatedData.fixedJobRate != null ? String(validatedData.fixedJobRate) : null,
+        eventRate: validatedData.eventRate != null ? String(validatedData.eventRate) : null,
+      } as any);
       res.json(paymentMethod);
     } catch (error: any) {
       console.error("Failed to create payment method:", error);
@@ -1372,20 +1391,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatePaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]).optional(),
         isActive: z.boolean().optional(),
-        hourlyRate: z.string().nullable().optional(),
-        minimumHours: z.string().nullable().optional(),
-        fixedJobRate: z.string().nullable().optional(),
-        eventRate: z.string().nullable().optional(),
+        hourlyRate: z.coerce.number().positive().nullable().optional(),
+        minimumHours: z.coerce.number().positive().nullable().optional(),
+        fixedJobRate: z.coerce.number().positive().nullable().optional(),
+        eventRate: z.coerce.number().positive().nullable().optional(),
         eventDescription: z.string().nullable().optional(),
         jobDescription: z.string().nullable().optional(),
-        estimatedDuration: z.number().nullable().optional(),
+        estimatedDuration: z.coerce.number().positive().nullable().optional(),
         requiresDeposit: z.boolean().optional(),
         depositPercentage: z.number().optional(),
         cancellationPolicy: z.string().nullable().optional()
       });
       
       const validatedData = updatePaymentMethodSchema.parse(req.body);
-      const paymentMethod = await storage.updatePaymentMethod(req.params.id, validatedData);
+      
+      // Convert numbers to strings for decimal fields in database
+      const dataToUpdate = {
+        ...validatedData,
+        hourlyRate: validatedData.hourlyRate != null ? String(validatedData.hourlyRate) : undefined,
+        minimumHours: validatedData.minimumHours != null ? String(validatedData.minimumHours) : undefined,
+        fixedJobRate: validatedData.fixedJobRate != null ? String(validatedData.fixedJobRate) : undefined,
+        eventRate: validatedData.eventRate != null ? String(validatedData.eventRate) : undefined,
+      };
+      
+      const paymentMethod = await storage.updatePaymentMethod(req.params.id, dataToUpdate as any);
       res.json(paymentMethod);
     } catch (error: any) {
       console.error("Failed to update payment method:", error);

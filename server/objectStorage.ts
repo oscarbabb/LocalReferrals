@@ -139,8 +139,9 @@ export class ObjectStorageService {
       );
     }
 
+    const timestamp = Date.now();
     const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    const fullPath = `${privateObjectDir}/uploads/${timestamp}-${objectId}`;
 
     const { bucketName, objectName } = parseObjectPath(fullPath);
 

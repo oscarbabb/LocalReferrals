@@ -14,14 +14,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ObjectUploader } from "@/components/ObjectUploader";
-import { Briefcase, DollarSign, Star, Clock, Camera, User, Menu, FileText, Timer } from "lucide-react";
+import { Briefcase, DollarSign, Star, Clock, Camera, User, Menu, FileText, Timer, Plus, X, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
 
 // Provider setup form schema with conditional payment method fields
 const providerSetupSchema = z.object({
-  categoryId: z.string().min(1, "Selecciona una categoría de servicio"),
-  subcategoryId: z.string().optional(),
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
   experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
@@ -74,11 +74,23 @@ const providerSetupSchema = z.object({
 
 type ProviderSetupForm = z.infer<typeof providerSetupSchema>;
 
+// Type for selected categories
+type SelectedCategory = {
+  categoryId: string;
+  subcategoryId?: string;
+  isPrimary: boolean;
+};
+
 export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  
+  // State for managing selected categories
+  const [selectedCategories, setSelectedCategories] = useState<SelectedCategory[]>([]);
+  const [tempCategoryId, setTempCategoryId] = useState<string>("");
+  const [tempSubcategoryId, setTempSubcategoryId] = useState<string>("");
 
   // Get provider setup token from session storage (set during registration)
   const providerSetupToken = sessionStorage.getItem('providerSetupToken');
@@ -96,6 +108,12 @@ export default function ProviderSetup() {
 
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
+  });
+
+  // Fetch subcategories for temporary selection
+  const { data: tempSubcategories = [], isLoading: tempSubcategoriesLoading } = useQuery<ServiceSubcategory[]>({
+    queryKey: [`/api/categories/${tempCategoryId}/subcategories`],
+    enabled: !!tempCategoryId,
   });
 
   // Profile picture upload functions
@@ -145,8 +163,6 @@ export default function ProviderSetup() {
   const form = useForm<ProviderSetupForm>({
     resolver: zodResolver(providerSetupSchema),
     defaultValues: {
-      categoryId: "",
-      subcategoryId: "",
       title: "",
       description: "",
       experience: "",
@@ -161,27 +177,111 @@ export default function ProviderSetup() {
     }
   });
   
-  // Watch payment type and category to show conditional fields
+  // Watch payment type
   const selectedPaymentType = form.watch("paymentType");
-  const selectedCategoryId = form.watch("categoryId");
-  
-  // Fetch subcategories when category is selected
-  const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
-    queryKey: [`/api/categories/${selectedCategoryId}/subcategories`],
-    enabled: !!selectedCategoryId,
-  });
+
+  // Add category to selected list
+  const handleAddCategory = () => {
+    if (!tempCategoryId) {
+      toast({
+        title: "Selecciona una categoría",
+        description: "Debes seleccionar al menos una categoría para agregar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if category already exists
+    const exists = selectedCategories.some(
+      cat => cat.categoryId === tempCategoryId && 
+             (cat.subcategoryId || "") === (tempSubcategoryId || "")
+    );
+
+    if (exists) {
+      toast({
+        title: "Categoría ya agregada",
+        description: "Esta categoría ya está en tu lista de servicios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add the category
+    const newCategory: SelectedCategory = {
+      categoryId: tempCategoryId,
+      subcategoryId: tempSubcategoryId || undefined,
+      isPrimary: selectedCategories.length === 0 // First one is primary by default
+    };
+
+    setSelectedCategories([...selectedCategories, newCategory]);
+    
+    // Reset temp selections
+    setTempCategoryId("");
+    setTempSubcategoryId("");
+    
+    toast({
+      title: "Servicio agregado",
+      description: "El servicio se agregó a tu lista.",
+    });
+  };
+
+  // Remove category from selected list
+  const handleRemoveCategory = (index: number) => {
+    const newCategories = selectedCategories.filter((_, i) => i !== index);
+    
+    // If we removed the primary category, make the first remaining one primary
+    if (selectedCategories[index].isPrimary && newCategories.length > 0) {
+      newCategories[0].isPrimary = true;
+    }
+    
+    setSelectedCategories(newCategories);
+  };
+
+  // Toggle primary status
+  const handleTogglePrimary = (index: number) => {
+    const newCategories = selectedCategories.map((cat, i) => ({
+      ...cat,
+      isPrimary: i === index // Only the selected one is primary
+    }));
+    setSelectedCategories(newCategories);
+  };
+
+  // Get category name by ID
+  const getCategoryName = (categoryId: string) => {
+    return categories.find(c => c.id === categoryId)?.name || "Categoría desconocida";
+  };
+
+  // Get subcategory name by ID
+  const getSubcategoryName = async (categoryId: string, subcategoryId: string) => {
+    try {
+      const response = await fetch(`/api/categories/${categoryId}/subcategories`);
+      const subcategories = await response.json();
+      return subcategories.find((s: ServiceSubcategory) => s.id === subcategoryId)?.name || "";
+    } catch {
+      return "";
+    }
+  };
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
-      // Create provider with only essential fields - let backend defaults handle the rest
+      // Validate that at least one category is selected
+      if (selectedCategories.length === 0) {
+        throw new Error("Debes seleccionar al menos una categoría de servicio");
+      }
+
+      // Find the primary category (for backwards compatibility with single category fields)
+      const primaryCategory = selectedCategories.find(c => c.isPrimary) || selectedCategories[0];
+
+      // Create provider with essential fields
       const response = await apiRequest("POST", "/api/providers", {
-        categoryId: providerData.categoryId,
-        subcategoryId: providerData.subcategoryId || null,
+        categoryId: primaryCategory.categoryId,
+        subcategoryId: primaryCategory.subcategoryId || null,
         title: providerData.title,
         description: providerData.description,
         experience: providerData.experience,
-        profilePicture: profilePicture, // Include profile picture in provider creation
-        providerSetupToken: providerSetupToken
+        profilePicture: profilePicture,
+        providerSetupToken: providerSetupToken,
+        categories: selectedCategories // Send all categories
       });
       const createdProvider = await response.json();
       
@@ -194,16 +294,16 @@ export default function ProviderSetup() {
       };
       
       if (providerData.paymentType === "hourly") {
-        paymentMethodData.hourlyRate = providerData.hourlyRate;
-        paymentMethodData.minimumHours = providerData.minimumHours;
+        paymentMethodData.hourlyRate = providerData.hourlyRate ? parseFloat(String(providerData.hourlyRate)) : undefined;
+        paymentMethodData.minimumHours = providerData.minimumHours ? parseFloat(String(providerData.minimumHours)) : undefined;
       } else if (providerData.paymentType === "fixed_job") {
-        paymentMethodData.fixedJobRate = providerData.fixedJobRate;
+        paymentMethodData.fixedJobRate = providerData.fixedJobRate ? parseFloat(String(providerData.fixedJobRate)) : undefined;
         paymentMethodData.jobDescription = providerData.jobDescription;
-        paymentMethodData.estimatedDuration = providerData.estimatedDuration;
+        paymentMethodData.estimatedDuration = providerData.estimatedDuration ? parseFloat(String(providerData.estimatedDuration)) : undefined;
       } else if (providerData.paymentType === "per_event") {
-        paymentMethodData.eventRate = providerData.eventRate;
+        paymentMethodData.eventRate = providerData.eventRate ? parseFloat(String(providerData.eventRate)) : undefined;
         paymentMethodData.eventDescription = providerData.eventDescription;
-        paymentMethodData.estimatedDuration = providerData.estimatedDuration;
+        paymentMethodData.estimatedDuration = providerData.estimatedDuration ? parseFloat(String(providerData.estimatedDuration)) : undefined;
       }
       
       // Create payment method
@@ -284,78 +384,167 @@ export default function ProviderSetup() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Service Category */}
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Categoría de Servicio</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // Reset subcategory when category changes
-                          form.setValue("subcategoryId", "");
-                        }} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger data-testid="select-category">
-                            <SelectValue placeholder="Selecciona el tipo de servicio que ofreces" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              <div className="flex items-center space-x-2">
-                                <span>{category.icon}</span>
-                                <span>{category.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Multiple Categories Section */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-base font-medium text-gray-900 mb-1">Servicios que ofreces</h3>
+                    <p className="text-sm text-gray-600">
+                      Selecciona todas las categorías de servicios que ofreces. Puedes agregar varias.
+                    </p>
+                  </div>
 
-                {/* Service Subcategory - shown when category has subcategories */}
-                {selectedCategoryId && subcategories.length > 0 && (
-                  <FormField
-                    control={form.control}
-                    name="subcategoryId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subcategoría (Opcional)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-subcategory">
-                              <SelectValue placeholder="Selecciona una subcategoría específica" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-[300px]">
-                            {subcategoriesLoading ? (
-                              <div className="p-4 text-center text-sm text-gray-500">
-                                Cargando subcategorías...
-                              </div>
-                            ) : (
-                              subcategories.map((subcategory) => (
-                                <SelectItem key={subcategory.id} value={subcategory.id}>
-                                  {subcategory.name}
-                                </SelectItem>
-                              ))
-                            )}
+                  {/* Category Selection Form */}
+                  <div className="border rounded-lg p-4 bg-gray-50 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="temp-category" className="text-sm font-medium">Categoría</Label>
+                        <Select 
+                          value={tempCategoryId}
+                          onValueChange={(value) => {
+                            setTempCategoryId(value);
+                            setTempSubcategoryId(""); // Reset subcategory when category changes
+                          }}
+                        >
+                          <SelectTrigger id="temp-category" data-testid="select-category">
+                            <SelectValue placeholder="Selecciona una categoría" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{category.icon}</span>
+                                  <span>{category.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Especifica tu área de especialización para ayudar a los clientes a encontrarte más fácilmente
-                        </p>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                      </div>
+
+                      {tempCategoryId && tempSubcategories.length > 0 && (
+                        <div>
+                          <Label htmlFor="temp-subcategory" className="text-sm font-medium">Subcategoría (Opcional)</Label>
+                          <Select 
+                            value={tempSubcategoryId}
+                            onValueChange={setTempSubcategoryId}
+                          >
+                            <SelectTrigger id="temp-subcategory" data-testid="select-subcategory">
+                              <SelectValue placeholder="Selecciona una subcategoría" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[300px]">
+                              {tempSubcategoriesLoading ? (
+                                <div className="p-4 text-center text-sm text-gray-500">
+                                  Cargando subcategorías...
+                                </div>
+                              ) : (
+                                tempSubcategories.map((subcategory) => (
+                                  <SelectItem key={subcategory.id} value={subcategory.id}>
+                                    {subcategory.name}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={handleAddCategory}
+                      variant="outline"
+                      className="w-full"
+                      data-testid="button-add-category"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Agregar Servicio
+                    </Button>
+                  </div>
+
+                  {/* Selected Categories Display */}
+                  {selectedCategories.length > 0 ? (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Servicios seleccionados ({selectedCategories.length})</Label>
+                      <div className="space-y-2">
+                        {selectedCategories.map((category, index) => {
+                          const categoryName = getCategoryName(category.categoryId);
+                          const categoryObj = categories.find(c => c.id === category.categoryId);
+                          
+                          return (
+                            <Card 
+                              key={index} 
+                              className="border-l-4 border-l-orange-500"
+                              data-testid={`card-service-${index}`}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-lg">{categoryObj?.icon}</span>
+                                      <div>
+                                        <p className="font-semibold text-gray-900">{categoryName}</p>
+                                        {category.subcategoryId && (
+                                          <p className="text-sm text-gray-600">
+                                            {tempSubcategories.find(s => s.id === category.subcategoryId)?.name || "Subcategoría"}
+                                          </p>
+                                        )}
+                                      </div>
+                                      {category.isPrimary && (
+                                        <Badge variant="default" className="bg-orange-600">
+                                          <Check className="w-3 h-3 mr-1" />
+                                          Principal
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        id={`primary-${index}`}
+                                        checked={category.isPrimary}
+                                        onCheckedChange={() => handleTogglePrimary(index)}
+                                        data-testid={`checkbox-primary-${index}`}
+                                      />
+                                      <Label 
+                                        htmlFor={`primary-${index}`}
+                                        className="text-sm text-gray-600 cursor-pointer"
+                                      >
+                                        Marcar como servicio principal
+                                      </Label>
+                                    </div>
+                                  </div>
+                                  
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRemoveCategory(index)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    data-testid={`button-remove-service-${index}`}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <Briefcase className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600">
+                        No has agregado servicios aún. Selecciona una categoría y haz clic en "Agregar Servicio".
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedCategories.length === 0 && (
+                    <p className="text-sm text-red-600">
+                      * Debes seleccionar al menos una categoría de servicio
+                    </p>
+                  )}
+                </div>
 
                 {/* Profile Picture Upload */}
                 <div className="space-y-3">
@@ -384,7 +573,7 @@ export default function ProviderSetup() {
                       <div className="flex-1">
                         <ObjectUploader
                           maxNumberOfFiles={1}
-                          maxFileSize={5 * 1024 * 1024} // 5MB
+                          maxFileSize={5 * 1024 * 1024}
                           onGetUploadParameters={handleProfilePictureUpload}
                           onComplete={handleProfilePictureComplete}
                           buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
@@ -900,7 +1089,7 @@ export default function ProviderSetup() {
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white"
-                    disabled={createProviderMutation.isPending}
+                    disabled={createProviderMutation.isPending || selectedCategories.length === 0}
                     data-testid="button-create-provider"
                   >
                     {createProviderMutation.isPending ? (

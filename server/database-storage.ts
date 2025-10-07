@@ -31,6 +31,8 @@ import {
   type InsertMenuItem,
   type MenuItemVariation,
   type InsertMenuItemVariation,
+  type ProviderCategory,
+  type InsertProviderCategory,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -46,7 +48,8 @@ import {
   verificationRequirements,
   paymentMethods,
   menuItems,
-  menuItemVariations
+  menuItemVariations,
+  providerCategories
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -334,6 +337,81 @@ export class DatabaseStorage implements IStorage {
   async createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation> {
     const [newVariation] = await db.insert(menuItemVariations).values(variation).returning();
     return newVariation;
+  }
+
+  // Provider Categories (Many-to-Many)
+  async createProviderCategory(data: InsertProviderCategory): Promise<ProviderCategory> {
+    const [newProviderCategory] = await db.insert(providerCategories).values(data).returning();
+    return newProviderCategory;
+  }
+
+  async getProviderCategories(providerId: string): Promise<ProviderCategory[]> {
+    const results = await db
+      .select({
+        id: providerCategories.id,
+        providerId: providerCategories.providerId,
+        categoryId: providerCategories.categoryId,
+        subcategoryId: providerCategories.subcategoryId,
+        isPrimary: providerCategories.isPrimary,
+        createdAt: providerCategories.createdAt,
+        category: serviceCategories,
+        subcategory: serviceSubcategories,
+      })
+      .from(providerCategories)
+      .leftJoin(serviceCategories, eq(providerCategories.categoryId, serviceCategories.id))
+      .leftJoin(serviceSubcategories, eq(providerCategories.subcategoryId, serviceSubcategories.id))
+      .where(eq(providerCategories.providerId, providerId));
+    
+    return results as any;
+  }
+
+  async deleteProviderCategory(id: string): Promise<void> {
+    await db.delete(providerCategories).where(eq(providerCategories.id, id));
+  }
+
+  async deleteAllProviderCategories(providerId: string): Promise<void> {
+    await db.delete(providerCategories).where(eq(providerCategories.providerId, providerId));
+  }
+
+  async createProviderWithCategories(
+    providerData: InsertProvider, 
+    categories: Array<{categoryId: string, subcategoryId?: string, isPrimary?: boolean}>
+  ): Promise<Provider> {
+    return await db.transaction(async (tx) => {
+      // Ensure exactly one isPrimary
+      const hasPrimary = categories.some(c => c.isPrimary);
+      const processedCategories = categories.map((cat, index) => ({
+        ...cat,
+        isPrimary: hasPrimary ? cat.isPrimary : index === 0
+      }));
+
+      // Ensure only first primary remains primary
+      let foundPrimary = false;
+      const finalCategories = processedCategories.map(cat => {
+        if (cat.isPrimary && !foundPrimary) {
+          foundPrimary = true;
+          return cat;
+        }
+        return { ...cat, isPrimary: false };
+      });
+
+      const [provider] = await tx.insert(providers).values({
+        ...providerData,
+        categoryId: finalCategories[0].categoryId,
+        subcategoryId: finalCategories[0].subcategoryId || null
+      }).returning();
+
+      for (const category of finalCategories) {
+        await tx.insert(providerCategories).values({
+          providerId: provider.id,
+          categoryId: category.categoryId,
+          subcategoryId: category.subcategoryId || null,
+          isPrimary: category.isPrimary || false
+        });
+      }
+
+      return provider;
+    });
   }
 
   // Required for Replit Auth

@@ -31,6 +31,8 @@ import {
   type InsertMenuItem,
   type MenuItemVariation,
   type InsertMenuItemVariation,
+  type ProviderCategory,
+  type InsertProviderCategory,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -46,7 +48,8 @@ import {
   verificationRequirements,
   paymentMethods,
   menuItems,
-  menuItemVariations
+  menuItemVariations,
+  providerCategories
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -139,6 +142,16 @@ export interface IStorage {
   // Menu Item Variations
   getMenuItemVariations(menuItemId: string): Promise<MenuItemVariation[]>;
   createMenuItemVariation(variation: InsertMenuItemVariation): Promise<MenuItemVariation>;
+
+  // Provider Categories (Many-to-Many)
+  createProviderCategory(data: InsertProviderCategory): Promise<ProviderCategory>;
+  getProviderCategories(providerId: string): Promise<ProviderCategory[]>;
+  deleteProviderCategory(id: string): Promise<void>;
+  deleteAllProviderCategories(providerId: string): Promise<void>;
+  createProviderWithCategories(
+    providerData: InsertProvider, 
+    categories: Array<{categoryId: string, subcategoryId?: string, isPrimary?: boolean}>
+  ): Promise<Provider>;
 }
 
 export class MemStorage implements IStorage {
@@ -158,6 +171,7 @@ export class MemStorage implements IStorage {
   private paymentMethods: Map<string, PaymentMethod>;
   private menuItems: Map<string, MenuItem>;
   private menuItemVariations: Map<string, MenuItemVariation>;
+  private providerCategories: Map<string, ProviderCategory>;
 
   constructor() {
     console.log("🏗️  Initializing MemStorage...");
@@ -177,6 +191,7 @@ export class MemStorage implements IStorage {
     this.paymentMethods = new Map();
     this.menuItems = new Map();
     this.menuItemVariations = new Map();
+    this.providerCategories = new Map();
     
     console.log("📦 Starting data seeding...");
     this.seedData();
@@ -235,6 +250,17 @@ export class MemStorage implements IStorage {
         building: "Edificio A", 
         phone: "+1234567890",
         isProvider: true,
+        condominioMaestro: "Las Flores",
+        condominio: "Sección A",
+        edificioOArea: "Torre Norte",
+        calle: "Av. Insurgentes Sur",
+        colonia: "Roma Norte",
+        codigoPostal: "06700",
+        numeroExterior: "123",
+        numeroInterior: "304",
+        municipio: "Cuauhtémoc",
+        estado: "CDMX",
+        addressNotes: "Portón verde",
       },
       {
         username: "carlos.mendoza",
@@ -247,6 +273,17 @@ export class MemStorage implements IStorage {
         building: "Edificio B",
         phone: "+1234567891",
         isProvider: true,
+        condominioMaestro: "Las Flores",
+        condominio: "Sección B",
+        edificioOArea: "Torre Sur",
+        calle: "Av. Insurgentes Sur",
+        colonia: "Roma Norte",
+        codigoPostal: "06700",
+        numeroExterior: "125",
+        numeroInterior: "201",
+        municipio: "Cuauhtémoc",
+        estado: "CDMX",
+        addressNotes: null,
       },
       {
         username: "ana.ruiz", 
@@ -259,6 +296,17 @@ export class MemStorage implements IStorage {
         building: "Edificio C",
         phone: "+1234567892",
         isProvider: true,
+        condominioMaestro: "Las Flores",
+        condominio: "Sección C",
+        edificioOArea: "Torre Este",
+        calle: "Av. Insurgentes Sur",
+        colonia: "Roma Norte",
+        codigoPostal: "06700",
+        numeroExterior: "127",
+        numeroInterior: "405",
+        municipio: "Cuauhtémoc",
+        estado: "CDMX",
+        addressNotes: "Entrada lateral",
       },
     ];
 
@@ -311,6 +359,7 @@ export class MemStorage implements IStorage {
         const newProvider = {
           id,
           ...provider,
+          subcategoryId: null,
           isActive: true,
           isVerified: true,
           verificationStatus: "verified" as const,
@@ -369,6 +418,17 @@ export class MemStorage implements IStorage {
       isProvider: insertUser.isProvider || false,
       address: insertUser.address || null,
       section: insertUser.section || null,
+      condominioMaestro: insertUser.condominioMaestro || null,
+      condominio: insertUser.condominio || null,
+      edificioOArea: insertUser.edificioOArea || null,
+      calle: insertUser.calle || null,
+      colonia: insertUser.colonia || null,
+      codigoPostal: insertUser.codigoPostal || null,
+      numeroExterior: insertUser.numeroExterior || null,
+      numeroInterior: insertUser.numeroInterior || null,
+      municipio: insertUser.municipio || null,
+      estado: insertUser.estado || null,
+      addressNotes: insertUser.addressNotes || null,
       createdAt: new Date() 
     };
     this.users.set(id, user);
@@ -394,7 +454,13 @@ export class MemStorage implements IStorage {
 
   async createServiceCategory(insertCategory: InsertServiceCategory): Promise<ServiceCategory> {
     const id = randomUUID();
-    const category: ServiceCategory = { ...insertCategory, id };
+    const category: ServiceCategory = { 
+      ...insertCategory, 
+      id,
+      description: insertCategory.description ?? null,
+      icon: insertCategory.icon ?? null,
+      color: insertCategory.color ?? null,
+    };
     this.serviceCategories.set(id, category);
     return category;
   }
@@ -417,6 +483,7 @@ export class MemStorage implements IStorage {
     const subcategory: ServiceSubcategory = { 
       ...insertSubcategory, 
       id,
+      order: insertSubcategory.order ?? null,
       createdAt: new Date()
     };
     this.serviceSubcategories.set(id, subcategory);
@@ -447,14 +514,18 @@ export class MemStorage implements IStorage {
     const provider: Provider = { 
       ...insertProvider, 
       id,
-      isActive: insertProvider.isActive !== false,
-      isVerified: insertProvider.isVerified || false,
-      verificationStatus: insertProvider.verificationStatus || "pending",
-      verificationLevel: insertProvider.verificationLevel || "basic",
-      lastVerificationDate: insertProvider.lastVerificationDate || null,
-      backgroundCheckStatus: insertProvider.backgroundCheckStatus || "pending", 
-      documentsSubmitted: insertProvider.documentsSubmitted || false,
-      verificationNotes: insertProvider.verificationNotes || null,
+      categoryId: insertProvider.categoryId ?? null,
+      subcategoryId: insertProvider.subcategoryId ?? null,
+      hourlyRate: insertProvider.hourlyRate ?? null,
+      experience: insertProvider.experience ?? null,
+      isActive: insertProvider.isActive ?? true,
+      isVerified: false,
+      verificationStatus: insertProvider.verificationStatus ?? "pending",
+      verificationLevel: insertProvider.verificationLevel ?? "basic",
+      lastVerificationDate: insertProvider.lastVerificationDate ?? null,
+      backgroundCheckStatus: insertProvider.backgroundCheckStatus ?? "not_started", 
+      documentsSubmitted: insertProvider.documentsSubmitted ?? false,
+      verificationNotes: insertProvider.verificationNotes ?? null,
       createdAt: new Date() 
     };
     this.providers.set(id, provider);
@@ -479,13 +550,14 @@ export class MemStorage implements IStorage {
     const review: Review = { 
       ...insertReview, 
       id, 
-      isVerified: insertReview.isVerified || false,
-      photos: insertReview.photos || null,
-      serviceQuality: insertReview.serviceQuality || null,
-      communication: insertReview.communication || null,
-      punctuality: insertReview.punctuality || null,
-      valueForMoney: insertReview.valueForMoney || null,
-      wouldRecommend: insertReview.wouldRecommend || null,
+      comment: insertReview.comment ?? null,
+      isVerified: insertReview.isVerified ?? false,
+      photos: insertReview.photos ?? null,
+      serviceQuality: insertReview.serviceQuality ?? null,
+      communication: insertReview.communication ?? null,
+      punctuality: insertReview.punctuality ?? null,
+      valueForMoney: insertReview.valueForMoney ?? null,
+      wouldRecommend: insertReview.wouldRecommend ?? null,
       createdAt: new Date() 
     };
     this.reviews.set(id, review);
@@ -510,15 +582,15 @@ export class MemStorage implements IStorage {
     const request: ServiceRequest = { 
       ...insertRequest, 
       id, 
-      status: insertRequest.status || "pending",
-      preferredDate: insertRequest.preferredDate || null,
-      preferredTime: insertRequest.preferredTime || null,
-      urgency: insertRequest.urgency || null,
-      budgetRange: insertRequest.budgetRange || null,
-      contactPhone: insertRequest.contactPhone || null,
-      specialRequirements: insertRequest.specialRequirements || null,
-      confirmedDate: insertRequest.confirmedDate || null,
-      confirmedTime: insertRequest.confirmedTime || null,
+      status: "pending",
+      preferredDate: insertRequest.preferredDate ?? null,
+      preferredTime: insertRequest.preferredTime ?? null,
+      estimatedDuration: insertRequest.estimatedDuration ?? null,
+      location: insertRequest.location ?? null,
+      notes: insertRequest.notes ?? null,
+      totalAmount: insertRequest.totalAmount ?? null,
+      confirmedDate: insertRequest.confirmedDate ?? null,
+      confirmedTime: insertRequest.confirmedTime ?? null,
       updatedAt: new Date(),
       createdAt: new Date() 
     };
@@ -635,6 +707,14 @@ export class MemStorage implements IStorage {
     const newMenuItem: MenuItem = {
       ...menuItem,
       id,
+      description: menuItem.description ?? null,
+      imageUrl: menuItem.imageUrl ?? null,
+      isAvailable: menuItem.isAvailable ?? null,
+      duration: menuItem.duration ?? null,
+      hasVariations: menuItem.hasVariations ?? null,
+      minQuantity: menuItem.minQuantity ?? null,
+      maxQuantity: menuItem.maxQuantity ?? null,
+      sortOrder: menuItem.sortOrder ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -671,7 +751,10 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newVariation: MenuItemVariation = {
       ...variation,
-      id
+      id,
+      isRequired: variation.isRequired ?? null,
+      sortOrder: variation.sortOrder ?? null,
+      priceModifier: variation.priceModifier ?? null,
     };
     this.menuItemVariations.set(id, newVariation);
     return newVariation;
@@ -687,6 +770,11 @@ export class MemStorage implements IStorage {
     const newDoc: VerificationDocument = {
       ...doc,
       id,
+      status: doc.status ?? "pending",
+      reviewedBy: doc.reviewedBy ?? null,
+      reviewedAt: null,
+      reviewNotes: doc.reviewNotes ?? null,
+      expiryDate: doc.expiryDate ?? null,
       uploadedAt: new Date()
     };
     this.verificationDocuments.set(id, newDoc);
@@ -716,6 +804,12 @@ export class MemStorage implements IStorage {
     const newCheck: BackgroundCheck = {
       ...check,
       id,
+      status: check.status ?? "pending",
+      result: check.result ?? null,
+      thirdPartyId: check.thirdPartyId ?? null,
+      completedAt: null,
+      validUntil: check.validUntil ?? null,
+      notes: check.notes ?? null,
       requestedAt: new Date()
     };
     this.backgroundChecks.set(id, newCheck);
@@ -745,6 +839,8 @@ export class MemStorage implements IStorage {
     const newReview: VerificationReview = {
       ...review,
       id,
+      comments: review.comments ?? null,
+      actionTaken: review.actionTaken ?? null,
       createdAt: new Date()
     };
     this.verificationReviews.set(id, newReview);
@@ -764,34 +860,99 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newRequirement: VerificationRequirement = {
       ...requirement,
-      id
+      id,
+      isRequired: requirement.isRequired ?? null,
     };
     this.verificationRequirements.set(id, newRequirement);
     return newRequirement;
   }
 
+  // Provider Categories (Many-to-Many)
+  async createProviderCategory(data: InsertProviderCategory): Promise<ProviderCategory> {
+    const id = randomUUID();
+    const newProviderCategory: ProviderCategory = {
+      ...data,
+      id,
+      subcategoryId: data.subcategoryId || null,
+      isPrimary: data.isPrimary || false,
+      createdAt: new Date()
+    };
+    this.providerCategories.set(id, newProviderCategory);
+    return newProviderCategory;
+  }
+
+  async getProviderCategories(providerId: string): Promise<ProviderCategory[]> {
+    return Array.from(this.providerCategories.values()).filter(pc => pc.providerId === providerId);
+  }
+
+  async deleteProviderCategory(id: string): Promise<void> {
+    this.providerCategories.delete(id);
+  }
+
+  async deleteAllProviderCategories(providerId: string): Promise<void> {
+    const toDelete = Array.from(this.providerCategories.entries())
+      .filter(([_, pc]) => pc.providerId === providerId)
+      .map(([id]) => id);
+    
+    toDelete.forEach(id => this.providerCategories.delete(id));
+  }
+
+  async createProviderWithCategories(
+    providerData: InsertProvider, 
+    categories: Array<{categoryId: string, subcategoryId?: string, isPrimary?: boolean}>
+  ): Promise<Provider> {
+    const firstCategory = categories[0];
+    const providerToInsert = {
+      ...providerData,
+      categoryId: firstCategory?.categoryId || null,
+      subcategoryId: firstCategory?.subcategoryId || null,
+    };
+    
+    const provider = await this.createProvider(providerToInsert);
+    
+    if (categories.length > 0) {
+      for (const cat of categories) {
+        await this.createProviderCategory({
+          providerId: provider.id,
+          categoryId: cat.categoryId,
+          subcategoryId: cat.subcategoryId,
+          isPrimary: cat.isPrimary || false,
+        });
+      }
+    }
+    
+    return provider;
+  }
+
   // Required for Replit Auth
   async upsertUser(userData: any): Promise<User> {
     const existingUser = this.users.get(userData.id);
+    const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email?.split('@')[0] || userData.id;
     const user: User = {
       id: userData.id,
       email: userData.email,
       username: userData.email?.split('@')[0] || userData.id,
-      fullName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+      fullName,
       password: existingUser?.password || '',
-      firstName: userData.firstName || null,
-      lastName: userData.lastName || null,
-      profileImageUrl: userData.profileImageUrl || null,
       address: existingUser?.address || null,
       section: existingUser?.section || null,
       apartment: existingUser?.apartment || null,
       building: existingUser?.building || null,
       phone: existingUser?.phone || null,
+      isProvider: existingUser?.isProvider || false,
       avatar: userData.profileImageUrl || existingUser?.avatar || null,
-      isOnline: existingUser?.isOnline || false,
-      lastSeen: existingUser?.lastSeen || null,
+      condominioMaestro: existingUser?.condominioMaestro || null,
+      condominio: existingUser?.condominio || null,
+      edificioOArea: existingUser?.edificioOArea || null,
+      calle: existingUser?.calle || null,
+      colonia: existingUser?.colonia || null,
+      codigoPostal: existingUser?.codigoPostal || null,
+      numeroExterior: existingUser?.numeroExterior || null,
+      numeroInterior: existingUser?.numeroInterior || null,
+      municipio: existingUser?.municipio || null,
+      estado: existingUser?.estado || null,
+      addressNotes: existingUser?.addressNotes || null,
       createdAt: existingUser?.createdAt || new Date(),
-      updatedAt: new Date()
     };
     this.users.set(userData.id, user);
     return user;
@@ -821,6 +982,17 @@ export class MemStorage implements IStorage {
         phone: "+1234567893",
         isProvider: false,
         avatar: null,
+        condominioMaestro: "Las Flores",
+        condominio: "Sección Central",
+        edificioOArea: "Edificio D",
+        calle: "Av. Insurgentes Sur",
+        colonia: "Roma Norte",
+        codigoPostal: "06700",
+        numeroExterior: "129",
+        numeroInterior: "102",
+        municipio: "Cuauhtémoc",
+        estado: "CDMX",
+        addressNotes: null,
         createdAt: new Date()
       });
       userIds.push(reviewerId);
@@ -1065,7 +1237,18 @@ export class DatabaseStorage implements IStorage {
           apartment: "501",
           building: "Torre A",
           phone: "+57 300 123 4567",
-          isProvider: true
+          isProvider: true,
+          condominioMaestro: "Las Flores",
+          condominio: "Sección A",
+          edificioOArea: "Torre A",
+          calle: "Av. Insurgentes Sur",
+          colonia: "Roma Norte",
+          codigoPostal: "06700",
+          numeroExterior: "123",
+          numeroInterior: "501",
+          municipio: "Cuauhtémoc",
+          estado: "CDMX",
+          addressNotes: "Portón verde"
         },
         {
           username: "carlos.reparaciones",
@@ -1077,7 +1260,18 @@ export class DatabaseStorage implements IStorage {
           apartment: "302",
           building: "Torre B",
           phone: "+57 301 234 5678",
-          isProvider: true
+          isProvider: true,
+          condominioMaestro: "Las Flores",
+          condominio: "Sección B",
+          edificioOArea: "Torre B",
+          calle: "Av. Insurgentes Sur",
+          colonia: "Roma Norte",
+          codigoPostal: "06700",
+          numeroExterior: "125",
+          numeroInterior: "302",
+          municipio: "Cuauhtémoc",
+          estado: "CDMX",
+          addressNotes: null
         },
         {
           username: "ana.tutorias",
@@ -1089,7 +1283,18 @@ export class DatabaseStorage implements IStorage {
           apartment: "205",
           building: "Torre A", 
           phone: "+57 302 345 6789",
-          isProvider: true
+          isProvider: true,
+          condominioMaestro: "Las Flores",
+          condominio: "Sección A",
+          edificioOArea: "Torre A",
+          calle: "Av. Insurgentes Sur",
+          colonia: "Roma Norte",
+          codigoPostal: "06700",
+          numeroExterior: "123",
+          numeroInterior: "205",
+          municipio: "Cuauhtémoc",
+          estado: "CDMX",
+          addressNotes: "Entrada lateral"
         },
         {
           username: "dr.ricardo",
@@ -1101,12 +1306,23 @@ export class DatabaseStorage implements IStorage {
           apartment: "401",
           building: "Torre C",
           phone: "+57 303 456 7890",
-          isProvider: true
+          isProvider: true,
+          condominioMaestro: "Las Flores",
+          condominio: "Sección C",
+          edificioOArea: "Torre C",
+          calle: "Av. Insurgentes Sur",
+          colonia: "Roma Norte",
+          codigoPostal: "06700",
+          numeroExterior: "127",
+          numeroInterior: "401",
+          municipio: "Cuauhtémoc",
+          estado: "CDMX",
+          addressNotes: null
         }
       ];
 
       // Insert users
-      const createdUsers = [];
+      const createdUsers: User[] = [];
       for (const userData of sampleUsers) {
         const [user] = await db.insert(users).values(userData).returning();
         createdUsers.push(user);
@@ -1120,7 +1336,7 @@ export class DatabaseStorage implements IStorage {
       }));
 
       for (const providerData of providersWithUserIds) {
-        const [provider] = await db.insert(providers).values(providerData).returning();
+        const [provider] = await db.insert(providers).values(providerData as any).returning();
         console.log(`👨‍💼 Created provider: ${provider.title}`);
         
         // Add some sample availability for each provider
@@ -1501,24 +1717,45 @@ export class DatabaseStorage implements IStorage {
     const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email.split('@')[0];
     const username = userData.email.split('@')[0];
     
-    const existingUser = this.users.get(userData.id);
-    const user: User = {
+    // Try to find existing user in database
+    const [existingUser] = await db.select().from(users).where(eq(users.id, userData.id));
+    
+    const userToUpsert = {
       id: userData.id,
       username: existingUser?.username || username,
       email: userData.email,
       password: existingUser?.password || 'oauth_user',
       fullName,
-      avatar: userData.profileImageUrl,
+      avatar: userData.profileImageUrl || null,
       address: existingUser?.address || null,
       section: existingUser?.section || null,
       apartment: existingUser?.apartment || null,
       building: existingUser?.building || null,
       phone: existingUser?.phone || null,
       isProvider: existingUser?.isProvider || false,
-      createdAt: existingUser?.createdAt || new Date(),
+      condominioMaestro: existingUser?.condominioMaestro || null,
+      condominio: existingUser?.condominio || null,
+      edificioOArea: existingUser?.edificioOArea || null,
+      calle: existingUser?.calle || null,
+      colonia: existingUser?.colonia || null,
+      codigoPostal: existingUser?.codigoPostal || null,
+      numeroExterior: existingUser?.numeroExterior || null,
+      numeroInterior: existingUser?.numeroInterior || null,
+      municipio: existingUser?.municipio || null,
+      estado: existingUser?.estado || null,
+      addressNotes: existingUser?.addressNotes || null,
     };
     
-    this.users.set(userData.id, user);
+    // Upsert the user (insert or update)
+    const [user] = await db
+      .insert(users)
+      .values(userToUpsert)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: userToUpsert
+      })
+      .returning();
+    
     return user;
   }
 
@@ -1533,6 +1770,74 @@ export class DatabaseStorage implements IStorage {
       .values(insertVariation)
       .returning();
     return variation;
+  }
+
+  async getMenuItem(id: string): Promise<MenuItem | undefined> {
+    const [menuItem] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return menuItem || undefined;
+  }
+
+  // Provider Categories (Many-to-Many)
+  async createProviderCategory(data: InsertProviderCategory): Promise<ProviderCategory> {
+    const [newProviderCategory] = await db.insert(providerCategories).values(data).returning();
+    return newProviderCategory;
+  }
+
+  async getProviderCategories(providerId: string): Promise<ProviderCategory[]> {
+    const results = await db
+      .select({
+        id: providerCategories.id,
+        providerId: providerCategories.providerId,
+        categoryId: providerCategories.categoryId,
+        subcategoryId: providerCategories.subcategoryId,
+        isPrimary: providerCategories.isPrimary,
+        createdAt: providerCategories.createdAt,
+        category: serviceCategories,
+        subcategory: serviceSubcategories,
+      })
+      .from(providerCategories)
+      .leftJoin(serviceCategories, eq(providerCategories.categoryId, serviceCategories.id))
+      .leftJoin(serviceSubcategories, eq(providerCategories.subcategoryId, serviceSubcategories.id))
+      .where(eq(providerCategories.providerId, providerId));
+    
+    return results as any;
+  }
+
+  async deleteProviderCategory(id: string): Promise<void> {
+    await db.delete(providerCategories).where(eq(providerCategories.id, id));
+  }
+
+  async deleteAllProviderCategories(providerId: string): Promise<void> {
+    await db.delete(providerCategories).where(eq(providerCategories.providerId, providerId));
+  }
+
+  async createProviderWithCategories(
+    providerData: InsertProvider, 
+    categories: Array<{categoryId: string, subcategoryId?: string, isPrimary?: boolean}>
+  ): Promise<Provider> {
+    return await db.transaction(async (tx) => {
+      const firstCategory = categories[0];
+      const providerToInsert = {
+        ...providerData,
+        categoryId: firstCategory?.categoryId || null,
+        subcategoryId: firstCategory?.subcategoryId || null,
+      };
+      
+      const [newProvider] = await tx.insert(providers).values(providerToInsert).returning();
+      
+      if (categories.length > 0) {
+        const categoryAssociations = categories.map(cat => ({
+          providerId: newProvider.id,
+          categoryId: cat.categoryId,
+          subcategoryId: cat.subcategoryId || null,
+          isPrimary: cat.isPrimary || false,
+        }));
+        
+        await tx.insert(providerCategories).values(categoryAssociations);
+      }
+      
+      return newProvider;
+    });
   }
 }
 
