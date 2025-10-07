@@ -6,12 +6,17 @@ This is a full-stack TypeScript application for a local services marketplace cal
 - **Menu Management System for Providers (October 7, 2025):**
   - Implemented comprehensive menu management interface at /menu-management for providers to upload and manage service/product menus
   - Created full CRUD operations with authenticated API endpoints for menu items (create, read, update, delete)
+  - Added menu document upload capability - providers can upload PDF or image files (JPEG, PNG) as complete menu displays
+  - Database schema includes menuDocumentUrl field on providers table for storing full menu documents
+  - Menu documents displayed on provider profiles and detail pages with inline image preview or PDF download buttons
   - Added menu item display on provider profiles organized by category with pricing and availability badges
   - Implemented owner-only controls with isOwnProfile security checks - "Manage Menu" button only visible to profile owners
   - Built empty state CTAs encouraging providers to add their first menu items
   - Profile page shows menu statistics and quick navigation to menu management
-  - Menu items grouped by category (Servicios de Belleza, Alimentos y Bebidas, etc.) with price, duration, and description fields
+  - Menu items grouped by category (Servicios de Belleza, Alimentos y Bebidas, etc.) with price, optional duration, and description fields
+  - Duration field marked as optional with helper text "Solo para servicios con tiempo específico"
   - All menu operations properly invalidate React Query cache for instant UI updates
+  - Secured object storage endpoints with authentication to prevent unauthorized access
 - **Multi-Category Provider Registration (October 7, 2025):**
   - Implemented many-to-many relationship allowing providers to register in multiple service categories
   - Created provider_categories junction table with unique constraints and transaction-based operations
