@@ -16,6 +16,18 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isProvider: boolean("is_provider").default(false),
   avatar: text("avatar"),
+  // Detailed Mexican Address Fields
+  condominioMaestro: text("condominio_maestro"),
+  condominio: text("condominio"),
+  edificioOArea: text("edificio_o_area"),
+  calle: text("calle"),
+  colonia: text("colonia"),
+  codigoPostal: text("codigo_postal"),
+  numeroExterior: text("numero_exterior"),
+  numeroInterior: text("numero_interior"),
+  municipio: text("municipio"),
+  estado: text("estado"),
+  addressNotes: text("address_notes"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 

@@ -10,14 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Mail, Lock, User, Phone, Building, MapPin, Briefcase, Eye, EyeOff } from "lucide-react";
-import AppleMapsAddressInput from "@/components/apple-maps-address-input";
+import { Mail, Lock, User, Phone, Briefcase, Eye, EyeOff } from "lucide-react";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [buildingValue, setBuildingValue] = useState("");
-  const [addressValue, setAddressValue] = useState("");
   const [isProviderRegistration, setIsProviderRegistration] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -136,12 +133,20 @@ export default function Auth() {
       email: formData.get("email") as string,
       password: password,
       fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
-      address: addressValue,
-      section: formData.get("section") as string,
       phone: formData.get("phone") as string,
-      building: buildingValue,
-      apartment: formData.get("apartment") as string,
       isProvider: isProvider,
+      // Mexican Address Fields
+      condominioMaestro: formData.get("condominioMaestro") as string,
+      condominio: formData.get("condominio") as string,
+      edificioOArea: formData.get("edificioOArea") as string,
+      calle: formData.get("calle") as string,
+      colonia: formData.get("colonia") as string,
+      codigoPostal: formData.get("codigoPostal") as string,
+      numeroExterior: formData.get("numeroExterior") as string,
+      numeroInterior: formData.get("numeroInterior") as string,
+      municipio: formData.get("municipio") as string,
+      estado: formData.get("estado") as string,
+      addressNotes: formData.get("addressNotes") as string,
     };
 
     registerMutation.mutate(userData);
@@ -312,53 +317,137 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Dirección Completa / Nombre de tu Condominio</Label>
-                    <AppleMapsAddressInput
-                      id="address"
-                      name="address"
-                      value={addressValue}
-                      onChange={setAddressValue}
-                      placeholder="Ej: Condominio Las Flores, Av. Principal 123, Colonia Centro"
-                      required
-                      testId="input-address"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="section">Sección</Label>
-                    <Input
-                      id="section"
-                      name="section"
-                      type="text"
-                      placeholder="Ej: Norte, Sur, A, B, Torre 1"
-                      data-testid="input-section"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="building">Edificio</Label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  {/* Mexican Address Structure */}
+                  <div className="space-y-4 border-t pt-4">
+                    <h3 className="font-semibold text-gray-700">Dirección</h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="condominio-maestro">Condominio Maestro</Label>
                         <Input
-                          id="building"
-                          name="building"
+                          id="condominio-maestro"
+                          name="condominioMaestro"
                           type="text"
-                          placeholder="Ej: Torre Norte, Edificio A, Casa 123"
-                          className="pl-10"
-                          value={buildingValue}
-                          onChange={(e) => setBuildingValue(e.target.value)}
-                          data-testid="input-building"
+                          placeholder="Ej: Las Flores"
+                          data-testid="input-condominio-maestro"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="condominio">Condominio</Label>
+                        <Input
+                          id="condominio"
+                          name="condominio"
+                          type="text"
+                          placeholder="Ej: Sección A"
+                          data-testid="input-condominio"
                         />
                       </div>
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="apartment">Apartamento</Label>
+                      <Label htmlFor="edificio-area">Edificio o Área</Label>
                       <Input
-                        id="apartment"
-                        name="apartment"
+                        id="edificio-area"
+                        name="edificioOArea"
                         type="text"
-                        placeholder="305"
-                        required
+                        placeholder="Ej: Torre Norte"
+                        data-testid="input-edificio-area"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="calle">Calle</Label>
+                        <Input
+                          id="calle"
+                          name="calle"
+                          type="text"
+                          placeholder="Ej: Av. Principal"
+                          required
+                          data-testid="input-calle"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="colonia">Colonia</Label>
+                        <Input
+                          id="colonia"
+                          name="colonia"
+                          type="text"
+                          placeholder="Ej: Centro"
+                          required
+                          data-testid="input-colonia"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="codigo-postal">C.P.</Label>
+                        <Input
+                          id="codigo-postal"
+                          name="codigoPostal"
+                          type="text"
+                          placeholder="01000"
+                          required
+                          data-testid="input-codigo-postal"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="numero-exterior">Núm. Exterior</Label>
+                        <Input
+                          id="numero-exterior"
+                          name="numeroExterior"
+                          type="text"
+                          placeholder="123"
+                          required
+                          data-testid="input-numero-exterior"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="numero-interior">Núm. Interior</Label>
+                        <Input
+                          id="numero-interior"
+                          name="numeroInterior"
+                          type="text"
+                          placeholder="305"
+                          data-testid="input-numero-interior"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="municipio">Municipio</Label>
+                        <Input
+                          id="municipio"
+                          name="municipio"
+                          type="text"
+                          placeholder="Ej: Benito Juárez"
+                          required
+                          data-testid="input-municipio"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="estado">Estado</Label>
+                        <Input
+                          id="estado"
+                          name="estado"
+                          type="text"
+                          placeholder="Ej: CDMX"
+                          required
+                          data-testid="input-estado"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address-notes">Notas adicionales</Label>
+                      <Input
+                        id="address-notes"
+                        name="addressNotes"
+                        type="text"
+                        placeholder="Ej: Entre calles X y Y, portón verde"
+                        data-testid="input-address-notes"
                       />
                     </div>
                   </div>
