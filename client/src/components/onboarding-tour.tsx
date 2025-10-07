@@ -279,8 +279,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Shield className="w-4 h-4 text-green-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Verificación de Antecedentes</h4>
-                                <p className="text-sm text-gray-600">Revisamos historial criminal y referencias laborales</p>
+                                <h4 className="font-semibold text-gray-900">Validación de Experiencias Reales</h4>
+                                <p className="text-sm text-gray-600">Verificamos experiencias laborales auténticas y comprobables</p>
                               </div>
                             </div>
                             
@@ -289,8 +289,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Users className="w-4 h-4 text-blue-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Referencias Comunitarias</h4>
-                                <p className="text-sm text-gray-600">Validamos referencias de otros vecinos</p>
+                                <h4 className="font-semibold text-gray-900">Registro Estadístico de Trabajos</h4>
+                                <p className="text-sm text-gray-600">Mantenemos un historial completo de servicios realizados</p>
                               </div>
                             </div>
 
@@ -299,8 +299,18 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Sparkles className="w-4 h-4 text-purple-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Certificaciones</h4>
-                                <p className="text-sm text-gray-600">Verificamos credenciales y certificaciones profesionales</p>
+                                <h4 className="font-semibold text-gray-900">Medición de la Reputación Pública</h4>
+                                <p className="text-sm text-gray-600">Evaluamos y rastreamos la reputación de cada proveedor</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <Users className="w-4 h-4 text-orange-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900">Referencias Reales de Personas Reales</h4>
+                                <p className="text-sm text-gray-600">Referencias verificadas de clientes reales de la comunidad</p>
                               </div>
                             </div>
                           </div>
@@ -310,7 +320,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Shield className="w-8 h-8 text-white" />
                               </div>
-                              <h4 className="font-bold text-green-900 mb-2">100% Verificado</h4>
+                              <h4 className="font-bold text-green-900 mb-2">Real Referrals</h4>
                               <p className="text-sm text-green-700">
                                 Solo proveedores que completan nuestro proceso de verificación pueden ofrecer servicios
                               </p>
