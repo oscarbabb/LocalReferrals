@@ -3,6 +3,15 @@
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
 **Recent Changes (January 2025):**
+- **Multi-Category Provider Registration (October 7, 2025):**
+  - Implemented many-to-many relationship allowing providers to register in multiple service categories
+  - Created provider_categories junction table with unique constraints and transaction-based operations
+  - Added UI for selecting multiple categories/subcategories with add/remove functionality and primary designation
+  - Enforced exactly one primary category per provider with automatic normalization logic
+  - Fixed payment field validation with proper string-to-number conversion using parseFloat and z.coerce.number()
+  - Added timestamp-based unique file naming for profile picture uploads to prevent overwrites
+  - All category associations properly persisted with backwards compatibility for single-category providers
+  - Comprehensive validation: frontend converts numbers, backend validates with numeric coercion, database stores as decimals
 - **Provider Registration with Subcategory Selection (October 2, 2025):**
   - Added subcategoryId field to providers table schema for specialized service filtering
   - Implemented dynamic subcategory dropdown in provider registration form
