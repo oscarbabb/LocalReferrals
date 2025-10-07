@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
 import QuickBookingButton from "@/components/quick-booking-button";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat } from "lucide-react";
+import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit } from "lucide-react";
 import { Provider, User, Review, MenuItem, MenuItemVariation } from "@shared/schema";
 
 // Extended types for API responses
@@ -31,6 +31,7 @@ interface MenuItemWithVariations extends MenuItem {
 
 export default function ProviderDetail() {
   const [, params] = useRoute("/providers/:id");
+  const [, setLocation] = useLocation();
   const providerId = params?.id;
   const [showReviewForm, setShowReviewForm] = useState(false);
 
@@ -48,6 +49,9 @@ export default function ProviderDetail() {
     queryKey: ["/api/auth/user"],
     retry: false,
   });
+
+  // Check if the logged-in user is the owner of this provider profile
+  const isOwnProfile = user?.id === provider?.userId;
 
   // Use the calculated average rating from the API
   const averageRating = provider?.averageRating || 0;
@@ -200,10 +204,22 @@ export default function ProviderDetail() {
             {menuItems && menuItems.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <ChefHat className="w-5 h-5 mr-2" />
-                    Menú de Servicios ({menuItems.length})
-                  </CardTitle>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="flex items-center">
+                      <ChefHat className="w-5 h-5 mr-2" />
+                      Menú de Servicios ({menuItems.length})
+                    </CardTitle>
+                    {isOwnProfile && (
+                      <Button 
+                        onClick={() => setLocation('/menu-management')}
+                        className="bg-orange-600 hover:bg-orange-700"
+                        data-testid="button-manage-own-menu"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Gestionar Menú
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-6">
@@ -254,6 +270,37 @@ export default function ProviderDetail() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Empty Menu State - Only for own profile */}
+            {menuItems && menuItems.length === 0 && isOwnProfile && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <ChefHat className="w-5 h-5 mr-2" />
+                    Menú de Servicios
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No tienes servicios en tu menú
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      Agrega servicios a tu menú para que los clientes puedan reservarlos y conocer tus precios.
+                    </p>
+                    <Button 
+                      onClick={() => setLocation('/menu-management')}
+                      className="bg-orange-600 hover:bg-orange-700"
+                      data-testid="button-manage-own-menu"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Agregar Primer Servicio
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
