@@ -26,7 +26,7 @@ import TestPayments from "@/pages/test-payments";
 import ProductionSeed from "@/pages/production-seed";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
-import { useOnboarding } from "@/hooks/use-onboarding";
+import { useOnboarding, OnboardingProvider } from "@/hooks/use-onboarding";
 
 function Router() {
   const { showOnboarding, completeOnboarding } = useOnboarding();
@@ -69,10 +69,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <OnboardingProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </OnboardingProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
