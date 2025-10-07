@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, ArrowLeft, ArrowRight, ChevronDown, Sparkles, Users, Search, Calendar, Shield } from "lucide-react";
+import { X, ArrowLeft, ArrowRight, ChevronDown, Sparkles, Users, Search, Calendar, Shield, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import type { ServiceCategory } from "@shared/schema";
@@ -318,9 +318,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6">
                             <div className="text-center">
                               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Shield className="w-8 h-8 text-white" />
+                                <MessageSquare className="w-8 h-8 text-white" />
                               </div>
-                              <h4 className="font-bold text-green-900 mb-2">Real Referrals</h4>
+                              <h4 className="font-bold text-green-900 mb-2">Referencias Reales de Personas Reales</h4>
                               <p className="text-sm text-green-700">
                                 Solo proveedores que completan nuestro proceso de verificación pueden ofrecer servicios
                               </p>
