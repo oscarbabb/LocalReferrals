@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, decimal, timestamp, boolean, jsonb, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -50,8 +50,8 @@ export const serviceSubcategories = pgTable("service_subcategories", {
 export const providers = pgTable("providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
-  subcategoryId: varchar("subcategory_id").references(() => serviceSubcategories.id),
+  categoryId: varchar("category_id").references(() => serviceCategories.id), // Nullable - serves as backwards compatibility for "primary" category
+  subcategoryId: varchar("subcategory_id").references(() => serviceSubcategories.id), // Nullable - serves as backwards compatibility for "primary" subcategory
   title: text("title").notNull(),
   description: text("description").notNull(),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
@@ -66,6 +66,19 @@ export const providers = pgTable("providers", {
   verificationNotes: text("verification_notes"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
+
+// Junction table for many-to-many relationship between providers and categories
+// Note: Only one isPrimary=true should exist per provider (enforced via app logic)
+export const providerCategories = pgTable("provider_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => providers.id, { onDelete: "cascade" }).notNull(),
+  categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
+  subcategoryId: varchar("subcategory_id").references(() => serviceSubcategories.id),
+  isPrimary: boolean("is_primary").default(false), // Mark one as the primary service
+  createdAt: timestamp("created_at").default(sql`now()`),
+}, (table) => ({
+  uniqueProviderCategory: unique("unique_provider_category").on(table.providerId, table.categoryId, table.subcategoryId),
+}));
 
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -335,6 +348,11 @@ export const insertMenuItemVariationSchema = createInsertSchema(menuItemVariatio
   id: true,
 });
 
+export const insertProviderCategorySchema = createInsertSchema(providerCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
@@ -367,3 +385,5 @@ export type MenuItem = typeof menuItems.$inferSelect;
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
 export type MenuItemVariation = typeof menuItemVariations.$inferSelect;
 export type InsertMenuItemVariation = z.infer<typeof insertMenuItemVariationSchema>;
+export type ProviderCategory = typeof providerCategories.$inferSelect;
+export type InsertProviderCategory = z.infer<typeof insertProviderCategorySchema>;
