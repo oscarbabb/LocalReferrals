@@ -3,6 +3,15 @@
 This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
 
 **Recent Changes (January 2025):**
+- **Menu Management System for Providers (October 7, 2025):**
+  - Implemented comprehensive menu management interface at /menu-management for providers to upload and manage service/product menus
+  - Created full CRUD operations with authenticated API endpoints for menu items (create, read, update, delete)
+  - Added menu item display on provider profiles organized by category with pricing and availability badges
+  - Implemented owner-only controls with isOwnProfile security checks - "Manage Menu" button only visible to profile owners
+  - Built empty state CTAs encouraging providers to add their first menu items
+  - Profile page shows menu statistics and quick navigation to menu management
+  - Menu items grouped by category (Servicios de Belleza, Alimentos y Bebidas, etc.) with price, duration, and description fields
+  - All menu operations properly invalidate React Query cache for instant UI updates
 - **Multi-Category Provider Registration (October 7, 2025):**
   - Implemented many-to-many relationship allowing providers to register in multiple service categories
   - Created provider_categories junction table with unique constraints and transaction-based operations
