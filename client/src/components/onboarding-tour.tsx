@@ -408,10 +408,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       <div className="space-y-6">
                         <div className="text-center mb-8">
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Reserva Servicios Fácilmente
+                            Plataforma Social de Conexión
                           </h3>
                           <p className="text-gray-600">
-                            Sistema de reservas integrado con calendario inteligente
+                            Esta es una plataforma social que conecta proveedores y consumidores. Puedes hacer solicitudes de servicio, pero no son reservas confirmadas
                           </p>
                         </div>
 
@@ -423,7 +423,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                               </div>
                               <div>
                                 <h4 className="font-semibold text-gray-900">Explora Servicios</h4>
-                                <p className="text-sm text-gray-600">Navega por categorías y proveedores</p>
+                                <p className="text-sm text-gray-600">Navega por categorías y proveedores verificados</p>
                               </div>
                             </div>
 
@@ -432,8 +432,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 2
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Selecciona Fecha</h4>
-                                <p className="text-sm text-gray-600">Elige fecha y hora disponible</p>
+                                <h4 className="font-semibold text-gray-900">Solicita Servicio</h4>
+                                <p className="text-sm text-gray-600">Envía una solicitud al proveedor de tu elección</p>
                               </div>
                             </div>
 
@@ -442,8 +442,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 3
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Confirma Reserva</h4>
-                                <p className="text-sm text-gray-600">Recibe confirmación inmediata</p>
+                                <h4 className="font-semibold text-gray-900">Espera Confirmación</h4>
+                                <p className="text-sm text-gray-600">El proveedor responderá tu solicitud directamente</p>
                               </div>
                             </div>
                           </div>
@@ -455,11 +455,11 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 transition={{ duration: 2, repeat: Infinity }}
                                 className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4"
                               >
-                                <Calendar className="w-8 h-8 text-white" />
+                                <Users className="w-8 h-8 text-white" />
                               </motion.div>
-                              <h4 className="font-bold text-orange-900 mb-2">¡Listo para empezar!</h4>
+                              <h4 className="font-bold text-orange-900 mb-2">¡Conecta con tu Comunidad!</h4>
                               <p className="text-sm text-orange-700 mb-4">
-                                Comienza a explorar servicios en tu comunidad
+                                Encuentra servicios confiables recomendados por tus vecinos
                               </p>
                               <Button 
                                 className="bg-orange-500 hover:bg-orange-600 text-white"
