@@ -43,8 +43,8 @@ const tourSteps = [
   },
   {
     id: "booking",
-    title: "Reserva Fácil",
-    description: "Agenda servicios con un solo clic",
+    title: "Plataforma Social de Conexión",
+    description: "Esta es una plataforma social que conecta proveedores y consumidores. Puedes hacer solicitudes de servicio, pero no son reservas confirmadas",
     icon: Calendar,
     color: "from-teal-500 to-blue-600"
   }
