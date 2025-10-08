@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +22,14 @@ import {
   Star,
   MessageCircle
 } from "lucide-react";
+
+interface User {
+  id: string;
+  email: string;
+  username?: string;
+  fullName?: string;
+  role?: string;
+}
 
 interface ServiceRequest {
   id: string;
@@ -56,29 +66,55 @@ interface Appointment {
 
 export default function Bookings() {
   const [activeTab, setActiveTab] = useState("requests");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Get current user
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
 
   // Get user's service requests
-  const { data: myRequests = [], isLoading: requestsLoading } = useQuery({
+  const { data: myRequests = [], isLoading: requestsLoading } = useQuery<ServiceRequest[]>({
     queryKey: ["/api/service-requests/user", user?.id],
     enabled: !!user?.id,
   });
 
   // Get requests received (if user is a provider)
-  const { data: receivedRequests = [], isLoading: receivedLoading } = useQuery({
+  const { data: receivedRequests = [], isLoading: receivedLoading } = useQuery<ServiceRequest[]>({
     queryKey: ["/api/service-requests/provider", user?.id],
     enabled: !!user?.id,
   });
 
   // Get user's appointments
-  const { data: myAppointments = [], isLoading: appointmentsLoading } = useQuery({
+  const { data: myAppointments = [], isLoading: appointmentsLoading } = useQuery<Appointment[]>({
     queryKey: ["/api/appointments/user", user?.id],
     enabled: !!user?.id,
+  });
+
+  // Mutation for updating service request status
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {
+      const response = await apiRequest("PATCH", `/api/service-requests/${requestId}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Estado actualizado",
+        description: "La solicitud ha sido actualizada exitosamente.",
+      });
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: ["/api/service-requests/user", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/service-requests/provider", user?.id] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo actualizar el estado.",
+        variant: "destructive",
+      });
+    },
   });
 
   const getStatusBadge = (status: string) => {
@@ -184,10 +220,22 @@ export default function Bookings() {
           
           {request.status === "pending" && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" data-testid={`button-cancel-${request.id}`}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-testid={`button-cancel-${request.id}`}
+                onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "cancelled" })}
+                disabled={updateStatusMutation.isPending}
+              >
                 Cancelar
               </Button>
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600" data-testid={`button-confirm-${request.id}`}>
+              <Button 
+                size="sm" 
+                className="bg-orange-500 hover:bg-orange-600" 
+                data-testid={`button-confirm-${request.id}`}
+                onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "confirmed" })}
+                disabled={updateStatusMutation.isPending}
+              >
                 Confirmar
               </Button>
             </div>
