@@ -149,189 +149,249 @@ export default function Bookings() {
       .toUpperCase();
   };
 
-  const ServiceRequestCard = ({ request }: { request: ServiceRequest }) => (
-    <Card className="mb-4" data-testid={`card-service-request-${request.id}`}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start space-x-4">
-            <Avatar className="w-12 h-12">
-              <AvatarFallback className="bg-orange-100 text-orange-700">
-                {request.provider ? getInitials(request.provider.title) : "?"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg" data-testid={`text-request-title-${request.id}`}>{request.title}</h3>
-              <p className="text-gray-600" data-testid={`text-provider-name-${request.id}`}>{request.provider?.title || "Proveedor"}</p>
-              <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {format(new Date(request.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
-                </div>
-                {request.confirmedDate && (
+  const ServiceRequestCard = ({ request, currentUser }: { request: ServiceRequest; currentUser: User | undefined }) => {
+    const getMessageRecipient = () => {
+      if (!currentUser) return null;
+      
+      if (request.requesterId === currentUser.id) {
+        return {
+          id: request.provider?.userId,
+          name: request.provider?.title
+        };
+      }
+      
+      if (request.provider?.userId === currentUser.id) {
+        return {
+          id: request.requesterId,
+          name: request.requester?.fullName || request.requester?.username || "Usuario"
+        };
+      }
+      
+      return null;
+    };
+
+    return (
+      <Card className="mb-4" data-testid={`card-service-request-${request.id}`}>
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start space-x-4">
+              <Avatar className="w-12 h-12">
+                <AvatarFallback className="bg-orange-100 text-orange-700">
+                  {request.provider ? getInitials(request.provider.title) : "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg" data-testid={`text-request-title-${request.id}`}>{request.title}</h3>
+                <p className="text-gray-600" data-testid={`text-provider-name-${request.id}`}>{request.provider?.title || "Proveedor"}</p>
+                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {request.confirmedTime}
+                    <Calendar className="w-4 h-4" />
+                    {format(new Date(request.createdAt), "dd 'de' MMMM, yyyy", { locale: es })}
                   </div>
-                )}
+                  {request.confirmedDate && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {request.confirmedTime}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+            <div data-testid={`badge-status-${request.id}`}>
+              {getStatusBadge(request.status)}
+            </div>
           </div>
-          <div data-testid={`badge-status-${request.id}`}>
-            {getStatusBadge(request.status)}
-          </div>
-        </div>
 
-        <div className="space-y-3">
-          <p className="text-gray-700" data-testid={`text-description-${request.id}`}>{request.description}</p>
-          
-          {request.location && (
-            <div className="flex items-center gap-2 text-gray-600" data-testid={`text-location-${request.id}`}>
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">{request.location}</span>
-            </div>
-          )}
+          <div className="space-y-3">
+            <p className="text-gray-700" data-testid={`text-description-${request.id}`}>{request.description}</p>
+            
+            {request.location && (
+              <div className="flex items-center gap-2 text-gray-600" data-testid={`text-location-${request.id}`}>
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{request.location}</span>
+              </div>
+            )}
 
-          {request.totalAmount && (
-            <div className="flex items-center gap-2 text-green-600" data-testid={`text-total-amount-${request.id}`}>
-              <DollarSign className="w-4 h-4" />
-              <span className="font-semibold">${request.totalAmount}</span>
-            </div>
-          )}
+            {request.totalAmount && (
+              <div className="flex items-center gap-2 text-green-600" data-testid={`text-total-amount-${request.id}`}>
+                <DollarSign className="w-4 h-4" />
+                <span className="font-semibold">${request.totalAmount}</span>
+              </div>
+            )}
 
-          {request.notes && (
-            <div className="bg-gray-50 p-3 rounded-lg" data-testid={`text-notes-${request.id}`}>
-              <p className="text-sm text-gray-700">{request.notes}</p>
-            </div>
-          )}
-        </div>
-
-        <Separator className="my-4" />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              data-testid={`button-message-${request.id}`}
-              onClick={() => {
-                if (request.provider?.userId) {
-                  setSelectedProvider({
-                    id: request.provider.userId,
-                    name: request.provider.title
-                  });
-                  setShowMessagingModal(true);
-                }
-              }}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Mensaje
-            </Button>
-            {request.status === "completed" && (
-              <Button variant="outline" size="sm" data-testid={`button-rate-${request.id}`}>
-                <Star className="w-4 h-4 mr-2" />
-                Calificar
-              </Button>
+            {request.notes && (
+              <div className="bg-gray-50 p-3 rounded-lg" data-testid={`text-notes-${request.id}`}>
+                <p className="text-sm text-gray-700">{request.notes}</p>
+              </div>
             )}
           </div>
-          
-          {request.status === "pending" && (
-            <div className="flex gap-2">
+
+          <Separator className="my-4" />
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
-                data-testid={`button-cancel-${request.id}`}
-                onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "cancelled" })}
-                disabled={updateStatusMutation.isPending}
+                data-testid={`button-message-${request.id}`}
+                onClick={() => {
+                  const recipient = getMessageRecipient();
+                  if (recipient && recipient.id) {
+                    setSelectedProvider({
+                      id: recipient.id,
+                      name: recipient.name || "Usuario"
+                    });
+                    setShowMessagingModal(true);
+                  } else {
+                    toast({
+                      title: "No disponible",
+                      description: "No se puede enviar mensaje en este momento.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                disabled={!getMessageRecipient()?.id}
               >
-                Cancelar
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Mensaje
               </Button>
-              <Button 
-                size="sm" 
-                className="bg-orange-500 hover:bg-orange-600" 
-                data-testid={`button-confirm-${request.id}`}
-                onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "confirmed" })}
-                disabled={updateStatusMutation.isPending}
-              >
-                Confirmar
-              </Button>
+              {request.status === "completed" && (
+                <Button variant="outline" size="sm" data-testid={`button-rate-${request.id}`}>
+                  <Star className="w-4 h-4 mr-2" />
+                  Calificar
+                </Button>
+              )}
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+            
+            {request.status === "pending" && (
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  data-testid={`button-cancel-${request.id}`}
+                  onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "cancelled" })}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-orange-500 hover:bg-orange-600" 
+                  data-testid={`button-confirm-${request.id}`}
+                  onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "confirmed" })}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
-  const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
-    <Card className="mb-4" data-testid={`card-appointment-${appointment.id}`}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start space-x-4">
-            <Avatar className="w-12 h-12">
-              <AvatarFallback className="bg-blue-100 text-blue-700">
-                {appointment.provider ? getInitials(appointment.provider.title) : "?"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg" data-testid={`text-appointment-title-${appointment.id}`}>Cita Programada</h3>
-              <p className="text-gray-600" data-testid={`text-appointment-provider-${appointment.id}`}>{appointment.provider?.title || "Proveedor"}</p>
-              <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                <div className="flex items-center gap-1" data-testid={`text-appointment-date-${appointment.id}`}>
-                  <Calendar className="w-4 h-4" />
-                  {format(new Date(appointment.appointmentDate), "dd 'de' MMMM, yyyy", { locale: es })}
-                </div>
-                <div className="flex items-center gap-1" data-testid={`text-appointment-time-${appointment.id}`}>
-                  <Clock className="w-4 h-4" />
-                  {appointment.startTime} - {appointment.endTime}
+  const AppointmentCard = ({ appointment, currentUser }: { appointment: Appointment; currentUser: User | undefined }) => {
+    const getMessageRecipient = () => {
+      if (!currentUser) return null;
+      
+      if (appointment.requesterId === currentUser.id) {
+        return {
+          id: appointment.provider?.userId,
+          name: appointment.provider?.title
+        };
+      }
+      
+      if (appointment.provider?.userId === currentUser.id) {
+        return {
+          id: appointment.requesterId,
+          name: appointment.requester?.fullName || appointment.requester?.username || "Usuario"
+        };
+      }
+      
+      return null;
+    };
+
+    return (
+      <Card className="mb-4" data-testid={`card-appointment-${appointment.id}`}>
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start space-x-4">
+              <Avatar className="w-12 h-12">
+                <AvatarFallback className="bg-blue-100 text-blue-700">
+                  {appointment.provider ? getInitials(appointment.provider.title) : "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg" data-testid={`text-appointment-title-${appointment.id}`}>Cita Programada</h3>
+                <p className="text-gray-600" data-testid={`text-appointment-provider-${appointment.id}`}>{appointment.provider?.title || "Proveedor"}</p>
+                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-1" data-testid={`text-appointment-date-${appointment.id}`}>
+                    <Calendar className="w-4 h-4" />
+                    {format(new Date(appointment.appointmentDate), "dd 'de' MMMM, yyyy", { locale: es })}
+                  </div>
+                  <div className="flex items-center gap-1" data-testid={`text-appointment-time-${appointment.id}`}>
+                    <Clock className="w-4 h-4" />
+                    {appointment.startTime} - {appointment.endTime}
+                  </div>
                 </div>
               </div>
             </div>
+            <div data-testid={`badge-appointment-status-${appointment.id}`}>
+              {getStatusBadge(appointment.status)}
+            </div>
           </div>
-          <div data-testid={`badge-appointment-status-${appointment.id}`}>
-            {getStatusBadge(appointment.status)}
-          </div>
-        </div>
 
-        {appointment.notes && (
-          <div className="bg-gray-50 p-3 rounded-lg mb-4" data-testid={`text-appointment-notes-${appointment.id}`}>
-            <p className="text-sm text-gray-700">{appointment.notes}</p>
-          </div>
-        )}
-
-        <Separator className="my-4" />
-
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            data-testid={`button-contact-${appointment.id}`}
-            onClick={() => {
-              if (appointment.provider?.userId) {
-                setSelectedProvider({
-                  id: appointment.provider.userId,
-                  name: appointment.provider.title
-                });
-                setShowMessagingModal(true);
-              }
-            }}
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Contactar
-          </Button>
-          
-          {appointment.status === "scheduled" && (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" data-testid={`button-reschedule-${appointment.id}`}>
-                Reprogramar
-              </Button>
-              <Button variant="destructive" size="sm" data-testid={`button-cancel-appointment-${appointment.id}`}>
-                Cancelar
-              </Button>
+          {appointment.notes && (
+            <div className="bg-gray-50 p-3 rounded-lg mb-4" data-testid={`text-appointment-notes-${appointment.id}`}>
+              <p className="text-sm text-gray-700">{appointment.notes}</p>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+
+          <Separator className="my-4" />
+
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              data-testid={`button-contact-${appointment.id}`}
+              onClick={() => {
+                const recipient = getMessageRecipient();
+                if (recipient && recipient.id) {
+                  setSelectedProvider({
+                    id: recipient.id,
+                    name: recipient.name || "Usuario"
+                  });
+                  setShowMessagingModal(true);
+                } else {
+                  toast({
+                    title: "No disponible",
+                    description: "No se puede enviar mensaje en este momento.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={!getMessageRecipient()?.id}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Contactar
+            </Button>
+            
+            {appointment.status === "scheduled" && (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" data-testid={`button-reschedule-${appointment.id}`}>
+                  Reprogramar
+                </Button>
+                <Button variant="destructive" size="sm" data-testid={`button-cancel-appointment-${appointment.id}`}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (!user) {
     return (
@@ -396,7 +456,7 @@ export default function Bookings() {
                 ) : myRequests.length > 0 ? (
                   <div className="space-y-4">
                     {myRequests.map((request: ServiceRequest) => (
-                      <ServiceRequestCard key={request.id} request={request} />
+                      <ServiceRequestCard key={request.id} request={request} currentUser={user} />
                     ))}
                   </div>
                 ) : (
@@ -437,7 +497,7 @@ export default function Bookings() {
                 ) : receivedRequests.length > 0 ? (
                   <div className="space-y-4">
                     {receivedRequests.map((request: ServiceRequest) => (
-                      <ServiceRequestCard key={request.id} request={request} />
+                      <ServiceRequestCard key={request.id} request={request} currentUser={user} />
                     ))}
                   </div>
                 ) : (
@@ -478,7 +538,7 @@ export default function Bookings() {
                 ) : myAppointments.length > 0 ? (
                   <div className="space-y-4">
                     {myAppointments.map((appointment: Appointment) => (
-                      <AppointmentCard key={appointment.id} appointment={appointment} />
+                      <AppointmentCard key={appointment.id} appointment={appointment} currentUser={user} />
                     ))}
                   </div>
                 ) : (
