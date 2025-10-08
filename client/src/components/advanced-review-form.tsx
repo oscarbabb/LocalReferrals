@@ -143,12 +143,12 @@ export default function AdvancedReviewForm({
       const photoURL = uploadedFile.uploadURL as string;
       
       try {
-        // Set ACL policy for the photo
+        // Set ACL policy for the photo and get the public objectPath
         const response = await apiRequest("PUT", "/api/review-photos", { photoURL });
-        await response.json();
+        const data = await response.json();
         
-        // Add to uploaded photos list
-        setUploadedPhotos(prev => [...prev, photoURL]);
+        // Add the public objectPath to uploaded photos list for preview
+        setUploadedPhotos(prev => [...prev, data.objectPath]);
       } catch (error) {
         console.error("Error setting photo ACL:", error);
         toast({
