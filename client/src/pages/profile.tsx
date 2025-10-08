@@ -714,6 +714,42 @@ export default function Profile() {
                   </CardContent>
                 </Card>
 
+                {/* Availability Management */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-5 h-5" />
+                        <span>Disponibilidad</span>
+                      </div>
+                      <Button 
+                        onClick={() => setLocation('/availability-management')}
+                        className="bg-orange-600 hover:bg-orange-700"
+                        data-testid="button-manage-availability"
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Gestionar Disponibilidad
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-4">
+                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-4">
+                        Configura tus horarios semanales para que los clientes puedan agendar servicios
+                      </p>
+                      <Button 
+                        onClick={() => setLocation('/availability-management')}
+                        variant="outline"
+                        data-testid="button-setup-availability"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Configurar Horarios
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Quick Stats */}
                 <Card>
                   <CardHeader>

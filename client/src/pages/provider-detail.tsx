@@ -381,7 +381,6 @@ export default function ProviderDetail() {
                   <div className="mb-8">
                     <AdvancedReviewForm
                       providerId={provider.id}
-                      reviewerId={user.id}
                       onSubmit={() => setShowReviewForm(false)}
                       onCancel={() => setShowReviewForm(false)}
                     />

@@ -692,14 +692,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new review
-  app.post("/api/reviews", async (req, res) => {
+  // Create new review (requires authentication)
+  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
-      const reviewData = insertReviewSchema.parse(req.body);
+      const reviewerId = req.user.claims.sub;
+      const reviewData = insertReviewSchema.parse({ ...req.body, reviewerId });
       const review = await storage.createReview(reviewData);
       res.status(201).json(review);
     } catch (error) {
-      res.status(400).json({ message: "Invalid review data" });
+      console.error("Review submission error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid review data", 
+          errors: error.errors,
+          details: process.env.NODE_ENV === 'development' ? error.errors : undefined
+        });
+      }
+      res.status(400).json({ 
+        message: "Invalid review data",
+        error: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined
+      });
     }
   });
 
@@ -1101,17 +1113,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reviews
-  app.post("/api/reviews", async (req, res) => {
-    try {
-      const validatedData = insertReviewSchema.parse(req.body);
-      const review = await storage.createReview(validatedData);
-      res.status(201).json(review);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid review data" });
-    }
-  });
-
   app.get("/api/providers/:id/reviews", async (req, res) => {
     try {
       const reviews = await storage.getReviewsByProvider(req.params.id);
@@ -1200,6 +1201,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to validate user-provider ownership
+  const validateProviderOwnership = async (providerId: string, userId: string) => {
+    const provider = await storage.getProvider(providerId);
+    if (!provider) {
+      return { valid: false, error: "Provider not found", status: 404 };
+    }
+    if (provider.userId !== userId) {
+      return { valid: false, error: "Unauthorized: You can only access your own provider data", status: 403 };
+    }
+    return { valid: true, provider };
+  };
+
   // Provider Availability
   app.get("/api/providers/:id/availability", async (req, res) => {
     try {
@@ -1210,8 +1223,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/providers/:id/availability", async (req, res) => {
+  app.post("/api/providers/:id/availability", isAuthenticated, async (req: any, res) => {
     try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.id, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status!).json({ error: ownership.error });
+      }
+
       const availabilityData = insertProviderAvailabilitySchema.parse({
         ...req.body,
         providerId: req.params.id
@@ -1220,6 +1240,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(availability);
     } catch (error) {
       res.status(400).json({ message: "Invalid availability data" });
+    }
+  });
+
+  app.patch("/api/providers/:id/availability/:availabilityId", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.id, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status!).json({ error: ownership.error });
+      }
+
+      const updateData = insertProviderAvailabilitySchema.partial().parse(req.body);
+      const availability = await storage.updateProviderAvailability(req.params.availabilityId, updateData);
+      
+      if (!availability) {
+        return res.status(404).json({ message: "Availability slot not found" });
+      }
+      
+      res.json(availability);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid availability data" });
+    }
+  });
+
+  app.delete("/api/providers/:id/availability/:availabilityId", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user-provider ownership
+      const userId = req.user.claims.sub;
+      const ownership = await validateProviderOwnership(req.params.id, userId);
+      if (!ownership.valid) {
+        return res.status(ownership.status!).json({ error: ownership.error });
+      }
+
+      const deleted = await storage.deleteProviderAvailability(req.params.availabilityId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Availability slot not found" });
+      }
+      
+      res.json({ success: true, message: "Availability slot deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete availability slot" });
     }
   });
 
@@ -1421,18 +1484,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ error: error.message });
     }
   });
-
-  // Helper function to validate user-provider ownership
-  const validateProviderOwnership = async (providerId: string, userId: string) => {
-    const provider = await storage.getProvider(providerId);
-    if (!provider) {
-      return { valid: false, error: "Provider not found", status: 404 };
-    }
-    if (provider.userId !== userId) {
-      return { valid: false, error: "Unauthorized: You can only access your own provider data", status: 403 };
-    }
-    return { valid: true, provider };
-  };
 
   // Menu Items management
   app.get("/api/providers/:providerId/menu-items", isAuthenticated, async (req: any, res) => {

@@ -23,7 +23,6 @@ import type { UploadResult } from "@uppy/core";
 
 const advancedReviewSchema = z.object({
   providerId: z.string(),
-  reviewerId: z.string(),
   rating: z.number().min(1).max(5),
   comment: z.string().optional(),
   photos: z.array(z.string()).default([]),
@@ -38,7 +37,6 @@ type AdvancedReviewData = z.infer<typeof advancedReviewSchema>;
 
 interface AdvancedReviewFormProps {
   providerId: string;
-  reviewerId: string;
   onSubmit?: () => void;
   onCancel?: () => void;
 }
@@ -74,7 +72,6 @@ function StarRating({ value, onChange, label }: StarRatingProps) {
 
 export default function AdvancedReviewForm({ 
   providerId, 
-  reviewerId, 
   onSubmit, 
   onCancel 
 }: AdvancedReviewFormProps) {
@@ -86,7 +83,6 @@ export default function AdvancedReviewForm({
     resolver: zodResolver(advancedReviewSchema),
     defaultValues: {
       providerId,
-      reviewerId,
       rating: 5,
       comment: "",
       photos: [],
@@ -100,7 +96,8 @@ export default function AdvancedReviewForm({
 
   const createReviewMutation = useMutation({
     mutationFn: async (data: AdvancedReviewData) => {
-      return apiRequest("/api/reviews", "POST", { ...data, photos: uploadedPhotos });
+      const response = await apiRequest("POST", "/api/reviews", { ...data, photos: uploadedPhotos });
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -110,20 +107,33 @@ export default function AdvancedReviewForm({
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId] });
       onSubmit?.();
     },
-    onError: () => {
+    onError: (error: Error) => {
+      // Handle 401 authentication errors specifically
+      if (error.message.includes("401")) {
+        toast({
+          title: "Autenticación requerida",
+          description: "Por favor inicia sesión para dejar una reseña.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Extract error message from the response (format: "status: message")
+      const errorMessage = error.message.replace(/^\d+:\s*/, '') || "No se pudo enviar la reseña. Intenta nuevamente.";
       toast({
         title: "Error",
-        description: "No se pudo enviar la reseña. Intenta nuevamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
   const handlePhotoUpload = async (): Promise<{ method: "PUT"; url: string }> => {
-    const response = await apiRequest("/api/objects/upload", "POST");
+    const response = await apiRequest("POST", "/api/objects/upload");
+    const data = await response.json();
     return {
       method: "PUT",
-      url: response.uploadURL as string,
+      url: data.uploadURL as string,
     };
   };
 
@@ -132,11 +142,21 @@ export default function AdvancedReviewForm({
       const uploadedFile = result.successful[0];
       const photoURL = uploadedFile.uploadURL as string;
       
-      // Set ACL policy for the photo
-      await apiRequest("/api/review-photos", "PUT", { photoURL });
-      
-      // Add to uploaded photos list
-      setUploadedPhotos(prev => [...prev, photoURL]);
+      try {
+        // Set ACL policy for the photo
+        const response = await apiRequest("PUT", "/api/review-photos", { photoURL });
+        await response.json();
+        
+        // Add to uploaded photos list
+        setUploadedPhotos(prev => [...prev, photoURL]);
+      } catch (error) {
+        console.error("Error setting photo ACL:", error);
+        toast({
+          title: "Error al subir foto",
+          description: "No se pudo configurar la foto. Intenta nuevamente.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

@@ -73,7 +73,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
-      return apiRequest("/api/service-requests", "POST", bookingData);
+      return apiRequest("POST", "/api/service-requests", bookingData);
     },
     onSuccess: () => {
       toast({

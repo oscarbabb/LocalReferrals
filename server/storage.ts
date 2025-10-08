@@ -97,6 +97,9 @@ export interface IStorage {
   // Provider Availability
   getProviderAvailability(providerId: string): Promise<ProviderAvailability[]>;
   createProviderAvailability(availability: InsertProviderAvailability): Promise<ProviderAvailability>;
+  updateProviderAvailability(id: string, data: Partial<InsertProviderAvailability>): Promise<ProviderAvailability | undefined>;
+  deleteProviderAvailability(id: string): Promise<boolean>;
+  deleteAllProviderAvailability(providerId: string): Promise<void>;
 
   // Appointments
   getAppointmentsByProvider(providerId: string): Promise<Appointment[]>;
@@ -368,6 +371,7 @@ export class MemStorage implements IStorage {
           backgroundCheckStatus: "completed" as const,
           documentsSubmitted: true,
           verificationNotes: null,
+          menuDocumentUrl: null,
           createdAt: new Date(),
         };
         this.providers.set(id, newProvider);
@@ -526,6 +530,7 @@ export class MemStorage implements IStorage {
       backgroundCheckStatus: insertProvider.backgroundCheckStatus ?? "not_started", 
       documentsSubmitted: insertProvider.documentsSubmitted ?? false,
       verificationNotes: insertProvider.verificationNotes ?? null,
+      menuDocumentUrl: insertProvider.menuDocumentUrl ?? null,
       createdAt: new Date() 
     };
     this.providers.set(id, provider);
@@ -621,6 +626,26 @@ export class MemStorage implements IStorage {
     };
     this.providerAvailability.set(id, availability);
     return availability;
+  }
+
+  async updateProviderAvailability(id: string, data: Partial<InsertProviderAvailability>): Promise<ProviderAvailability | undefined> {
+    const existing = this.providerAvailability.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...data };
+    this.providerAvailability.set(id, updated);
+    return updated;
+  }
+
+  async deleteProviderAvailability(id: string): Promise<boolean> {
+    return this.providerAvailability.delete(id);
+  }
+
+  async deleteAllProviderAvailability(providerId: string): Promise<void> {
+    const toDelete = Array.from(this.providerAvailability.values())
+      .filter(a => a.providerId === providerId)
+      .map(a => a.id);
+    toDelete.forEach(id => this.providerAvailability.delete(id));
   }
 
   // Appointments
@@ -1562,6 +1587,20 @@ export class DatabaseStorage implements IStorage {
       .values(insertAvailability)
       .returning();
     return availability;
+  }
+
+  async updateProviderAvailability(id: string, data: Partial<InsertProviderAvailability>): Promise<ProviderAvailability | undefined> {
+    const [updatedAvailability] = await db.update(providerAvailability).set(data).where(eq(providerAvailability.id, id)).returning();
+    return updatedAvailability || undefined;
+  }
+
+  async deleteProviderAvailability(id: string): Promise<boolean> {
+    const result = await db.delete(providerAvailability).where(eq(providerAvailability.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async deleteAllProviderAvailability(providerId: string): Promise<void> {
+    await db.delete(providerAvailability).where(eq(providerAvailability.providerId, providerId));
   }
 
   // Appointments

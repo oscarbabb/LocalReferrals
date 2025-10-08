@@ -192,6 +192,20 @@ export class DatabaseStorage implements IStorage {
     return newAvailability;
   }
 
+  async updateProviderAvailability(id: string, data: Partial<InsertProviderAvailability>): Promise<ProviderAvailability | undefined> {
+    const [updatedAvailability] = await db.update(providerAvailability).set(data).where(eq(providerAvailability.id, id)).returning();
+    return updatedAvailability || undefined;
+  }
+
+  async deleteProviderAvailability(id: string): Promise<boolean> {
+    const result = await db.delete(providerAvailability).where(eq(providerAvailability.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async deleteAllProviderAvailability(providerId: string): Promise<void> {
+    await db.delete(providerAvailability).where(eq(providerAvailability.providerId, providerId));
+  }
+
   // Appointments
   async getAppointmentsByProvider(providerId: string): Promise<Appointment[]> {
     return await db.select().from(appointments).where(eq(appointments.providerId, providerId));
