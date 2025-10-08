@@ -111,7 +111,7 @@ export default function Bookings() {
   };
 
   const ServiceRequestCard = ({ request }: { request: ServiceRequest }) => (
-    <Card className="mb-4">
+    <Card className="mb-4" data-testid={`card-service-request-${request.id}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-4">
@@ -121,8 +121,8 @@ export default function Bookings() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">{request.title}</h3>
-              <p className="text-gray-600">{request.provider?.title || "Proveedor"}</p>
+              <h3 className="font-semibold text-lg" data-testid={`text-request-title-${request.id}`}>{request.title}</h3>
+              <p className="text-gray-600" data-testid={`text-provider-name-${request.id}`}>{request.provider?.title || "Proveedor"}</p>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
@@ -137,28 +137,30 @@ export default function Bookings() {
               </div>
             </div>
           </div>
-          {getStatusBadge(request.status)}
+          <div data-testid={`badge-status-${request.id}`}>
+            {getStatusBadge(request.status)}
+          </div>
         </div>
 
         <div className="space-y-3">
-          <p className="text-gray-700">{request.description}</p>
+          <p className="text-gray-700" data-testid={`text-description-${request.id}`}>{request.description}</p>
           
           {request.location && (
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600" data-testid={`text-location-${request.id}`}>
               <MapPin className="w-4 h-4" />
               <span className="text-sm">{request.location}</span>
             </div>
           )}
 
           {request.totalAmount && (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-600" data-testid={`text-total-amount-${request.id}`}>
               <DollarSign className="w-4 h-4" />
               <span className="font-semibold">${request.totalAmount}</span>
             </div>
           )}
 
           {request.notes && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-gray-50 p-3 rounded-lg" data-testid={`text-notes-${request.id}`}>
               <p className="text-sm text-gray-700">{request.notes}</p>
             </div>
           )}
@@ -168,12 +170,12 @@ export default function Bookings() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" data-testid={`button-message-${request.id}`}>
               <MessageCircle className="w-4 h-4 mr-2" />
               Mensaje
             </Button>
             {request.status === "completed" && (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" data-testid={`button-rate-${request.id}`}>
                 <Star className="w-4 h-4 mr-2" />
                 Calificar
               </Button>
@@ -182,10 +184,10 @@ export default function Bookings() {
           
           {request.status === "pending" && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" data-testid={`button-cancel-${request.id}`}>
                 Cancelar
               </Button>
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+              <Button size="sm" className="bg-orange-500 hover:bg-orange-600" data-testid={`button-confirm-${request.id}`}>
                 Confirmar
               </Button>
             </div>
@@ -196,7 +198,7 @@ export default function Bookings() {
   );
 
   const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
-    <Card className="mb-4">
+    <Card className="mb-4" data-testid={`card-appointment-${appointment.id}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-4">
@@ -206,25 +208,27 @@ export default function Bookings() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">Cita Programada</h3>
-              <p className="text-gray-600">{appointment.provider?.title || "Proveedor"}</p>
+              <h3 className="font-semibold text-lg" data-testid={`text-appointment-title-${appointment.id}`}>Cita Programada</h3>
+              <p className="text-gray-600" data-testid={`text-appointment-provider-${appointment.id}`}>{appointment.provider?.title || "Proveedor"}</p>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" data-testid={`text-appointment-date-${appointment.id}`}>
                   <Calendar className="w-4 h-4" />
                   {format(new Date(appointment.appointmentDate), "dd 'de' MMMM, yyyy", { locale: es })}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" data-testid={`text-appointment-time-${appointment.id}`}>
                   <Clock className="w-4 h-4" />
                   {appointment.startTime} - {appointment.endTime}
                 </div>
               </div>
             </div>
           </div>
-          {getStatusBadge(appointment.status)}
+          <div data-testid={`badge-appointment-status-${appointment.id}`}>
+            {getStatusBadge(appointment.status)}
+          </div>
         </div>
 
         {appointment.notes && (
-          <div className="bg-gray-50 p-3 rounded-lg mb-4">
+          <div className="bg-gray-50 p-3 rounded-lg mb-4" data-testid={`text-appointment-notes-${appointment.id}`}>
             <p className="text-sm text-gray-700">{appointment.notes}</p>
           </div>
         )}
@@ -232,17 +236,17 @@ export default function Bookings() {
         <Separator className="my-4" />
 
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" data-testid={`button-contact-${appointment.id}`}>
             <MessageCircle className="w-4 h-4 mr-2" />
             Contactar
           </Button>
           
           {appointment.status === "scheduled" && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" data-testid={`button-reschedule-${appointment.id}`}>
                 Reprogramar
               </Button>
-              <Button variant="destructive" size="sm">
+              <Button variant="destructive" size="sm" data-testid={`button-cancel-appointment-${appointment.id}`}>
                 Cancelar
               </Button>
             </div>
@@ -281,15 +285,15 @@ export default function Bookings() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="requests" className="flex items-center gap-2">
+            <TabsTrigger value="requests" className="flex items-center gap-2" data-testid="tab-my-requests">
               <User className="w-4 h-4" />
               Mis Solicitudes
             </TabsTrigger>
-            <TabsTrigger value="received" className="flex items-center gap-2">
+            <TabsTrigger value="received" className="flex items-center gap-2" data-testid="tab-received-requests">
               <Star className="w-4 h-4" />
               Solicitudes Recibidas
             </TabsTrigger>
-            <TabsTrigger value="appointments" className="flex items-center gap-2">
+            <TabsTrigger value="appointments" className="flex items-center gap-2" data-testid="tab-appointments">
               <Calendar className="w-4 h-4" />
               Citas Programadas
             </TabsTrigger>

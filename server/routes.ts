@@ -1207,6 +1207,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update service request status (for confirming, cancelling, etc.)
+  app.patch("/api/service-requests/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Get the service request first
+      const existingRequest = await storage.getServiceRequests();
+      const request = existingRequest.find(r => r.id === id);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Service request not found" });
+      }
+      
+      // Authorization: Users can update their own requests, providers can update requests to them
+      if (request.requesterId !== userId) {
+        // Check if user is the provider
+        const provider = await storage.getProvider(request.providerId);
+        if (!provider || provider.userId !== userId) {
+          return res.status(403).json({ message: "Unauthorized: You can only update your own service requests or requests to your services" });
+        }
+      }
+      
+      // Validate update data
+      const updateSchema = z.object({
+        status: z.enum(["pending", "confirmed", "in_progress", "completed", "cancelled"]).optional(),
+        confirmedDate: z.coerce.date().optional(),
+        confirmedTime: z.string().optional(),
+        notes: z.string().optional(),
+      });
+      
+      const validatedData = updateSchema.parse(req.body);
+      
+      // Update the service request
+      const updatedRequest = await storage.updateServiceRequest(id, validatedData);
+      
+      if (!updatedRequest) {
+        return res.status(500).json({ message: "Failed to update service request" });
+      }
+      
+      res.json(updatedRequest);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(422).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Service request update error:", error);
+      res.status(500).json({ message: "Failed to update service request" });
+    }
+  });
+
   // Helper function to validate user-provider ownership
   const validateProviderOwnership = async (providerId: string, userId: string) => {
     const provider = await storage.getProvider(providerId);

@@ -71,6 +71,13 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
     enabled: !!provider.id,
   });
 
+  // Get pending/confirmed service requests for the provider to prevent double-booking
+  const { data: serviceRequests = [] } = useQuery({
+    queryKey: ["/api/service-requests", "provider", provider.id],
+    queryFn: () => fetch(`/api/service-requests/provider/${provider.id}`).then(res => res.json()),
+    enabled: !!provider.id,
+  });
+
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
       return apiRequest("POST", "/api/service-requests", bookingData);
@@ -118,14 +125,24 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
   const isTimeSlotAvailable = (time: string, date: Date) => {
     if (!selectedDate) return false;
     
-    // Check against existing appointments
     const dateString = format(date, 'yyyy-MM-dd');
-    const conflict = (appointments as any[]).some((apt: any) => {
+    
+    // Check against existing appointments
+    const appointmentConflict = (appointments as any[]).some((apt: any) => {
       const aptDate = format(new Date(apt.appointmentDate), 'yyyy-MM-dd');
       return aptDate === dateString && apt.startTime === time;
     });
     
-    return !conflict;
+    // Check against pending/confirmed service requests
+    const serviceRequestConflict = (serviceRequests as any[]).some((req: any) => {
+      // Only check pending and confirmed requests
+      if (req.status !== 'pending' && req.status !== 'confirmed') return false;
+      
+      const reqDate = format(new Date(req.preferredDate), 'yyyy-MM-dd');
+      return reqDate === dateString && req.preferredTime === time;
+    });
+    
+    return !appointmentConflict && !serviceRequestConflict;
   };
 
   const calculateTotal = () => {
