@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment routes
-  app.post("/api/create-payment-intent", async (req, res) => {
+  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
     try {
       const { amount, description, metadata } = req.body;
       
@@ -337,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Production sync endpoint - syncs categories from dev to production database
-  app.post("/api/admin/sync-production", async (req, res) => {
+  app.post("/api/admin/sync-production", isAuthenticated, async (req: any, res) => {
     try {
       console.log("🚀 Production sync requested");
       const result = await syncCategoriesToProduction();
@@ -378,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Force reseed endpoint - clears and rebuilds category data from JSON
-  app.post("/api/admin/force-reseed", async (req, res) => {
+  app.post("/api/admin/force-reseed", isAuthenticated, async (req: any, res) => {
     try {
       console.log("🔄 FORCE RESEED REQUESTED");
       
@@ -502,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // FORCE IMPORT complete category dataset (for production sync)
-  app.post("/api/admin/force-import-categories", async (req, res) => {
+  app.post("/api/admin/force-import-categories", isAuthenticated, async (req: any, res) => {
     try {
       console.log("🚀 FORCE IMPORT: Starting safe category import...");
       
@@ -1040,7 +1040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.params.id);
       if (!user) {
@@ -1135,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Service Requests and Booking System
-  app.get("/api/service-requests", async (req, res) => {
+  app.get("/api/service-requests", isAuthenticated, async (req: any, res) => {
     try {
       const { userId, providerId } = req.query;
       let requests;
@@ -1154,7 +1154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/service-requests", async (req, res) => {
+  app.post("/api/service-requests", isAuthenticated, async (req: any, res) => {
     try {
       const requestData = insertServiceRequestSchema.parse(req.body);
       const serviceRequest = await storage.createServiceRequest(requestData);
@@ -1293,7 +1293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Appointments
-  app.get("/api/appointments/:providerId", async (req, res) => {
+  app.get("/api/appointments/:providerId", isAuthenticated, async (req: any, res) => {
     try {
       const appointments = await storage.getAppointmentsByProvider(req.params.providerId);
       res.json(appointments);
@@ -1302,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/appointments", async (req, res) => {
+  app.post("/api/appointments", isAuthenticated, async (req: any, res) => {
     try {
       const appointmentData = insertAppointmentSchema.parse(req.body);
       const appointment = await storage.createAppointment(appointmentData);
@@ -1355,7 +1355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/appointments/user/:userId", async (req, res) => {
+  app.get("/api/appointments/user/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const appointments = await storage.getAppointmentsByUser(req.params.userId);
       
@@ -1373,7 +1373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/service-requests/user/:userId", async (req, res) => {
+  app.get("/api/service-requests/user/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const requests = await storage.getServiceRequestsByUser(req.params.userId);
       
@@ -1391,7 +1391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/service-requests/provider/:providerId", async (req, res) => {
+  app.get("/api/service-requests/provider/:providerId", isAuthenticated, async (req: any, res) => {
     try {
       const requests = await storage.getServiceRequestsByProvider(req.params.providerId);
       
@@ -1410,7 +1410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment Methods management
-  app.get("/api/providers/:providerId/payment-methods", async (req, res) => {
+  app.get("/api/providers/:providerId/payment-methods", isAuthenticated, async (req: any, res) => {
     try {
       const paymentMethods = await storage.getPaymentMethods(req.params.providerId);
       res.json(paymentMethods);
@@ -1420,7 +1420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/providers/:providerId/payment-methods", async (req, res) => {
+  app.post("/api/providers/:providerId/payment-methods", isAuthenticated, async (req: any, res) => {
     try {
       const insertPaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]),
@@ -1455,7 +1455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/providers/:providerId/payment-methods/:id", async (req, res) => {
+  app.put("/api/providers/:providerId/payment-methods/:id", isAuthenticated, async (req: any, res) => {
     try {
       const updatePaymentMethodSchema = z.object({
         paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"]).optional(),
@@ -1492,6 +1492,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Menu Items management
+  // Public endpoint for customers to view menu items
+  app.get("/api/menu-items/:providerId", async (req, res) => {
+    try {
+      const menuItems = await storage.getMenuItems(req.params.providerId);
+      res.json(menuItems);
+    } catch (error: any) {
+      console.error("Failed to get menu items:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Protected endpoint for providers to manage their menu items
   app.get("/api/providers/:providerId/menu-items", isAuthenticated, async (req: any, res) => {
     try {
       // Validate user-provider ownership
@@ -1643,7 +1655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Messages
-  app.post("/api/messages", async (req, res) => {
+  app.post("/api/messages", isAuthenticated, async (req: any, res) => {
     try {
       const validatedData = insertMessageSchema.parse(req.body);
       const message = await storage.createMessage(validatedData);
@@ -1653,7 +1665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/messages/conversation/:userId1/:userId2", async (req, res) => {
+  app.get("/api/messages/conversation/:userId1/:userId2", isAuthenticated, async (req: any, res) => {
     try {
       const messages = await storage.getConversation(req.params.userId1, req.params.userId2);
       res.json(messages);
@@ -1663,7 +1675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Photo upload endpoints
-  app.post("/api/objects/upload", async (req, res) => {
+  app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {
     const objectStorageService = new ObjectStorageService();
     try {
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -1751,7 +1763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Verification System Routes
   // Verification Documents
-  app.get("/api/providers/:providerId/verification-documents", async (req, res) => {
+  app.get("/api/providers/:providerId/verification-documents", isAuthenticated, async (req: any, res) => {
     try {
       const { providerId } = req.params;
       const documents = await storage.getVerificationDocuments(providerId);
@@ -1762,7 +1774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/verification-documents", async (req, res) => {
+  app.post("/api/verification-documents", isAuthenticated, async (req: any, res) => {
     try {
       const document = await storage.createVerificationDocument(req.body);
       res.status(201).json(document);
@@ -1772,7 +1784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/verification-documents/:id", async (req, res) => {
+  app.patch("/api/verification-documents/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const document = await storage.updateVerificationDocument(id, req.body);
@@ -1787,7 +1799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Background Checks
-  app.get("/api/providers/:providerId/background-checks", async (req, res) => {
+  app.get("/api/providers/:providerId/background-checks", isAuthenticated, async (req: any, res) => {
     try {
       const { providerId } = req.params;
       const checks = await storage.getBackgroundChecks(providerId);
@@ -1798,7 +1810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/background-checks", async (req, res) => {
+  app.post("/api/background-checks", isAuthenticated, async (req: any, res) => {
     try {
       const check = await storage.createBackgroundCheck(req.body);
       res.status(201).json(check);
@@ -1808,7 +1820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/background-checks/:id", async (req, res) => {
+  app.patch("/api/background-checks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const check = await storage.updateBackgroundCheck(id, req.body);
@@ -1823,7 +1835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verification Reviews
-  app.get("/api/providers/:providerId/verification-reviews", async (req, res) => {
+  app.get("/api/providers/:providerId/verification-reviews", isAuthenticated, async (req: any, res) => {
     try {
       const { providerId } = req.params;
       const reviews = await storage.getVerificationReviews(providerId);
@@ -1834,7 +1846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/verification-reviews", async (req, res) => {
+  app.post("/api/verification-reviews", isAuthenticated, async (req: any, res) => {
     try {
       const review = await storage.createVerificationReview(req.body);
       res.status(201).json(review);
@@ -1866,7 +1878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/verification-requirements", async (req, res) => {
+  app.post("/api/verification-requirements", isAuthenticated, async (req: any, res) => {
     try {
       const requirement = await storage.createVerificationRequirement(req.body);
       res.status(201).json(requirement);
@@ -1877,7 +1889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update provider verification status
-  app.patch("/api/providers/:id/verification-status", async (req, res) => {
+  app.patch("/api/providers/:id/verification-status", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { verificationStatus, verificationLevel, backgroundCheckStatus, verificationNotes } = req.body;
@@ -1936,7 +1948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Import categories and subcategories from CSV file
-  app.post("/api/admin/import-csv-categories", async (req, res) => {
+  app.post("/api/admin/import-csv-categories", isAuthenticated, async (req: any, res) => {
     try {
       console.log("🚀 IMPORTING from CSV: Starting comprehensive import...");
       
