@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import MessagingModal from "@/components/messaging-modal";
 import { 
   Calendar, 
   Clock, 
@@ -66,6 +67,8 @@ interface Appointment {
 
 export default function Bookings() {
   const [activeTab, setActiveTab] = useState("requests");
+  const [showMessagingModal, setShowMessagingModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<{ id: string; name: string } | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -206,7 +209,20 @@ export default function Bookings() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" data-testid={`button-message-${request.id}`}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              data-testid={`button-message-${request.id}`}
+              onClick={() => {
+                if (request.provider?.userId) {
+                  setSelectedProvider({
+                    id: request.provider.userId,
+                    name: request.provider.title
+                  });
+                  setShowMessagingModal(true);
+                }
+              }}
+            >
               <MessageCircle className="w-4 h-4 mr-2" />
               Mensaje
             </Button>
@@ -284,7 +300,20 @@ export default function Bookings() {
         <Separator className="my-4" />
 
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm" data-testid={`button-contact-${appointment.id}`}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            data-testid={`button-contact-${appointment.id}`}
+            onClick={() => {
+              if (appointment.provider?.userId) {
+                setSelectedProvider({
+                  id: appointment.provider.userId,
+                  name: appointment.provider.title
+                });
+                setShowMessagingModal(true);
+              }
+            }}
+          >
             <MessageCircle className="w-4 h-4 mr-2" />
             Contactar
           </Button>
@@ -470,6 +499,17 @@ export default function Bookings() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Messaging Modal */}
+        {showMessagingModal && selectedProvider && (
+          <MessagingModal
+            open={showMessagingModal}
+            onOpenChange={setShowMessagingModal}
+            currentUserId={user?.id || ""}
+            recipientUserId={selectedProvider.id}
+            recipientName={selectedProvider.name}
+          />
+        )}
       </div>
   );
 }
