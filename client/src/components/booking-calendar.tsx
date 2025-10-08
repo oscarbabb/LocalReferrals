@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isBefore, addMonths, subMonths, getDay } from "date-fns";
-import { es } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Clock, Calendar, MapPin, DollarSign } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import type { Provider } from "@shared/schema";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
@@ -57,6 +57,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
   const [serviceTitle, setServiceTitle] = useState("");
   
   const { toast } = useToast();
+  const { dateLocale } = useLanguage();
   const queryClient = useQueryClient();
 
   // Get provider's availability
@@ -260,7 +261,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <h3 className="text-lg font-semibold">
-              {format(currentDate, 'MMMM yyyy', { locale: es })}
+              {format(currentDate, 'MMMM yyyy', { locale: dateLocale })}
             </h3>
             <Button
               variant="outline"
@@ -313,7 +314,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
         {selectedDate && (
           <div>
             <Label className="text-base font-medium mb-3 block">
-              Horarios disponibles para {format(selectedDate, 'dd/MM/yyyy', { locale: es })}
+              Horarios disponibles para {format(selectedDate, 'dd/MM/yyyy', { locale: dateLocale })}
             </Label>
             <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
               {timeSlots.map((slot) => {
@@ -362,7 +363,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {format(selectedDate, 'dd/MM/yyyy', { locale: es })}
+                  {format(selectedDate, 'dd/MM/yyyy', { locale: dateLocale })}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />

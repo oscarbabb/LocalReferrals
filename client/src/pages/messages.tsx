@@ -9,12 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageCircle, Inbox } from "lucide-react";
 import MessagingModal from "@/components/messaging-modal";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
 import type { Conversation } from "@shared/schema";
 
 export default function Messages() {
   const { user, isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { t, dateLocale } = useLanguage();
   const userId = (user as any)?.id;
   const [selectedConversation, setSelectedConversation] = useState<{
     userId: string;
@@ -27,13 +26,13 @@ export default function Messages() {
     enabled: !!userId && isAuthenticated,
   });
 
-  // Format relative time in Spanish
+  // Format relative time
   const formatTime = (date: Date | string) => {
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
       return formatDistanceToNow(dateObj, { 
         addSuffix: true, 
-        locale: es 
+        locale: dateLocale 
       });
     } catch {
       return "";

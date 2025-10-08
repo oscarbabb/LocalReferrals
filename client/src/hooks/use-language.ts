@@ -1,6 +1,8 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { es } from '@/locales/es';
 import { en } from '@/locales/en';
+import { es as esLocale, enUS } from 'date-fns/locale';
+import type { Locale } from 'date-fns';
 
 export type Language = 'es' | 'en';
 
@@ -8,6 +10,7 @@ interface LanguageContextType {
   language: Language;
   toggleLanguage: () => void;
   t: (key: string) => string;
+  dateLocale: Locale;
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -44,9 +47,12 @@ export function useLanguageManager(): LanguageContextType {
     return translations[language][key as keyof typeof translations[typeof language]] || key;
   };
 
+  const dateLocale = language === 'es' ? esLocale : enUS;
+
   return {
     language,
     toggleLanguage,
-    t
+    t,
+    dateLocale
   };
 }

@@ -16,7 +16,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, MessageCircle, Loader2 } from "lucide-react";
 import { Message } from "@shared/schema";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 interface MessagingModalProps {
   open: boolean;
@@ -35,7 +34,7 @@ export default function MessagingModal({
 }: MessagingModalProps) {
   const [messageContent, setMessageContent] = useState("");
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, dateLocale } = useLanguage();
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -212,7 +211,7 @@ export default function MessagingModal({
                         }`}
                         data-testid={`text-message-time-${message.id}`}
                       >
-                        {format(new Date(message.createdAt || Date.now()), "PPp", { locale: es })}
+                        {format(new Date(message.createdAt || Date.now()), "PPp", { locale: dateLocale })}
                       </p>
                     </div>
                   </div>
