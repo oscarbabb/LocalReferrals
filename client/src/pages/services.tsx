@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search } from "lucide-react";
 import { useState } from "react";
 import type { ServiceCategory } from "@shared/schema";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function Services() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const { t } = useLanguage();
 
   const { data: categories = [], isLoading } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
@@ -54,10 +56,10 @@ export default function Services() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
-            Categorías de Servicios
+            {t('services.pageTitle')}
           </h1>
           <p className="text-xl text-gray-600 mb-8 animate-fade-in">
-            Encuentra exactamente lo que necesitas
+            {t('services.pageDescription')}
           </p>
 
           {/* Search and Filter */}
@@ -66,7 +68,7 @@ export default function Services() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
-                placeholder="Buscar servicios..."
+                placeholder={t('services.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 py-3 text-lg transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-gray-300"
@@ -76,10 +78,10 @@ export default function Services() {
             
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-full transition-all duration-300 hover:border-gray-300 focus:ring-2 focus:ring-primary/20" data-testid="select-category-filter">
-                <SelectValue placeholder="Filtrar por categoría" />
+                <SelectValue placeholder={t('services.filterPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="all">{t('services.allCategories')}</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
@@ -93,7 +95,7 @@ export default function Services() {
         {filteredCategories.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-xl text-gray-600">
-              No se encontraron servicios que coincidan con tu búsqueda.
+              {t('services.noResults')}
             </p>
           </div>
         ) : (

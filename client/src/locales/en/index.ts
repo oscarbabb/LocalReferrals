@@ -27,12 +27,37 @@ export const en = {
   'home.howItWorks': 'How It Works',
   'home.viewServices': 'View Services',
   'home.findProviders': 'Find Providers',
+  'home.heroTitle1': 'Find Trusted',
+  'home.heroTitle2': 'Services',
+  'home.heroTitle3': 'in Your Community',
+  'home.exploreServices': 'Explore Services',
+  'home.categoriesTitle': 'Service',
+  'home.categoriesHighlight': 'Categories',
+  'home.viewAllServices': 'View All Services',
+  'home.searchFilterTitle': 'Search and Filter',
+  'home.searchFilterDesc': 'Explore services by category, location and ratings. Find exactly what you need.',
+  'home.trustSecurityTitle': 'Trust and Security',
+  'home.verifiedProvidersTitle': 'Verified Providers',
+  'home.verifiedProvidersDesc': 'All our providers go through a rigorous verification process.',
+  'home.localCommunityTitle': 'Local Community',
+  'home.localCommunityDesc': 'Meet your neighbors and build trusted relationships.',
+  'home.ctaText': 'Join hundreds of neighbors who have already found trusted services on Local References',
+  'home.footerServices': 'Services',
+  'home.footerRights': '© 2025 Local References. All rights reserved.',
   
   // Services (existing)
   'services.title': 'Service Categories',
   'services.description': 'Find the service you need',
   'services.providers': 'providers',
   'services.viewAll': 'View All',
+  
+  // Services page
+  'services.pageTitle': 'Service Categories',
+  'services.pageDescription': 'Find exactly what you need',
+  'services.searchPlaceholder': 'Search services...',
+  'services.filterPlaceholder': 'Filter by category',
+  'services.allCategories': 'All categories',
+  'services.noResults': 'No services found matching your search.',
   
   // Auth (existing)
   'auth.register': 'Sign Up',

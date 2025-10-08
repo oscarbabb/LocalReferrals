@@ -63,8 +63,8 @@ export default function Home() {
               </p>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-slide-up">
-              Encuentra Servicios <br className="hidden sm:block" />
-              <span className="text-primary">de Confianza</span> <span className="text-accent">en tu Comunidad</span>
+              {t('home.heroTitle1')} <br className="hidden sm:block" />
+              <span className="text-primary">{t('home.heroTitle2')}</span> <span className="text-accent">{t('home.heroTitle3')}</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto animate-fade-in">
               Conecta con vecinos que ofrecen servicios verificados. Desde limpieza hasta tutorías, 
@@ -73,7 +73,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
               <Link href="/services">
                 <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary px-8 py-4 text-lg w-full sm:w-auto shadow-lg btn-animate hover-lift" data-testid="button-explore-services">
-                  Explorar Servicios
+                  {t('home.exploreServices')}
                 </Button>
               </Link>
               <Link href="/review-demo">
@@ -104,7 +104,7 @@ export default function Home() {
               <HomeIcon className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Categorías de <span className="text-orange-600">Servicios</span>
+              {t('home.categoriesTitle')} <span className="text-orange-600">{t('home.categoriesHighlight')}</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Descubre servicios de calidad verificados por tu propia comunidad. Cada categoría está diseñada para satisfacer tus necesidades específicas.
@@ -137,7 +137,7 @@ export default function Home() {
                   className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg btn-animate hover-lift"
                   data-testid="button-view-all-services"
                 >
-                  Ver Todos los Servicios
+                  {t('home.viewAllServices')}
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -190,8 +190,8 @@ export default function Home() {
               <div className="w-20 h-20 bg-gradient-to-r from-primary to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-3xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">Busca y Filtra</h3>
-              <p className="text-gray-600 text-lg">Explora servicios por categoría, ubicación y calificaciones. Encuentra exactamente lo que necesitas.</p>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">{t('home.searchFilterTitle')}</h3>
+              <p className="text-gray-600 text-lg">{t('home.searchFilterDesc')}</p>
             </div>
 
             <div className="text-center">
@@ -217,7 +217,7 @@ export default function Home() {
       <section className="py-16 bg-white pattern-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Confianza y Seguridad</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('home.trustSecurityTitle')}</h2>
             <p className="text-xl text-gray-600">Tu tranquilidad es nuestra prioridad</p>
           </div>
 
@@ -226,8 +226,8 @@ export default function Home() {
               <div className="w-16 h-16 bg-blue-50 border-2 border-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Proveedores Verificados</h3>
-              <p className="text-gray-600">Todos los proveedores son residentes verificados de tu comunidad</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('home.verifiedProvidersTitle')}</h3>
+              <p className="text-gray-600">{t('home.verifiedProvidersDesc')}</p>
             </div>
 
             <div className="text-center">
@@ -242,8 +242,8 @@ export default function Home() {
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Handshake className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Comunidad Local</h3>
-              <p className="text-gray-600">Solo servicios dentro de tu edificio o complejo residencial</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('home.localCommunityTitle')}</h3>
+              <p className="text-gray-600">{t('home.localCommunityDesc')}</p>
             </div>
 
             <div className="text-center">
@@ -280,7 +280,7 @@ export default function Home() {
             ¿Listo para Conectar con tu Comunidad?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Únete a cientos de vecinos que ya encontraron servicios de confianza en Referencias Locales
+            {t('home.ctaText')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/auth">
@@ -323,7 +323,7 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Enlaces</h3>
               <ul className="space-y-2">
-                <li><Link href="/services" className="text-gray-300 hover:text-white">Servicios</Link></li>
+                <li><Link href="/services" className="text-gray-300 hover:text-white">{t('home.footerServices')}</Link></li>
                 <li><Link href="/como-funciona" className="text-gray-300 hover:text-white">Cómo Funciona</Link></li>
                 <li><Link href="/testimonials" className="text-gray-300 hover:text-white">Testimonios</Link></li>
                 <li><Link href="/verification" className="text-gray-300 hover:text-white">Verificación</Link></li>
@@ -346,7 +346,7 @@ export default function Home() {
           
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2025 Referencias Locales. Todos los derechos reservados.
+              {t('home.footerRights')}
             </p>
             <p className="text-gray-400 text-sm mt-2 md:mt-0">
               Hecho con ❤️ para tu comunidad

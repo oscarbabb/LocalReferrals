@@ -27,12 +27,37 @@ export const es = {
   'home.howItWorks': 'Cómo Funciona',
   'home.viewServices': 'Ver Servicios',
   'home.findProviders': 'Buscar Proveedores',
+  'home.heroTitle1': 'Encuentra Servicios',
+  'home.heroTitle2': 'de Confianza',
+  'home.heroTitle3': 'en tu Comunidad',
+  'home.exploreServices': 'Explorar Servicios',
+  'home.categoriesTitle': 'Categorías de',
+  'home.categoriesHighlight': 'Servicios',
+  'home.viewAllServices': 'Ver Todos los Servicios',
+  'home.searchFilterTitle': 'Busca y Filtra',
+  'home.searchFilterDesc': 'Explora servicios por categoría, ubicación y calificaciones. Encuentra exactamente lo que necesitas.',
+  'home.trustSecurityTitle': 'Confianza y Seguridad',
+  'home.verifiedProvidersTitle': 'Proveedores Verificados',
+  'home.verifiedProvidersDesc': 'Todos nuestros proveedores pasan por un proceso de verificación riguroso.',
+  'home.localCommunityTitle': 'Comunidad Local',
+  'home.localCommunityDesc': 'Conoce a tus vecinos y construye relaciones de confianza.',
+  'home.ctaText': 'Únete a cientos de vecinos que ya encontraron servicios de confianza en Referencias Locales',
+  'home.footerServices': 'Servicios',
+  'home.footerRights': '© 2025 Referencias Locales. Todos los derechos reservados.',
   
   // Services (existing)
   'services.title': 'Categorías de Servicios',
   'services.description': 'Encuentra el servicio que necesitas',
   'services.providers': 'proveedores',
   'services.viewAll': 'Ver Todos',
+  
+  // Services page
+  'services.pageTitle': 'Categorías de Servicios',
+  'services.pageDescription': 'Encuentra exactamente lo que necesitas',
+  'services.searchPlaceholder': 'Buscar servicios...',
+  'services.filterPlaceholder': 'Filtrar por categoría',
+  'services.allCategories': 'Todas las categorías',
+  'services.noResults': 'No se encontraron servicios que coincidan con tu búsqueda.',
   
   // Auth (existing)
   'auth.register': 'Registrarse',
