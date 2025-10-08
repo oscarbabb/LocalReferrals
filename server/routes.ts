@@ -1846,6 +1846,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/messages/user/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user can only access their own messages
+      if (req.user.claims.sub !== req.params.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const conversations = await storage.getUserConversations(req.params.userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
   // Photo upload endpoints
   app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {
     const objectStorageService = new ObjectStorageService();

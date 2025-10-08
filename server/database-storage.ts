@@ -33,6 +33,7 @@ import {
   type InsertMenuItemVariation,
   type ProviderCategory,
   type InsertProviderCategory,
+  type Conversation,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -52,7 +53,7 @@ import {
   providerCategories
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import type { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
@@ -237,6 +238,54 @@ export class DatabaseStorage implements IStorage {
         eq(messages.receiverId, userId2)
       )
     );
+  }
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    // Get all unique conversation partners with their latest message
+    const result = await db.execute(sql`
+      WITH user_messages AS (
+        SELECT 
+          CASE 
+            WHEN sender_id = ${userId} THEN receiver_id
+            ELSE sender_id
+          END as other_user_id,
+          content as last_message,
+          created_at as last_message_time,
+          sender_id as last_message_sender_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY 
+              CASE 
+                WHEN sender_id = ${userId} THEN receiver_id
+                ELSE sender_id
+              END 
+            ORDER BY created_at DESC
+          ) as rn
+        FROM messages
+        WHERE sender_id = ${userId} OR receiver_id = ${userId}
+      )
+      SELECT 
+        um.other_user_id,
+        u.full_name as other_user_name,
+        u.email as other_user_email,
+        u.avatar as other_user_avatar,
+        um.last_message,
+        um.last_message_time,
+        um.last_message_sender_id
+      FROM user_messages um
+      JOIN users u ON u.id = um.other_user_id
+      WHERE um.rn = 1
+      ORDER BY um.last_message_time DESC
+    `);
+
+    return (result.rows as any[]).map(row => ({
+      otherUserId: row.other_user_id,
+      otherUserName: row.other_user_name,
+      otherUserEmail: row.other_user_email,
+      otherUserAvatar: row.other_user_avatar,
+      lastMessage: row.last_message,
+      lastMessageTime: new Date(row.last_message_time),
+      lastMessageSenderId: row.last_message_sender_id,
+    }));
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {

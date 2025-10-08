@@ -389,3 +389,14 @@ export type MenuItemVariation = typeof menuItemVariations.$inferSelect;
 export type InsertMenuItemVariation = z.infer<typeof insertMenuItemVariationSchema>;
 export type ProviderCategory = typeof providerCategories.$inferSelect;
 export type InsertProviderCategory = z.infer<typeof insertProviderCategorySchema>;
+
+// Conversation type for message inbox
+export interface Conversation {
+  otherUserId: string;
+  otherUserName: string;
+  otherUserEmail: string;
+  otherUserAvatar?: string | null;
+  lastMessage: string;
+  lastMessageTime: Date;
+  lastMessageSenderId: string;
+}

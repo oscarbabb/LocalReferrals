@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn, LogOut, Sparkles } from "lucide-react";
+import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/hooks/use-language";
@@ -42,6 +42,7 @@ export default function Header() {
     { href: "/como-funciona", label: t('nav.howItWorks') },
     { href: "/providers", label: t('nav.providers') },
     { href: "/bookings", label: "Mis Reservas" },
+    { href: "/messages", label: "Mensajes", icon: MessageCircle },
     { href: "/testimonials", label: t('nav.testimonials') },
   ];
 

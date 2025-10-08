@@ -17,6 +17,7 @@ import PaymentSuccess from "@/pages/payment-success";
 import PaymentMethods from "@/pages/payment-methods";
 import MenuManagement from "@/pages/menu-management";
 import AvailabilityManagement from "@/pages/availability-management";
+import Messages from "@/pages/messages";
 import Testimonials from "@/pages/testimonials";
 import HowItWorks from "@/pages/how-it-works";
 import ProviderVerification from "@/pages/provider-verification";
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/payment-methods" component={PaymentMethods} />
         <Route path="/menu-management" component={MenuManagement} />
         <Route path="/availability-management" component={AvailabilityManagement} />
+        <Route path="/messages" component={Messages} />
         <Route path="/profile" component={Profile} />
         <Route path="/auth" component={Auth} />
         <Route component={NotFound} />
