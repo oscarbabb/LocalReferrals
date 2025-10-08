@@ -5,6 +5,7 @@ import AdvancedReviewForm from "@/components/advanced-review-form";
 import EnhancedReviewCard from "@/components/enhanced-review-card";
 import QuickBookingButton from "@/components/quick-booking-button";
 import PayForServiceButton from "@/components/pay-for-service-button";
+import MessagingModal from "@/components/messaging-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ export default function ProviderDetail() {
   const [, setLocation] = useLocation();
   const providerId = params?.id;
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showMessagingModal, setShowMessagingModal] = useState(false);
 
   const { data: provider, isLoading } = useQuery<ProviderWithDetails>({
     queryKey: ["/api/providers", providerId],
@@ -173,7 +175,13 @@ export default function ProviderDetail() {
                 size="lg" 
                 className="flex-1"
               />
-              <Button variant="outline" size="lg" className="flex-1">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="flex-1"
+                onClick={() => setShowMessagingModal(true)}
+                data-testid="button-send-message"
+              >
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Enviar Mensaje
               </Button>
@@ -498,6 +506,15 @@ export default function ProviderDetail() {
           </div>
         </div>
       </div>
+
+      {/* Messaging Modal */}
+      <MessagingModal
+        open={showMessagingModal}
+        onOpenChange={setShowMessagingModal}
+        currentUserId={user?.id}
+        recipientUserId={provider.userId}
+        recipientName={provider.user?.fullName || 'Proveedor'}
+      />
     </div>
   );
 }
