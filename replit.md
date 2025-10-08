@@ -4,6 +4,16 @@
 
 ## Recent Changes (October 8, 2025)
 
+**Full Platform Internationalization (Spanish/English):**
+- Implemented modular locale architecture with feature-based translation files in `client/src/locales/{en,es}/`
+- Created comprehensive translations for all user-facing pages: home, services, bookings, messages, navigation
+- Updated all pages to use `t()` translation function from `useLanguage` hook
+- Language toggle in header switches entire platform between Spanish and English
+- Language preference persists in localStorage and survives page navigation/refresh
+- Translation system uses dot-notation naming convention (e.g., `bookings.title`, `messages.modal.send`)
+- Modular structure allows easy addition of new translations and languages
+- Default language: Spanish (es), supported languages: Spanish (es), English (en)
+
 **Messages/Inbox Page Implementation:**
 - Created comprehensive Messages page (`/messages`) for viewing all user conversations
 - Added backend API endpoint `GET /api/messages/user/:userId` with authentication and authorization
@@ -61,7 +71,7 @@ Preferred communication style: Simple, everyday language.
 - **One-Click Booking**: Calendar interface with time slot selection and availability checking.
 - **Messaging System**: Complete inbox page for viewing all conversations, MessagingModal for direct communication between providers and consumers, message history with timestamps.
 - **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
-- **Localization**: Complete Spanish translation of the platform.
+- **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences.
 
 # External Dependencies
 
