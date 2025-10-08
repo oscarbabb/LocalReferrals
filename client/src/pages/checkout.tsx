@@ -8,11 +8,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard, Shield, Clock } from "lucide-react";
 
-// Load Stripe
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// Dynamically load Stripe with the correct public key based on environment
+let stripePromise: Promise<any> | null = null;
+
+const initializeStripe = async () => {
+  try {
+    const response = await fetch('/api/stripe/public-key');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Stripe public key: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.publicKey) {
+      throw new Error('No public key received from backend');
+    }
+    
+    console.log(`✅ Loading Stripe in ${data.isTestMode ? 'TEST' : 'LIVE'} mode`);
+    return loadStripe(data.publicKey);
+  } catch (error) {
+    console.error('❌ Failed to initialize Stripe:', error);
+    throw error;
+  }
+};
+
+// Initialize Stripe promise
+stripePromise = initializeStripe();
 
 interface CheckoutFormProps {
   serviceDetails: {
