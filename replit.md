@@ -1,117 +1,6 @@
 # Overview
 
-This is a full-stack TypeScript application for a local services marketplace called "Referencias Locales" - a platform that connects residents within buildings or neighborhoods with service providers like cleaners, tutors, handymen, and other professionals. The application allows users to discover, rate, and request services from verified local providers, fostering trust within residential communities.
-
-**Recent Changes (January 2025):**
-- **Menu Management System for Providers (October 7, 2025):**
-  - Implemented comprehensive menu management interface at /menu-management for providers to upload and manage service/product menus
-  - Created full CRUD operations with authenticated API endpoints for menu items (create, read, update, delete)
-  - Added menu document upload capability - providers can upload PDF or image files (JPEG, PNG) as complete menu displays
-  - Database schema includes menuDocumentUrl field on providers table for storing full menu documents
-  - Menu documents displayed on provider profiles and detail pages with inline image preview or PDF download buttons
-  - Added menu item display on provider profiles organized by category with pricing and availability badges
-  - Implemented owner-only controls with isOwnProfile security checks - "Manage Menu" button only visible to profile owners
-  - Built empty state CTAs encouraging providers to add their first menu items
-  - Profile page shows menu statistics and quick navigation to menu management
-  - Menu items grouped by category (Servicios de Belleza, Alimentos y Bebidas, etc.) with price, optional duration, and description fields
-  - Duration field marked as optional with helper text "Solo para servicios con tiempo específico"
-  - All menu operations properly invalidate React Query cache for instant UI updates
-  - Secured object storage endpoints with authentication to prevent unauthorized access
-- **Multi-Category Provider Registration (October 7, 2025):**
-  - Implemented many-to-many relationship allowing providers to register in multiple service categories
-  - Created provider_categories junction table with unique constraints and transaction-based operations
-  - Added UI for selecting multiple categories/subcategories with add/remove functionality and primary designation
-  - Enforced exactly one primary category per provider with automatic normalization logic
-  - Fixed payment field validation with proper string-to-number conversion using parseFloat and z.coerce.number()
-  - Added timestamp-based unique file naming for profile picture uploads to prevent overwrites
-  - All category associations properly persisted with backwards compatibility for single-category providers
-  - Comprehensive validation: frontend converts numbers, backend validates with numeric coercion, database stores as decimals
-- **Provider Registration with Subcategory Selection (October 2, 2025):**
-  - Added subcategoryId field to providers table schema for specialized service filtering
-  - Implemented dynamic subcategory dropdown in provider registration form
-  - Subcategories load automatically when provider selects a category
-  - Enhanced provider profiles with optional subcategory specialization
-  - Fixed sessions table creation issue (changed createTableIfMissing to true)
-- **Subcategory Dropdown UX Fix (October 2, 2025):**
-  - Fixed subcategory dropdown scrolling issue - now fully scrollable and visible
-  - Implemented smart positioning that opens upward/downward based on viewport space
-  - Dynamic height calculation prevents dropdown overflow beyond screen bounds
-  - Improved flexbox layout with fixed header and scrollable content area
-- **Production Database Management & Launch Readiness (October 2, 2025):**
-  - Fixed production seeding system to handle 55 categories and 431 subcategories
-  - Added POST /api/admin/force-reseed endpoint for manual database reseeding
-  - Simplified auto-heal logic to only seed when database is completely empty (prevents FK constraint errors)
-  - Verified end-to-end functionality: homepage, services page, category filters, and subcategories all working
-  - Application fully tested and production-ready for launch
-  - All Mexican service categories properly loaded (from Administración Condominal to Transporte Terrestre)
-- **Self-Healing Production Seeding System (October 1, 2025):**
-  - Implemented bundled TypeScript seed module with all 55 categories and 431 subcategories
-  - Added on-demand seeding in GET /api/categories endpoint - automatically seeds if database is empty
-  - Production database self-heals on first page visit - guaranteed never to be empty
-  - Seed data bundled with deployment (not file-system dependent) for 100% reliability
-  - Added /api/admin/seed-status endpoint for production observability
-  - Idempotent operation - safe to run multiple times without duplicating data
-- **Animated Navigation Micro-interactions (January 15, 2025):**
-  - Implemented sophisticated tab navigation animations with smooth underline effects
-  - Added hover micro-interactions with translateY animations and color transitions
-  - Created animated gradient underlines that expand on hover and glow for active tabs
-  - Enhanced button interactions with ripple effects and smooth scaling
-  - Added staggered entrance animations for navigation items (0.1s delays)
-  - Implemented mobile menu item animations with slide-in-from-right effects
-  - Added gentle pulse animation for active navigation tabs
-  - Enhanced user experience with smooth cubic-bezier transitions
-- **Currency Conversion to Mexican Pesos (January 15, 2025):**
-  - Completed comprehensive conversion from Colombian pesos to Mexican pesos throughout entire platform
-  - Updated all frontend currency displays to use "MXN $" format for clear identification
-  - Updated backend sample provider data with realistic Mexican peso hourly rates (1500-2500 MXN/hour)
-  - Updated database provider records with realistic Mexican market pricing
-  - Updated all form placeholders and examples to reflect realistic Mexican pricing (1500-5000 MXN ranges)
-  - Entire platform now consistently uses Mexican peso pricing across all components and calculations
-- Integrated PostgreSQL database using Neon Database with Drizzle ORM
-- Replaced in-memory storage with persistent database storage
-- Added automatic database seeding for service categories
-- Enhanced visual design with larger logo and more orange branding accents
-- **Advanced Review System Implementation (January 8, 2025):**
-  - Enhanced database schema with detailed rating fields (service quality, communication, punctuality, value for money)
-  - Integrated object storage for photo uploads in reviews
-  - Created advanced review form with photo upload capabilities
-  - Built enhanced review cards displaying detailed ratings and photo galleries
-  - Added review demo page showcasing new features at `/review-demo`
-- **Service Category Icon Enhancement (January 8, 2025):**
-  - Replaced emoji icons with professional Lucide React vector icons
-  - Implemented vibrant multi-color gradient backgrounds for service cards
-  - Added smooth hover animations with scaling and rotation effects
-  - Enhanced visual design with shine effects and improved shadows
-  - Fixed icon mapping to use actual database values (emoji to Lucide icon conversion)
-- **One-Click Service Booking System (January 8, 2025):**
-  - Implemented complete booking calendar with time slot selection and availability checking
-  - Added QuickBookingButton component for instant booking from provider detail pages
-  - Built comprehensive database schemas for provider availability, appointments, and booking management
-  - Created API endpoints for availability checking, appointment scheduling, and booking workflows
-  - Integrated calendar interface with date/time selection and conflict detection
-  - Added automated provider availability seeding for all service providers
-  - Reverted service category icons back to original emoji display for better visual appeal
-- **Complete Spanish Localization and New Pages (January 8, 2025):**
-  - Completed comprehensive Spanish translation of entire platform
-  - Created dedicated Testimonials page with real customer testimonies and people's images
-  - Built interactive "Cómo Funciona" (How It Works) page with detailed platform explanation
-  - Added stylish step-by-step process visualization with interactive elements
-  - Enhanced navigation with direct links to new dedicated pages
-- **Provider Verification and Background Check System (January 8, 2025):**
-  - Implemented comprehensive database schema for verification documents, background checks, and reviews
-  - Added verification status tracking (pending, verified, rejected, suspended) with multiple levels (basic, standard, premium)
-  - Created background check integration with status tracking and third-party service support
-  - Built admin verification dashboard with provider management and status updates
-  - Added verification requirements system configurable by service categories
-  - Enhanced provider profiles with verification badges and status displays
-- **Comprehensive Service Category Expansion (January 8, 2025):**
-  - Expanded from 6 basic service categories to 26+ comprehensive categories
-  - Added professional services: Legal advice, accounting, technology support, security services
-  - Included health & wellness: Medical services, psychology, beauty, massages, personal training
-  - Added creative services: Photography, event planning, interior design, art classes
-  - Included specialized care: Childcare, elderly care, pet services, veterinary care
-  - Added educational services: Languages, music lessons, tutoring, art workshops
-  - Created complete local services marketplace covering all residential community needs
+"Referencias Locales" is a full-stack TypeScript application functioning as a local services marketplace. It connects residents within communities with verified local service providers (cleaners, tutors, handymen, etc.), enabling users to discover, rate, and request services. The platform aims to foster trust and facilitate local commerce within residential areas.
 
 # User Preferences
 
@@ -120,64 +9,66 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-- **Framework**: React with TypeScript using Vite as the build tool
-- **Routing**: Wouter for client-side routing with pages for home, services, providers, authentication, and user profiles
-- **UI Components**: Shadcn/ui component library built on Radix UI primitives with Tailwind CSS for styling
-- **State Management**: TanStack Query (React Query) for server state management and API caching
-- **Forms**: React Hook Form with Zod validation for type-safe form handling
+- **Framework**: React with TypeScript (Vite)
+- **Routing**: Wouter
+- **UI Components**: Shadcn/ui (built on Radix UI) with Tailwind CSS
+- **State Management**: TanStack Query (React Query) for server state
+- **Forms**: React Hook Form with Zod validation
+- **UI/UX**: Animated navigation with smooth transitions, hover effects, and mobile-first responsive design. Multi-color gradient backgrounds for service cards, professional Lucide React icons, and Spanish localization.
 
 ## Backend Architecture
-- **Runtime**: Node.js with Express.js REST API server
-- **Database ORM**: Drizzle ORM with PostgreSQL for type-safe database operations
-- **API Structure**: RESTful endpoints for categories, providers, reviews, service requests, and messaging
-- **Development Setup**: Hot reloading with Vite integration and custom middleware for request logging
+- **Runtime**: Node.js with Express.js REST API
+- **Database ORM**: Drizzle ORM with PostgreSQL
+- **API Structure**: RESTful endpoints for core functionalities (categories, providers, reviews, requests, messaging).
+- **Development Setup**: Hot reloading with Vite, custom middleware.
 
 ## Data Storage
-- **Primary Database**: PostgreSQL accessed through Neon Database serverless driver with WebSocket support
-- **ORM**: Drizzle ORM with type-safe database operations and automatic schema synchronization
-- **Schema Design**: Relational model with tables for users, service categories, providers, reviews, service requests, and messages
-- **Type Safety**: Database schema definitions shared between frontend and backend using Drizzle Zod integration
-- **Data Management**: DatabaseStorage class implementing all CRUD operations with automatic seeding
-- **Object Storage**: Replit Object Storage for photo uploads with public visibility for review photos
-- **Enhanced Reviews**: Review schema supports photo arrays, detailed ratings, verification status, and recommendation flags
+- **Primary Database**: PostgreSQL via Neon Database serverless driver
+- **ORM**: Drizzle ORM for type-safe operations and schema synchronization.
+- **Schema Design**: Relational model including users, categories, providers, reviews, service requests, and messages.
+- **Type Safety**: Drizzle Zod integration for shared schema definitions.
+- **Object Storage**: Replit Object Storage for photo uploads (reviews, menus).
+- **Advanced Features**: Enhanced review schema (detailed ratings, photos), provider availability management, menu management (items, documents), multi-category provider registration.
 
 ## Authentication & Authorization
-- **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
-- **User Types**: Regular users and service providers with role-based access
-- **Profile Management**: User profiles with building/apartment information for local community features
+- **Session Management**: Express sessions with PostgreSQL store.
+- **User Types**: Regular users and service providers with role-based access.
+- **Profile Management**: User profiles with community-specific information.
+- **Provider Verification**: System for tracking verification status (basic, standard, premium) and background checks.
 
 ## Key Features Architecture
-- **Service Discovery**: Categorized service listings with search and filtering capabilities
-- **Provider Profiles**: Detailed provider pages with ratings, reviews, and service descriptions
-- **Advanced Review System**: Enhanced rating system with detailed criteria (service quality, communication, punctuality, value for money), photo uploads, verification badges, and recommendation tracking
-- **Photo Upload**: Object storage integration for review photos with automatic ACL management
-- **Request Management**: Service request workflow for booking and communication between users and providers
-- **Responsive Design**: Mobile-first approach with responsive components and mobile navigation
+- **Service Discovery**: Categorized listings with search and filters.
+- **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
+- **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
+- **One-Click Booking**: Calendar interface with time slot selection and availability checking.
+- **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
+- **Localization**: Complete Spanish translation of the platform.
 
 # External Dependencies
 
 ## Database & Storage
-- **Neon Database**: Serverless PostgreSQL database hosting
-- **Drizzle ORM**: Type-safe SQL query builder and migration tool
+- **Neon Database**: Serverless PostgreSQL hosting.
+- **Drizzle ORM**: Type-safe SQL query builder.
+- **Replit Object Storage**: For photo and document uploads.
 
 ## UI & Styling
-- **Tailwind CSS**: Utility-first CSS framework for responsive design
-- **Shadcn/ui**: Pre-built accessible component library based on Radix UI
-- **Radix UI**: Unstyled, accessible UI primitives for custom component development
-- **Lucide React**: Icon library for consistent iconography
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Shadcn/ui**: Pre-built accessible React components.
+- **Radix UI**: Unstyled, accessible UI primitives.
+- **Lucide React**: Icon library.
 
 ## Development Tools
-- **Vite**: Fast development server and build tool with TypeScript support
-- **PostCSS**: CSS processing with Tailwind CSS integration
-- **ESBuild**: Fast JavaScript bundler for production builds
+- **Vite**: Fast development server and build tool.
+- **PostCSS**: CSS processing.
+- **ESBuild**: Fast JavaScript bundler.
 
 ## Frontend Libraries
-- **TanStack Query**: Server state management and data fetching
-- **React Hook Form**: Form handling with validation
-- **Zod**: Runtime type validation and schema definition
-- **Date-fns**: Date manipulation and formatting utilities
-- **Class Variance Authority**: Type-safe component variant management
+- **TanStack Query**: Server state management.
+- **React Hook Form**: Form handling.
+- **Zod**: Runtime type validation.
+- **Date-fns**: Date manipulation.
+- **Class Variance Authority**: Type-safe component variant management.
 
-## Session & State
-- **Connect PG Simple**: PostgreSQL session store for Express sessions
-- **Express**: Web framework for API endpoints and middleware
+## Backend & Session
+- **Express**: Web framework.
+- **Connect PG Simple**: PostgreSQL session store.
