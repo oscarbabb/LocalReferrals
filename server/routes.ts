@@ -26,6 +26,7 @@ import {
   insertMenuItemVariationSchema
 } from "@shared/schema";
 import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail } from "./email.js";
+import bcrypt from "bcrypt";
 
 // Lazy initialize Stripe - only when needed
 let stripe: Stripe | null = null;
@@ -119,9 +120,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // In a real app, you would hash and compare passwords
-      // For now, we'll implement basic validation
-      if (user.password !== password) {
+      // Securely compare passwords using bcrypt
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
@@ -974,7 +975,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User already exists" });
       }
       
-      const user = await storage.createUser(validatedData);
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      const user = await storage.createUser({
+        ...validatedData,
+        password: hashedPassword
+      });
       
       // Generate secure provider setup token if user is registering as provider
       let providerSetupToken = null;
