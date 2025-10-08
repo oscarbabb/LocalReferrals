@@ -111,6 +111,7 @@ export const serviceRequests = pgTable("service_requests", {
   notes: text("notes"),
   status: text("status").default("pending"), // pending, confirmed, in_progress, completed, cancelled
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }),
+  paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID for idempotency
   confirmedDate: timestamp("confirmed_date"),
   confirmedTime: text("confirmed_time"),
   createdAt: timestamp("created_at").default(sql`now()`),

@@ -251,33 +251,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event;
 
     try {
-      // For development, if no webhook secret is set, skip verification
+      // Webhook secret configuration with environment-aware handling
       if (process.env.STRIPE_WEBHOOK_SECRET) {
         event = getStripe().webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+        console.log('✅ Webhook signature verified');
       } else {
+        // Development mode: Skip verification with warning
+        console.warn('⚠️  STRIPE_WEBHOOK_SECRET not set - skipping webhook signature verification (development mode only)');
         event = req.body;
       }
     } catch (err: any) {
-      console.log(`Webhook signature verification failed.`, err.message);
+      console.error('❌ Webhook signature verification failed:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        console.log('Payment succeeded:', paymentIntent.id);
-        // TODO: Update booking status, send confirmation emails
-        break;
-      case 'payment_intent.payment_failed':
-        const failedPayment = event.data.object;
-        console.log('Payment failed:', failedPayment.id);
-        // TODO: Handle failed payment
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+    // Wrap all webhook logic in try-catch and always return 200 (Stripe requirement)
+    try {
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log('💳 Payment succeeded:', paymentIntent.id);
+          
+          try {
+            // 1. Check idempotency - ensure we haven't already processed this payment
+            const existingBooking = await storage.getServiceRequestByPaymentIntentId(paymentIntent.id);
+            if (existingBooking) {
+              console.log('✅ Booking already exists for payment intent:', paymentIntent.id);
+              break;
+            }
+
+            // 2. Extract metadata from payment intent
+            const metadata = paymentIntent.metadata;
+            if (!metadata || !metadata.userId || !metadata.providerId) {
+              console.error('❌ Missing required metadata in payment intent:', paymentIntent.id);
+              break;
+            }
+
+            // 3. Get user and provider information for emails
+            const user = await storage.getUser(metadata.userId);
+            const provider = await storage.getProvider(metadata.providerId);
+            
+            if (!user || !provider) {
+              console.error('❌ User or provider not found:', { userId: metadata.userId, providerId: metadata.providerId });
+              break;
+            }
+
+            const providerUser = await storage.getUser(provider.userId);
+            if (!providerUser) {
+              console.error('❌ Provider user not found:', provider.userId);
+              break;
+            }
+
+            // 4. Create service request in database
+            const bookingData = {
+              requesterId: metadata.userId,
+              providerId: metadata.providerId,
+              categoryId: metadata.categoryId,
+              title: metadata.serviceTitle || 'Servicio',
+              description: metadata.notes || '',
+              preferredDate: metadata.date ? new Date(metadata.date) : null,
+              preferredTime: metadata.time || null,
+              estimatedDuration: metadata.duration ? parseInt(metadata.duration) : null,
+              location: metadata.location || '',
+              notes: metadata.notes || '',
+              totalAmount: (paymentIntent.amount / 100).toString(), // Convert from centavos to pesos
+              status: 'confirmed',
+              paymentIntentId: paymentIntent.id,
+              confirmedDate: new Date(),
+              confirmedTime: metadata.time || null,
+            };
+
+            const newBooking = await storage.createServiceRequest(bookingData);
+            console.log('✅ Booking created:', newBooking.id);
+
+            // 5. Send confirmation email to customer (non-blocking)
+            try {
+              await sendBookingConfirmationEmail(
+                user.email,
+                user.fullName || user.username,
+                providerUser.fullName || providerUser.username,
+                metadata.serviceTitle || 'Servicio',
+                metadata.date ? new Date(metadata.date).toLocaleDateString('es-MX') : 'Por confirmar',
+                metadata.time || 'Por confirmar'
+              );
+              console.log('✅ Confirmation email sent to customer:', user.email);
+            } catch (emailError) {
+              console.error('⚠️  Failed to send confirmation email to customer:', emailError);
+              // Don't block - email failure shouldn't prevent booking creation
+            }
+
+            // 6. Send notification email to provider (non-blocking)
+            try {
+              await sendBookingNotificationEmail(
+                providerUser.email,
+                providerUser.fullName || providerUser.username,
+                user.fullName || user.username,
+                metadata.serviceTitle || 'Servicio',
+                metadata.date ? new Date(metadata.date).toLocaleDateString('es-MX') : 'Por confirmar',
+                metadata.time || 'Por confirmar'
+              );
+              console.log('✅ Notification email sent to provider:', providerUser.email);
+            } catch (emailError) {
+              console.error('⚠️  Failed to send notification email to provider:', emailError);
+              // Don't block - email failure shouldn't prevent booking creation
+            }
+
+            console.log('🎉 Payment processing complete for:', paymentIntent.id);
+          } catch (processingError) {
+            console.error('❌ Error processing payment_intent.succeeded:', processingError);
+            // Log but don't throw - we still want to return 200 to Stripe
+          }
+          break;
+
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          console.error('❌ Payment failed:', {
+            paymentIntentId: failedPayment.id,
+            amount: failedPayment.amount / 100,
+            currency: failedPayment.currency,
+            error: failedPayment.last_payment_error?.message || 'Unknown error'
+          });
+          
+          // TODO: Send failure notification email to customer if user info available in metadata
+          try {
+            const metadata = failedPayment.metadata;
+            if (metadata && metadata.userId) {
+              const user = await storage.getUser(metadata.userId);
+              if (user && user.email) {
+                console.log('📧 Payment failure notification would be sent to:', user.email);
+                // Implement failure email if needed
+              }
+            }
+          } catch (err) {
+            console.error('Error handling payment failure notification:', err);
+          }
+          break;
+
+        default:
+          console.log(`ℹ️  Unhandled event type: ${event.type}`);
+      }
+    } catch (error) {
+      // Log all errors for debugging, but always return 200 (Stripe requirement)
+      console.error('❌ Webhook processing error:', error);
     }
 
+    // Always return 200 to Stripe to acknowledge receipt
     res.json({ received: true });
   });
 

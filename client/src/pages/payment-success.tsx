@@ -6,20 +6,26 @@ import { CheckCircle, Calendar, MessageSquare, Home } from "lucide-react";
 
 export default function PaymentSuccess() {
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [paymentIntentId, setPaymentIntentId] = useState<string>('');
+  const [bookingId, setBookingId] = useState<string>('');
   const [, setLocation] = useLocation();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const paymentIntentId = urlParams.get('payment_intent');
+    const paymentIntent = urlParams.get('payment_intent');
     const paymentIntentClientSecret = urlParams.get('payment_intent_client_secret');
     const redirectStatus = urlParams.get('redirect_status');
 
     if (redirectStatus === 'succeeded') {
       setPaymentStatus('success');
       
-      // TODO: Create booking record in database
-      // TODO: Send confirmation email
-      // TODO: Notify service provider
+      // Extract payment intent ID for display
+      if (paymentIntent) {
+        setPaymentIntentId(paymentIntent);
+        // The webhook will handle booking creation, email sending, and provider notification
+        // The booking ID would be available from the webhook processing
+        console.log('✅ Payment successful for payment intent:', paymentIntent);
+      }
       
     } else if (redirectStatus === 'processing') {
       setPaymentStatus('loading');
@@ -112,8 +118,19 @@ export default function PaymentSuccess() {
             </Link>
           </div>
 
-          <div className="text-center text-sm text-gray-600">
-            <p>Número de confirmación: #{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+          <div className="text-center text-sm text-gray-600 space-y-2" data-testid="confirmation-details">
+            {paymentIntentId ? (
+              <>
+                <p className="font-mono text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                  ID de Pago: {paymentIntentId}
+                </p>
+                <p className="text-green-700 dark:text-green-400">
+                  ✅ Tu reserva está siendo procesada. Revisa tu correo electrónico para los detalles de confirmación.
+                </p>
+              </>
+            ) : (
+              <p>Procesando tu reserva...</p>
+            )}
           </div>
         </CardContent>
       </Card>

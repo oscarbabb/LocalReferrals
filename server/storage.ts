@@ -91,6 +91,7 @@ export interface IStorage {
   getServiceRequests(): Promise<ServiceRequest[]>;
   getServiceRequestsByUser(userId: string): Promise<ServiceRequest[]>;
   getServiceRequestsByProvider(providerId: string): Promise<ServiceRequest[]>;
+  getServiceRequestByPaymentIntentId(paymentIntentId: string): Promise<ServiceRequest | undefined>;
   createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
   updateServiceRequest(id: string, request: Partial<ServiceRequest>): Promise<ServiceRequest | undefined>;
 
@@ -580,6 +581,10 @@ export class MemStorage implements IStorage {
 
   async getServiceRequestsByProvider(providerId: string): Promise<ServiceRequest[]> {
     return Array.from(this.serviceRequests.values()).filter(r => r.providerId === providerId);
+  }
+
+  async getServiceRequestByPaymentIntentId(paymentIntentId: string): Promise<ServiceRequest | undefined> {
+    return Array.from(this.serviceRequests.values()).find(r => r.paymentIntentId === paymentIntentId);
   }
 
   async createServiceRequest(insertRequest: InsertServiceRequest): Promise<ServiceRequest> {

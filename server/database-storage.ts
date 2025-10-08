@@ -172,6 +172,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(serviceRequests).where(eq(serviceRequests.providerId, providerId));
   }
 
+  async getServiceRequestByPaymentIntentId(paymentIntentId: string): Promise<ServiceRequest | undefined> {
+    const [request] = await db.select().from(serviceRequests).where(eq(serviceRequests.paymentIntentId, paymentIntentId));
+    return request || undefined;
+  }
+
   async createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest> {
     const [newRequest] = await db.insert(serviceRequests).values(request).returning();
     return newRequest;
