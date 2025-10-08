@@ -2,6 +2,15 @@
 
 "Referencias Locales" is a full-stack TypeScript application functioning as a local services marketplace. It connects residents within communities with verified local service providers (cleaners, tutors, handymen, etc.), enabling users to discover, rate, and request services. The platform aims to foster trust and facilitate local commerce within residential areas.
 
+## Recent Changes (October 8, 2025)
+
+**Review Photo Upload Bug Fix:**
+- Fixed critical bug where clicking "Agregar Fotos" button in review form was prematurely submitting the review
+- Added `type="button"` to ObjectUploader component to prevent default form submission behavior
+- Photo upload button now correctly opens the upload modal without triggering form submission
+- Users can now properly attach multiple photos before submitting their review
+- All form buttons verified to have correct type attributes to prevent future submission issues
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
