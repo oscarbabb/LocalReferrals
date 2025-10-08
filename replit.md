@@ -6,13 +6,15 @@
 
 **Full Platform Internationalization (Spanish/English):**
 - Implemented modular locale architecture with feature-based translation files in `client/src/locales/{en,es}/`
-- Created comprehensive translations for all user-facing pages: home, services, bookings, messages, navigation
+- Created comprehensive translations for all user-facing pages: home (37 keys), services, bookings, messages, navigation
 - Updated all pages to use `t()` translation function from `useLanguage` hook
 - Language toggle in header switches entire platform between Spanish and English
 - Language preference persists in localStorage and survives page navigation/refresh
 - Translation system uses dot-notation naming convention (e.g., `bookings.title`, `messages.modal.send`)
 - Modular structure allows easy addition of new translations and languages
 - Default language: Spanish (es), supported languages: Spanish (es), English (en)
+- **Dynamic Date Formatting**: Implemented locale-aware date-fns formatting - all dates and timestamps (messages, bookings, calendar) dynamically switch between English/Spanish based on selected language
+- **Translation Coverage**: 80+ translation keys covering navigation, home page, services, bookings, messages, authentication, and common UI elements
 
 **Messages/Inbox Page Implementation:**
 - Created comprehensive Messages page (`/messages`) for viewing all user conversations
