@@ -4,6 +4,15 @@
 
 ## Recent Changes (October 8, 2025)
 
+**Messages/Inbox Page Implementation:**
+- Created comprehensive Messages page (`/messages`) for viewing all user conversations
+- Added backend API endpoint `GET /api/messages/user/:userId` with authentication and authorization
+- Implemented conversation list showing participant names, last message preview, and relative timestamps
+- Integrated with existing MessagingModal for seamless conversation viewing and sending
+- Added navigation link with MessageCircle icon in header
+- Fixed critical bug in queryKey to properly fetch user conversations
+- Both providers and consumers can now access their complete message history in one place
+
 **Review Photo Upload Bug Fix:**
 - Fixed critical bug where clicking "Agregar Fotos" button in review form was prematurely submitting the review
 - Added `type="button"` to ObjectUploader component to prevent default form submission behavior
@@ -50,6 +59,7 @@ Preferred communication style: Simple, everyday language.
 - **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
 - **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
 - **One-Click Booking**: Calendar interface with time slot selection and availability checking.
+- **Messaging System**: Complete inbox page for viewing all conversations, MessagingModal for direct communication between providers and consumers, message history with timestamps.
 - **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
 - **Localization**: Complete Spanish translation of the platform.
 
