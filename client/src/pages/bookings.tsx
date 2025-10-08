@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +72,7 @@ export default function Bookings() {
   const [selectedProvider, setSelectedProvider] = useState<{ id: string; name: string } | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Get current user
   const { data: user } = useQuery<User>({
@@ -104,8 +106,8 @@ export default function Bookings() {
     },
     onSuccess: () => {
       toast({
-        title: "Estado actualizado",
-        description: "La solicitud ha sido actualizada exitosamente.",
+        title: t('bookings.toast.statusUpdated'),
+        description: t('bookings.toast.statusSuccess'),
       });
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ["/api/service-requests/user", user?.id] });
@@ -113,8 +115,8 @@ export default function Bookings() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "No se pudo actualizar el estado.",
+        title: t('bookings.toast.error'),
+        description: error.message || t('bookings.toast.updateFailed'),
         variant: "destructive",
       });
     },
@@ -122,12 +124,12 @@ export default function Bookings() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { label: "Pendiente", variant: "secondary" as const, icon: AlertCircle },
-      confirmed: { label: "Confirmado", variant: "default" as const, icon: CheckCircle },
-      in_progress: { label: "En Progreso", variant: "default" as const, icon: Clock },
-      completed: { label: "Completado", variant: "default" as const, icon: CheckCircle },
-      cancelled: { label: "Cancelado", variant: "destructive" as const, icon: XCircle },
-      scheduled: { label: "Programado", variant: "default" as const, icon: Calendar },
+      pending: { label: t('bookings.status.pending'), variant: "secondary" as const, icon: AlertCircle },
+      confirmed: { label: t('bookings.status.confirmed'), variant: "default" as const, icon: CheckCircle },
+      in_progress: { label: t('bookings.status.inProgress'), variant: "default" as const, icon: Clock },
+      completed: { label: t('bookings.status.completed'), variant: "default" as const, icon: CheckCircle },
+      cancelled: { label: t('bookings.status.cancelled'), variant: "destructive" as const, icon: XCircle },
+      scheduled: { label: t('bookings.status.scheduled'), variant: "default" as const, icon: Calendar },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -244,8 +246,8 @@ export default function Bookings() {
                     setShowMessagingModal(true);
                   } else {
                     toast({
-                      title: "No disponible",
-                      description: "No se puede enviar mensaje en este momento.",
+                      title: t('bookings.toast.messageUnavailable'),
+                      description: t('bookings.toast.cannotMessage'),
                       variant: "destructive",
                     });
                   }
@@ -253,12 +255,12 @@ export default function Bookings() {
                 disabled={!getMessageRecipient()?.id}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Mensaje
+                {t('bookings.buttons.message')}
               </Button>
               {request.status === "completed" && (
                 <Button variant="outline" size="sm" data-testid={`button-rate-${request.id}`}>
                   <Star className="w-4 h-4 mr-2" />
-                  Calificar
+                  {t('bookings.buttons.rate')}
                 </Button>
               )}
             </div>
@@ -272,7 +274,7 @@ export default function Bookings() {
                   onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "cancelled" })}
                   disabled={updateStatusMutation.isPending}
                 >
-                  Cancelar
+                  {t('bookings.buttons.cancel')}
                 </Button>
                 <Button 
                   size="sm" 
@@ -281,7 +283,7 @@ export default function Bookings() {
                   onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "confirmed" })}
                   disabled={updateStatusMutation.isPending}
                 >
-                  Confirmar
+                  {t('bookings.buttons.confirm')}
                 </Button>
               </div>
             )}
@@ -323,7 +325,7 @@ export default function Bookings() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg" data-testid={`text-appointment-title-${appointment.id}`}>Cita Programada</h3>
+                <h3 className="font-semibold text-lg" data-testid={`text-appointment-title-${appointment.id}`}>{t('bookings.appointments.scheduledTitle')}</h3>
                 <p className="text-gray-600" data-testid={`text-appointment-provider-${appointment.id}`}>{appointment.provider?.title || "Proveedor"}</p>
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                   <div className="flex items-center gap-1" data-testid={`text-appointment-date-${appointment.id}`}>
@@ -365,8 +367,8 @@ export default function Bookings() {
                   setShowMessagingModal(true);
                 } else {
                   toast({
-                    title: "No disponible",
-                    description: "No se puede enviar mensaje en este momento.",
+                    title: t('bookings.toast.messageUnavailable'),
+                    description: t('bookings.toast.cannotMessage'),
                     variant: "destructive",
                   });
                 }
@@ -374,16 +376,16 @@ export default function Bookings() {
               disabled={!getMessageRecipient()?.id}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              Contactar
+              {t('bookings.buttons.contact')}
             </Button>
             
             {appointment.status === "scheduled" && (
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" data-testid={`button-reschedule-${appointment.id}`}>
-                  Reprogramar
+                  {t('bookings.buttons.reschedule')}
                 </Button>
                 <Button variant="destructive" size="sm" data-testid={`button-cancel-appointment-${appointment.id}`}>
-                  Cancelar
+                  {t('bookings.buttons.cancel')}
                 </Button>
               </div>
             )}
@@ -398,12 +400,12 @@ export default function Bookings() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
             <CardContent className="text-center py-12">
-              <h2 className="text-2xl font-semibold mb-4">Acceso Requerido</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('bookings.auth.required')}</h2>
               <p className="text-gray-600 mb-6">
-                Debes iniciar sesión para ver tus reservas y citas.
+                {t('bookings.auth.message')}
               </p>
               <Button onClick={() => window.location.href = "/auth"}>
-                Iniciar Sesión
+                {t('bookings.auth.loginBtn')}
               </Button>
             </CardContent>
           </Card>
@@ -414,9 +416,9 @@ export default function Bookings() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Reservas</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('bookings.title')}</h1>
           <p className="text-gray-600">
-            Gestiona tus solicitudes de servicio y citas programadas
+            {t('bookings.description')}
           </p>
         </div>
 
@@ -424,15 +426,15 @@ export default function Bookings() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="requests" className="flex items-center gap-2" data-testid="tab-my-requests">
               <User className="w-4 h-4" />
-              Mis Solicitudes
+              {t('bookings.tabs.myRequests')}
             </TabsTrigger>
             <TabsTrigger value="received" className="flex items-center gap-2" data-testid="tab-received-requests">
               <Star className="w-4 h-4" />
-              Solicitudes Recibidas
+              {t('bookings.tabs.received')}
             </TabsTrigger>
             <TabsTrigger value="appointments" className="flex items-center gap-2" data-testid="tab-appointments">
               <Calendar className="w-4 h-4" />
-              Citas Programadas
+              {t('bookings.tabs.appointments')}
             </TabsTrigger>
           </TabsList>
 
@@ -441,7 +443,7 @@ export default function Bookings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  Mis Solicitudes de Servicio
+                  {t('bookings.requests.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -463,13 +465,13 @@ export default function Bookings() {
                   <div className="text-center py-12">
                     <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No tienes solicitudes
+                      {t('bookings.requests.noRequests')}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                      Explora nuestros proveedores y solicita un servicio
+                      {t('bookings.requests.exploreServices')}
                     </p>
                     <Button onClick={() => window.location.href = "/services"}>
-                      Explorar Servicios
+                      {t('bookings.requests.exploreServicesBtn')}
                     </Button>
                   </div>
                 )}
@@ -482,7 +484,7 @@ export default function Bookings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5" />
-                  Solicitudes Recibidas
+                  {t('bookings.requests.receivedTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -504,13 +506,13 @@ export default function Bookings() {
                   <div className="text-center py-12">
                     <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No has recibido solicitudes
+                      {t('bookings.requests.noReceived')}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                      Cuando ofrezcas servicios, las solicitudes aparecerán aquí
+                      {t('bookings.requests.setupProvider')}
                     </p>
                     <Button onClick={() => window.location.href = "/profile"}>
-                      Configurar Perfil de Proveedor
+                      {t('bookings.requests.setupProviderBtn')}
                     </Button>
                   </div>
                 )}
@@ -523,7 +525,7 @@ export default function Bookings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  Citas Programadas
+                  {t('bookings.appointments.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -545,13 +547,13 @@ export default function Bookings() {
                   <div className="text-center py-12">
                     <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No tienes citas programadas
+                      {t('bookings.appointments.noAppointments')}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                      Tus citas confirmadas aparecerán aquí
+                      {t('bookings.appointments.willAppearHere')}
                     </p>
                     <Button onClick={() => window.location.href = "/providers"}>
-                      Buscar Proveedores
+                      {t('bookings.appointments.findProvidersBtn')}
                     </Button>
                   </div>
                 )}

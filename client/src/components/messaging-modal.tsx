@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ export default function MessagingModal({
 }: MessagingModalProps) {
   const [messageContent, setMessageContent] = useState("");
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -67,8 +69,8 @@ export default function MessagingModal({
     },
     onSuccess: () => {
       toast({
-        title: "Mensaje enviado",
-        description: "Tu mensaje ha sido enviado exitosamente.",
+        title: t('messages.toast.sent'),
+        description: t('messages.toast.sentSuccess'),
       });
       
       // Clear input
@@ -81,8 +83,8 @@ export default function MessagingModal({
     },
     onError: (error: Error) => {
       toast({
-        title: "Error al enviar mensaje",
-        description: error.message || "No se pudo enviar el mensaje. Intenta nuevamente.",
+        title: t('messages.toast.error'),
+        description: error.message || t('messages.toast.tryAgain'),
         variant: "destructive",
       });
     },
@@ -93,8 +95,8 @@ export default function MessagingModal({
     
     if (!trimmedContent) {
       toast({
-        title: "Mensaje vacío",
-        description: "Por favor escribe un mensaje antes de enviar.",
+        title: t('messages.toast.emptyMessage'),
+        description: t('messages.toast.writeMessage'),
         variant: "destructive",
       });
       return;
@@ -102,8 +104,8 @@ export default function MessagingModal({
     
     if (!currentUserId) {
       toast({
-        title: "No autenticado",
-        description: "Debes iniciar sesión para enviar mensajes.",
+        title: t('messages.modal.authRequired'),
+        description: t('messages.modal.authMessage'),
         variant: "destructive",
       });
       return;
@@ -125,15 +127,15 @@ export default function MessagingModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[500px]" data-testid="dialog-messaging-unauthenticated">
           <DialogHeader>
-            <DialogTitle>Iniciar sesión requerido</DialogTitle>
+            <DialogTitle>{t('messages.modal.authRequired')}</DialogTitle>
             <DialogDescription>
-              Debes iniciar sesión para enviar mensajes a {recipientName}.
+              {t('messages.modal.authMessage')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-6 text-center">
             <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 mb-6">
-              Inicia sesión o crea una cuenta para comenzar a comunicarte con los proveedores.
+              {t('messages.modal.authMessage')}
             </p>
             <Button
               onClick={() => {
@@ -143,7 +145,7 @@ export default function MessagingModal({
               className="bg-orange-600 hover:bg-orange-700"
               data-testid="button-login-to-message"
             >
-              Iniciar Sesión
+              {t('messages.modal.loginBtn')}
             </Button>
           </div>
         </DialogContent>
@@ -177,10 +179,10 @@ export default function MessagingModal({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <MessageCircle className="w-16 h-16 text-gray-300 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2" data-testid="text-empty-conversation">
-                No hay mensajes aún
+                {t('messages.modal.noMessages')}
               </h3>
               <p className="text-gray-500">
-                Comienza la conversación enviando el primer mensaje.
+                {t('messages.modal.startConversation')}
               </p>
             </div>
           ) : (
@@ -223,7 +225,7 @@ export default function MessagingModal({
         {/* Message Input */}
         <div className="flex gap-2 pt-4 border-t">
           <Textarea
-            placeholder="Escribe tu mensaje..."
+            placeholder={t('messages.modal.typeMessage')}
             value={messageContent}
             onChange={(e) => setMessageContent(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -242,7 +244,7 @@ export default function MessagingModal({
             ) : (
               <>
                 <Send className="w-5 h-5 mr-2" />
-                Enviar
+                {t('messages.modal.send')}
               </>
             )}
           </Button>

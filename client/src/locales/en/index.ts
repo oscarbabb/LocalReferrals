@@ -14,6 +14,11 @@ export const en = {
   'nav.logout': 'Sign Out',
   'nav.bookings': 'My Bookings',
   'nav.messages': 'Messages',
+  'nav.tour': 'Take Platform Tour',
+  'nav.logoutToastTitle': 'Logged out',
+  'nav.logoutToastSuccess': 'You have successfully logged out.',
+  'nav.logoutToastError': 'Logout error',
+  'nav.logoutToastErrorDesc': 'There was a problem logging out.',
   
   // Home page (existing)
   'home.title': 'Local References',

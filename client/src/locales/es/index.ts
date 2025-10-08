@@ -14,6 +14,11 @@ export const es = {
   'nav.logout': 'Cerrar Sesión',
   'nav.bookings': 'Mis Reservas',
   'nav.messages': 'Mensajes',
+  'nav.tour': 'Ver Tour de la Plataforma',
+  'nav.logoutToastTitle': 'Sesión cerrada',
+  'nav.logoutToastSuccess': 'Has cerrado sesión exitosamente.',
+  'nav.logoutToastError': 'Error al cerrar sesión',
+  'nav.logoutToastErrorDesc': 'Hubo un problema al cerrar tu sesión.',
   
   // Home page (existing)
   'home.title': 'Referencias Locales',

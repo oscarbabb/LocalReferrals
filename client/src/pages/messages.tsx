@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +14,7 @@ import type { Conversation } from "@shared/schema";
 
 export default function Messages() {
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const userId = (user as any)?.id;
   const [selectedConversation, setSelectedConversation] = useState<{
     userId: string;
@@ -61,10 +63,10 @@ export default function Messages() {
           <div className="text-center py-16">
             <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Iniciar sesión requerido
+              {t('messages.authRequired')}
             </h2>
             <p className="text-gray-600">
-              Debes iniciar sesión para ver tus mensajes.
+              {t('messages.authMessage')}
             </p>
           </div>
         </div>
@@ -79,10 +81,10 @@ export default function Messages() {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <Inbox className="w-8 h-8 text-orange-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Mis Mensajes</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('messages.title')}</h1>
           </div>
           <p className="text-gray-600">
-            Gestiona todas tus conversaciones en un solo lugar
+            {t('messages.description')}
           </p>
         </div>
 
@@ -111,11 +113,10 @@ export default function Messages() {
           <div className="text-center py-16" data-testid="empty-conversations">
             <MessageCircle className="w-20 h-20 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No tienes conversaciones aún
+              {t('messages.noConversations')}
             </h3>
             <p className="text-gray-600 max-w-md mx-auto">
-              Cuando envíes o recibas mensajes, aparecerán aquí. Explora
-              proveedores y comienza a chatear.
+              {t('messages.startMessaging')}
             </p>
           </div>
         )}
@@ -173,7 +174,7 @@ export default function Messages() {
                             data-testid={`text-last-message-${conversation.otherUserId}`}
                           >
                             {isUserSender && (
-                              <span className="text-orange-600 font-medium">Tú: </span>
+                              <span className="text-orange-600 font-medium">{t('messages.you')}: </span>
                             )}
                             {truncateMessage(conversation.lastMessage)}
                           </p>

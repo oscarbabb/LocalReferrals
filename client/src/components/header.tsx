@@ -24,14 +24,14 @@ export default function Header() {
       // Clear all cached data
       queryClient.clear();
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión exitosamente.",
+        title: t('nav.logoutToastTitle'),
+        description: t('nav.logoutToastSuccess'),
       });
       setLocation("/");
     } catch (error) {
       toast({
-        title: "Error al cerrar sesión",
-        description: "Hubo un problema al cerrar tu sesión.",
+        title: t('nav.logoutToastError'),
+        description: t('nav.logoutToastErrorDesc'),
         variant: "destructive",
       });
     }
@@ -41,8 +41,8 @@ export default function Header() {
     { href: "/services", label: t('nav.services') },
     { href: "/como-funciona", label: t('nav.howItWorks') },
     { href: "/providers", label: t('nav.providers') },
-    { href: "/bookings", label: "Mis Reservas" },
-    { href: "/messages", label: "Mensajes", icon: MessageCircle },
+    { href: "/bookings", label: t('nav.bookings') },
+    { href: "/messages", label: t('nav.messages'), icon: MessageCircle },
     { href: "/testimonials", label: t('nav.testimonials') },
   ];
 
@@ -86,7 +86,7 @@ export default function Header() {
               data-testid="button-start-tour"
             >
               <Sparkles className="w-4 h-4 mr-2 transition-transform hover:rotate-12" />
-              Tour
+              {t('nav.tour')}
             </Button>
             
             {isAuthenticated ? (
@@ -166,7 +166,7 @@ export default function Header() {
                   data-testid="button-start-tour-mobile"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Ver Tour de la Plataforma
+                  {t('nav.tour')}
                 </Button>
                 
                 {isAuthenticated ? (
