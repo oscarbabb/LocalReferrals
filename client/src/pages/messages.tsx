@@ -21,7 +21,7 @@ export default function Messages() {
 
   // Fetch user's conversations
   const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
-    queryKey: ["/api/messages/user", userId],
+    queryKey: [`/api/messages/user/${userId}`],
     enabled: !!userId && isAuthenticated,
   });
 
