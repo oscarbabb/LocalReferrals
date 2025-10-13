@@ -146,6 +146,18 @@ export const es = {
   'common.delete': 'Eliminar',
   'common.close': 'Cerrar',
   
+  // Invite
+  'invite.button': 'Invitar Amigos',
+  'invite.title': 'Invita a tus Vecinos',
+  'invite.description': 'Comparte Referencias Locales con tus vecinos y ayuda a crecer nuestra comunidad',
+  'invite.whatsapp': 'Compartir por WhatsApp',
+  'invite.email': 'Compartir por Email',
+  'invite.messageTitle': '¡Únete a Referencias Locales!',
+  'invite.messageBody': '¡Hola! Te invito a unirte a Referencias Locales, una plataforma donde puedes encontrar servicios confiables de vecinos verificados en nuestra comunidad. Desde limpieza hasta tutorías, encuentra profesionales recomendados. ¡Únete ahora!',
+  'invite.emailSubject': 'Te invito a Referencias Locales',
+  'invite.copied': 'Enlace copiado al portapapeles',
+  'invite.copyLink': 'Copiar Enlace',
+  
   // Import feature translations
   ...bookings,
   ...messages,

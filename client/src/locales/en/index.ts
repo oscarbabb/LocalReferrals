@@ -146,6 +146,18 @@ export const en = {
   'common.delete': 'Delete',
   'common.close': 'Close',
   
+  // Invite
+  'invite.button': 'Invite Friends',
+  'invite.title': 'Invite Your Neighbors',
+  'invite.description': 'Share Local References with your neighbors and help grow our community',
+  'invite.whatsapp': 'Share via WhatsApp',
+  'invite.email': 'Share via Email',
+  'invite.messageTitle': 'Join Local References!',
+  'invite.messageBody': 'Hi! I invite you to join Local References, a platform where you can find trusted services from verified neighbors in our community. From cleaning to tutoring, find recommended professionals. Join now!',
+  'invite.emailSubject': 'I invite you to Local References',
+  'invite.copied': 'Link copied to clipboard',
+  'invite.copyLink': 'Copy Link',
+  
   // Import feature translations
   ...bookings,
   ...messages,
