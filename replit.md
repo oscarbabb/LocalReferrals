@@ -4,6 +4,18 @@
 
 ## Recent Changes (October 13, 2025)
 
+**Legal Documentation Pages Implementation:**
+- Created Terms & Conditions page (`/terms`) with full legal content extracted from official PDF
+- Created Privacy Policy page (`/privacy`) including ARCO rights and cookie policy
+- Both pages feature complete bilingual support (Spanish/English) with 60+ translation keys
+- Professional layout with white card on gray background, proper typography, and semantic HTML
+- Back-to-home navigation button with arrow icon for easy return to main site
+- Footer links updated to route to legal pages instead of placeholder links
+- Routes registered in App.tsx for proper navigation flow
+- All interactive elements include data-testid attributes for testing
+- Legal content includes: Terms of Use, Service Scope, Obligations, Verification Process, Liability Disclaimers, ARCO Rights, Cookie Policy
+- Architect-verified as production-ready; awaiting legal counsel sign-off on content accuracy
+
 **Header Layout Optimization:**
 - Removed tour button from desktop header to save horizontal space (still available in mobile menu)
 - Reduced spacing throughout header for better space efficiency (space-x-2)
@@ -103,6 +115,7 @@ Preferred communication style: Simple, everyday language.
 - **One-Click Booking**: Calendar interface with time slot selection and availability checking.
 - **Messaging System**: Complete inbox page for viewing all conversations, MessagingModal for direct communication between providers and consumers, message history with timestamps.
 - **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
+- **Legal Documentation**: Comprehensive Terms & Conditions and Privacy Policy pages with ARCO rights, cookie policy, and full bilingual support. Accessible via footer navigation.
 - **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences.
 
 # External Dependencies
