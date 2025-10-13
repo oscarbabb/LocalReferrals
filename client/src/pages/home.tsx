@@ -333,10 +333,10 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-semibold mb-4">{t('home.footerLegalTitle')}</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white">{t('home.footerTerms')}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">{t('home.footerPrivacy')}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">{t('home.footerCookies')}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">{t('home.footerContact')}</a></li>
+                <li><Link href="/terms" className="text-gray-300 hover:text-white" data-testid="link-footer-terms">{t('home.footerTerms')}</Link></li>
+                <li><Link href="/privacy" className="text-gray-300 hover:text-white" data-testid="link-footer-privacy">{t('home.footerPrivacy')}</Link></li>
+                <li><Link href="/privacy" className="text-gray-300 hover:text-white" data-testid="link-footer-cookies">{t('home.footerCookies')}</Link></li>
+                <li><a href="mailto:legal@referenciaslocales.com.mx" className="text-gray-300 hover:text-white" data-testid="link-footer-contact">{t('home.footerContact')}</a></li>
               </ul>
             </div>
           </div>
