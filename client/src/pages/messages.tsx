@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageCircle, Inbox } from "lucide-react";
 import MessagingModal from "@/components/messaging-modal";
 import { formatDistanceToNow } from "date-fns";
+import { parseSafeDate } from "@/lib/date-utils";
 import type { Conversation } from "@shared/schema";
 
 export default function Messages() {
@@ -29,7 +30,7 @@ export default function Messages() {
   // Format relative time
   const formatTime = (date: Date | string) => {
     try {
-      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      const dateObj = parseSafeDate(date);
       return formatDistanceToNow(dateObj, { 
         addSuffix: true, 
         locale: dateLocale 
