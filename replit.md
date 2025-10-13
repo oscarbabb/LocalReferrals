@@ -7,6 +7,7 @@
 **Invite/Share Feature Implementation:**
 - Created InviteButton component (`client/src/components/invite-button.tsx`) for easy platform sharing
 - Integrated invite button into header on both desktop and mobile views
+- Button shows icon + text ("Invitar Amigos"/"Invite Friends") for clarity - highly visible and obvious
 - Multiple sharing methods: WhatsApp (wa.me URL scheme), Email (mailto links), Copy Link (clipboard API)
 - Fully bilingual with complete Spanish and English translations (10+ translation keys)
 - All user-facing text uses translation system - no hard-coded strings
