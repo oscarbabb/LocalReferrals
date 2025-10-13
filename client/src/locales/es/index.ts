@@ -159,6 +159,12 @@ export const es = {
   'invite.copyLink': 'Copiar Enlace',
   'invite.copyError': 'No se pudo copiar el enlace',
   
+  // Legal Pages
+  'legal.terms.title': 'Términos y Condiciones de Uso',
+  'legal.terms.lastUpdated': 'Última actualización: Julio 2025',
+  'legal.privacy.title': 'Política de Privacidad',
+  'legal.privacy.lastUpdated': 'Última actualización: Julio 2025',
+  
   // Import feature translations
   ...bookings,
   ...messages,
