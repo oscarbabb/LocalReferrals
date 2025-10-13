@@ -28,14 +28,25 @@ const translations = { es, en };
 export function useLanguageManager(): LanguageContextType {
   const [language, setLanguage] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('language');
-      return (saved as Language) || 'es'; // Default to Spanish
+      try {
+        const saved = localStorage.getItem('language');
+        return (saved as Language) || 'es'; // Default to Spanish
+      } catch (e) {
+        // Safari private browsing mode throws errors on localStorage access
+        console.warn('localStorage not available:', e);
+        return 'es';
+      }
     }
     return 'es';
   });
 
   useEffect(() => {
-    localStorage.setItem('language', language);
+    try {
+      localStorage.setItem('language', language);
+    } catch (e) {
+      // Safari private browsing mode - silently fail
+      console.warn('localStorage not available:', e);
+    }
     document.documentElement.lang = language;
   }, [language]);
 
