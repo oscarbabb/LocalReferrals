@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
+import InviteButton from "@/components/invite-button";
 import { useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -78,6 +79,7 @@ export default function Header() {
 
           <div className="hidden md:flex items-center space-x-4">
             <LanguageToggle />
+            <InviteButton />
             <Button 
               variant="ghost" 
               size="sm"
@@ -155,6 +157,9 @@ export default function Header() {
                 <hr className="my-4" />
                 <div className="flex items-center justify-center mb-4">
                   <LanguageToggle />
+                </div>
+                <div className="mb-2">
+                  <InviteButton />
                 </div>
                 <Button 
                   variant="ghost" 
