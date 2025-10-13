@@ -80,16 +80,6 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-2">
             <LanguageToggle />
             <InviteButton />
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={startOnboarding}
-              className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 btn-enhance transition-all duration-300"
-              data-testid="button-start-tour"
-              title={t('nav.tour')}
-            >
-              <Sparkles className="w-4 h-4 transition-transform hover:rotate-12" />
-            </Button>
             
             {isAuthenticated ? (
               <>

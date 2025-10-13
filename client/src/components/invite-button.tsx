@@ -58,9 +58,8 @@ export default function InviteButton() {
     <Dialog>
       <DialogTrigger asChild>
         <Button 
-          variant="ghost" 
           size="sm" 
-          className="hover:text-primary hover:bg-orange-50 gap-2"
+          className="bg-accent hover:bg-accent/90 text-white gap-2 shadow-sm"
           data-testid="button-invite"
         >
           <UserPlus className="h-4 w-4" />
