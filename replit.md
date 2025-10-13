@@ -2,7 +2,18 @@
 
 "Referencias Locales" is a full-stack TypeScript application functioning as a local services marketplace. It connects residents within communities with verified local service providers (cleaners, tutors, handymen, etc.), enabling users to discover, rate, and request services. The platform aims to foster trust and facilitate local commerce within residential areas.
 
-## Recent Changes (October 8, 2025)
+## Recent Changes (October 13, 2025)
+
+**Safari Browser Compatibility Fixed:**
+- Created `client/src/lib/date-utils.ts` with `parseSafeDate()` utility function for Safari-compatible date parsing
+- Fixed Safari's strict date parsing by normalizing PostgreSQL timestamps ("YYYY-MM-DD HH:mm:ss") to ISO 8601 format
+- Updated 8 components to use Safari-safe date parsing: booking-calendar, messages, bookings, provider-detail, messaging-modal, profile, provider-verification, enhanced-review-card
+- Fixed localStorage access for Safari private browsing mode with try-catch blocks in `use-language.ts`
+- Language preference now persists correctly even in Safari private browsing
+- Comprehensive testing verified no "Invalid Date" errors across all pages
+- Platform now fully functional on Safari browser
+
+**Previous Changes (October 8, 2025):**
 
 **Full Platform Internationalization (Spanish/English):**
 - Implemented modular locale architecture with feature-based translation files in `client/src/locales/{en,es}/`
