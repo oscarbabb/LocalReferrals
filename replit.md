@@ -4,10 +4,17 @@
 
 ## Recent Changes (October 13, 2025)
 
+**Header Layout Optimization:**
+- Removed tour button from desktop header to save horizontal space (still available in mobile menu)
+- Reduced spacing throughout header for better space efficiency (space-x-2)
+- All navigation items now fit properly without overflow at standard desktop widths
+- Maintains all 6 core navigation links (Services, Como Funciona, Providers, Bookings, Messages, Testimonials)
+
 **Invite/Share Feature Implementation:**
 - Created InviteButton component (`client/src/components/invite-button.tsx`) for easy platform sharing
 - Integrated invite button into header on both desktop and mobile views
 - Button shows icon + text ("Invitar Amigos"/"Invite Friends") for clarity - highly visible and obvious
+- **Prominent orange styling** using `bg-accent` color (hsl(15, 90%, 60%)) to stand out as primary call-to-action
 - Multiple sharing methods: WhatsApp (wa.me URL scheme), Email (mailto links), Copy Link (clipboard API)
 - Fully bilingual with complete Spanish and English translations (10+ translation keys)
 - All user-facing text uses translation system - no hard-coded strings
