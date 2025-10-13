@@ -157,6 +157,7 @@ export const es = {
   'invite.emailSubject': 'Te invito a Referencias Locales',
   'invite.copied': 'Enlace copiado al portapapeles',
   'invite.copyLink': 'Copiar Enlace',
+  'invite.copyError': 'No se pudo copiar el enlace',
   
   // Import feature translations
   ...bookings,

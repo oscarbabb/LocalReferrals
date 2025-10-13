@@ -43,13 +43,12 @@ export default function InviteButton() {
       setCopied(true);
       toast({
         title: t('invite.copied'),
-        description: shareUrl,
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
         title: t('common.error'),
-        description: "No se pudo copiar el enlace",
+        description: t('invite.copyError'),
         variant: "destructive",
       });
     }

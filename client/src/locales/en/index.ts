@@ -157,6 +157,7 @@ export const en = {
   'invite.emailSubject': 'I invite you to Local References',
   'invite.copied': 'Link copied to clipboard',
   'invite.copyLink': 'Copy Link',
+  'invite.copyError': 'Could not copy link',
   
   // Import feature translations
   ...bookings,
