@@ -57,14 +57,14 @@ export default function Header() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-4">
+          <nav className="hidden md:flex space-x-2">
             {navItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`nav-tab nav-item-enter ${
                   location === item.href ? "active" : ""
-                } px-1 py-2 relative text-xs font-medium whitespace-nowrap`}
+                } px-2 py-2 relative text-xs font-medium whitespace-nowrap`}
                 style={{
                   animationDelay: `${index * 0.1}s`
                 }}
@@ -77,18 +77,18 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
             <LanguageToggle />
             <InviteButton />
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={startOnboarding}
               className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 btn-enhance transition-all duration-300"
               data-testid="button-start-tour"
+              title={t('nav.tour')}
             >
-              <Sparkles className="w-4 h-4 mr-2 transition-transform hover:rotate-12" />
-              {t('nav.tour')}
+              <Sparkles className="w-4 h-4 transition-transform hover:rotate-12" />
             </Button>
             
             {isAuthenticated ? (

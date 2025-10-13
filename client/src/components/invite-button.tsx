@@ -59,12 +59,12 @@ export default function InviteButton() {
       <DialogTrigger asChild>
         <Button 
           variant="ghost" 
-          size="sm" 
-          className="gap-2"
+          size="icon" 
+          className="hover:text-primary hover:bg-orange-50"
           data-testid="button-invite"
+          title={t('invite.button')}
         >
           <UserPlus className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('invite.button')}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" data-testid="dialog-invite">
