@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, MessageCircle, Loader2 } from "lucide-react";
 import { Message } from "@shared/schema";
 import { format } from "date-fns";
+import { parseSafeDate } from "@/lib/date-utils";
 
 interface MessagingModalProps {
   open: boolean;
@@ -211,7 +212,7 @@ export default function MessagingModal({
                         }`}
                         data-testid={`text-message-time-${message.id}`}
                       >
-                        {format(new Date(message.createdAt || Date.now()), "PPp", { locale: dateLocale })}
+                        {format(parseSafeDate(message.createdAt), "PPp", { locale: dateLocale })}
                       </p>
                     </div>
                   </div>

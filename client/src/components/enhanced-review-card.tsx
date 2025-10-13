@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Star, CheckCircle, ThumbsUp } from "lucide-react";
+import { parseSafeDate } from "@/lib/date-utils";
 import type { Review } from "@shared/schema";
 
 interface EnhancedReviewCardProps {
@@ -77,7 +78,7 @@ function PhotoGallery({ photos }: { photos: string[] }) {
 }
 
 export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) {
-  const reviewDate = new Date(review.createdAt!).toLocaleDateString();
+  const reviewDate = parseSafeDate(review.createdAt).toLocaleDateString();
   const hasDetailedRatings = review.serviceQuality || review.communication || 
                             review.punctuality || review.valueForMoney;
 

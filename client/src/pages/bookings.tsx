@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/use-language";
 import { format } from "date-fns";
+import { parseSafeDate } from "@/lib/date-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -187,7 +188,7 @@ export default function Bookings() {
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {format(new Date(request.createdAt), "PP", { locale: dateLocale })}
+                    {format(parseSafeDate(request.createdAt), "PP", { locale: dateLocale })}
                   </div>
                   {request.confirmedDate && (
                     <div className="flex items-center gap-1">
@@ -329,7 +330,7 @@ export default function Bookings() {
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                   <div className="flex items-center gap-1" data-testid={`text-appointment-date-${appointment.id}`}>
                     <Calendar className="w-4 h-4" />
-                    {format(new Date(appointment.appointmentDate), "PP", { locale: dateLocale })}
+                    {format(parseSafeDate(appointment.appointmentDate), "PP", { locale: dateLocale })}
                   </div>
                   <div className="flex items-center gap-1" data-testid={`text-appointment-time-${appointment.id}`}>
                     <Clock className="w-4 h-4" />

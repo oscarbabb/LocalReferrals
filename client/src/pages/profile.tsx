@@ -18,6 +18,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseSafeDate } from "@/lib/date-utils";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 import type { UploadResult } from "@uppy/core";
@@ -582,7 +583,7 @@ export default function Profile() {
                           <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
                             <span>⭐ 4.9 (12 reseñas)</span>
                             <span>📍 {user.building}</span>
-                            <span>🕒 Activo desde {new Date(provider.createdAt).getFullYear()}</span>
+                            <span>🕒 Activo desde {parseSafeDate(provider.createdAt).getFullYear()}</span>
                           </div>
                         </div>
                       </div>

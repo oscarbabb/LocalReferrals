@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { parseSafeDate } from "@/lib/date-utils";
 import type { Provider, VerificationDocument, BackgroundCheck, VerificationReview } from "@shared/schema";
 
 interface ProviderWithDetails extends Provider {
@@ -272,7 +273,7 @@ export default function ProviderVerification() {
                           {selectedProvider.lastVerificationDate && (
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Calendar size={16} />
-                              Verificado: {new Date(selectedProvider.lastVerificationDate).toLocaleDateString()}
+                              Verificado: {parseSafeDate(selectedProvider.lastVerificationDate).toLocaleDateString()}
                             </div>
                           )}
                         </div>

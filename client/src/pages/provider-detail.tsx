@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit, FileText, Download } from "lucide-react";
+import { parseSafeDate } from "@/lib/date-utils";
 import { Provider, User, Review, MenuItem, MenuItemVariation } from "@shared/schema";
 
 // Extended types for API responses
@@ -471,7 +472,7 @@ export default function ProviderDetail() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Miembro desde</span>
                   <span className="font-medium">
-                    {new Date(provider.createdAt || Date.now()).toLocaleDateString('es-ES')}
+                    {parseSafeDate(provider.createdAt).toLocaleDateString('es-ES')}
                   </span>
                 </div>
                 <div className="flex justify-between">
