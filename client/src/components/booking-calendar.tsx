@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, Clock, Calendar, MapPin, DollarSign } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/use-language";
+import { parseSafeDate } from "@/lib/date-utils";
 import type { Provider } from "@shared/schema";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
@@ -130,7 +131,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
     
     // Check against existing appointments
     const appointmentConflict = (appointments as any[]).some((apt: any) => {
-      const aptDate = format(new Date(apt.appointmentDate), 'yyyy-MM-dd');
+      const aptDate = format(parseSafeDate(apt.appointmentDate), 'yyyy-MM-dd');
       return aptDate === dateString && apt.startTime === time;
     });
     
@@ -139,7 +140,7 @@ export default function BookingCalendar({ provider, userId, onBookingComplete }:
       // Only check pending and confirmed requests
       if (req.status !== 'pending' && req.status !== 'confirmed') return false;
       
-      const reqDate = format(new Date(req.preferredDate), 'yyyy-MM-dd');
+      const reqDate = format(parseSafeDate(req.preferredDate), 'yyyy-MM-dd');
       return reqDate === dateString && req.preferredTime === time;
     });
     
