@@ -25,7 +25,14 @@ const providerSetupSchema = z.object({
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
   experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
-  serviceRadiusKm: z.coerce.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional(),
+  serviceRadiusKm: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional()
+  ),
   
   // Payment method selection
   paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"], {

@@ -1106,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: z.string().min(20, "La descripción debe tener al menos 20 caracteres").optional(),
         hourlyRate: z.string().optional(), // Accept as string from form, will be stored as decimal
         experience: z.string().optional(),
-        serviceRadiusKm: z.number().int().min(1).max(100).optional(), // Service delivery radius (1-100 km)
+        serviceRadiusKm: z.number().int().min(1).max(100).nullable().optional(), // Service delivery radius (1-100 km)
       }).strict();
       
       const validatedData = providerUpdateSchema.parse(req.body);
@@ -1242,7 +1242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apartment: z.string().min(1, "El apartamento es requerido").optional(),
         address: z.string().min(10, "La dirección debe ser más específica").optional(),
         profilePicture: z.string().optional(),
-        serviceRadiusKm: z.number().int().min(1).max(100).optional(), // Service reception radius (1-100 km)
+        serviceRadiusKm: z.number().int().min(1).max(100).nullable().optional(), // Service reception radius (1-100 km)
       }).strict(); // .strict() rejects extra keys
       
       const validatedData = profileUpdateSchema.parse(req.body);

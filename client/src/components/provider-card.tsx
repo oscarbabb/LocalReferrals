@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, Globe } from "lucide-react";
 import { Link } from "wouter";
 
 interface Provider {
@@ -10,6 +10,7 @@ interface Provider {
   title: string;
   description: string;
   hourlyRate: string;
+  serviceRadiusKm?: number | null;
   user: {
     fullName: string;
     building: string;
@@ -86,6 +87,13 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
             <span className="text-sm text-gray-500">/hora</span>
           </div>
         </div>
+
+        {provider.serviceRadiusKm && (
+          <div className="flex items-center text-sm text-gray-500 mb-4">
+            <Globe className="w-4 h-4 mr-1" />
+            <span>Radio de servicio: {provider.serviceRadiusKm} km</span>
+          </div>
+        )}
 
         <Link href={`/providers/${provider.id}`}>
           <Button className="w-full bg-primary text-white hover:bg-blue-700 btn-animate hover-scale" data-testid="button-view-profile">

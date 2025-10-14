@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit, FileText, Download } from "lucide-react";
+import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit, FileText, Download, Globe } from "lucide-react";
 import { parseSafeDate } from "@/lib/date-utils";
 import { Provider, User, Review, MenuItem, MenuItemVariation } from "@shared/schema";
 
@@ -154,6 +154,12 @@ export default function ProviderDetail() {
                       <MapPin className="w-4 h-4 mr-1" />
                       <span>{provider.user?.building || 'Edificio Local'}</span>
                     </div>
+                    {provider.serviceRadiusKm && (
+                      <div className="flex items-center" data-testid="text-service-radius">
+                        <Globe className="w-4 h-4 mr-1" />
+                        <span>Radio: {provider.serviceRadiusKm} km</span>
+                      </div>
+                    )}
                   </div>
                   
                   {provider.hourlyRate && (

@@ -33,7 +33,14 @@ const profileSchema = z.object({
   building: z.string().min(1, "El edificio es requerido"),
   apartment: z.string().min(1, "El apartamento es requerido"),
   address: z.string().min(10, "La dirección debe ser más específica"),
-  serviceRadiusKm: z.coerce.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional(),
+  serviceRadiusKm: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional()
+  ),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
