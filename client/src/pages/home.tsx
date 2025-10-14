@@ -23,26 +23,7 @@ export default function Home() {
 
   const featuredProviders = (providers as any[]).slice(0, 3);
 
-  const testimonials = [
-    {
-      rating: 5,
-      comment: t('home.testimonial1'),
-      author: t('home.testimonial1Author'),
-      location: t('home.testimonial1Location'),
-    },
-    {
-      rating: 5,
-      comment: t('home.testimonial2'),
-      author: t('home.testimonial2Author'),
-      location: t('home.testimonial2Location'),
-    },
-    {
-      rating: 5,
-      comment: t('home.testimonial3'),
-      author: t('home.testimonial3Author'),
-      location: t('home.testimonial3Location'),
-    },
-  ];
+  const testimonials: any[] = [];
 
   return (
     <div className="min-h-screen bg-gray-50">
