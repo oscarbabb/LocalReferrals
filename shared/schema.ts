@@ -16,6 +16,7 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isProvider: boolean("is_provider").default(false),
   avatar: text("avatar"),
+  serviceRadiusKm: integer("service_radius_km"), // Service reception radius in km for consumers
   // Detailed Mexican Address Fields
   condominioMaestro: text("condominio_maestro"),
   condominio: text("condominio"),
@@ -56,6 +57,7 @@ export const providers = pgTable("providers", {
   description: text("description").notNull(),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   experience: text("experience"),
+  serviceRadiusKm: integer("service_radius_km"), // Service delivery radius in km
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
   verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected, suspended
