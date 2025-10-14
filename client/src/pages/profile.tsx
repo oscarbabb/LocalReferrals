@@ -32,7 +32,8 @@ const profileSchema = z.object({
   phone: z.string().min(10, "Teléfono debe tener al menos 10 dígitos"),
   building: z.string().min(1, "El edificio es requerido"),
   apartment: z.string().min(1, "El apartamento es requerido"),
-  address: z.string().min(10, "La dirección debe ser más específica")
+  address: z.string().min(10, "La dirección debe ser más específica"),
+  serviceRadiusKm: z.coerce.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -73,7 +74,8 @@ export default function Profile() {
       phone: user?.phone || "",
       building: user?.building || "",
       apartment: user?.apartment || "",
-      address: user?.address || ""
+      address: user?.address || "",
+      serviceRadiusKm: user?.serviceRadiusKm || undefined,
     }
   });
 
@@ -87,7 +89,8 @@ export default function Profile() {
         phone: user.phone || "",
         building: user.building || "",
         apartment: user.apartment || "",
-        address: user.address || ""
+        address: user.address || "",
+        serviceRadiusKm: user.serviceRadiusKm || undefined,
       });
       setProfilePicture(user.avatar || null);
     }
@@ -457,6 +460,29 @@ export default function Profile() {
                                     data-testid="input-address"
                                   />
                                 </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="serviceRadiusKm"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Radio de Servicio (km)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="Ej: 5"
+                                    min="1"
+                                    max="100"
+                                    {...field}
+                                    data-testid="input-user-service-radius"
+                                  />
+                                </FormControl>
+                                <p className="text-sm text-gray-600">
+                                  Distancia máxima para recibir servicios desde tu ubicación (opcional)
+                                </p>
                                 <FormMessage />
                               </FormItem>
                             )}
