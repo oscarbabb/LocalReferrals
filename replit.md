@@ -2,7 +2,25 @@
 
 "Referencias Locales" is a full-stack TypeScript application functioning as a local services marketplace. It connects residents within communities with verified local service providers (cleaners, tutors, handymen, etc.), enabling users to discover, rate, and request services. The platform aims to foster trust and facilitate local commerce within residential areas.
 
-## Recent Changes (October 13, 2025)
+## Recent Changes (October 14, 2025)
+
+**Admin Communication System Implementation:**
+- Created comprehensive admin messaging feature for lost & found, questions, and community support
+- Database: Added `admin_messages` table with userId, subject, category, message, status, priority, adminResponse fields
+- Backend API: POST /api/admin-messages (create), GET /api/admin-messages/user/:userId (list user's messages)
+- Security: Routes properly secured with authentication and authorization - users can only view/create their own messages
+- Frontend: Contact Admin page (`/contact-admin`) with form (category, priority, subject, message) and message history
+- Navigation: Added "Contact Admin" link to header with HelpCircle icon for easy access
+- Categories: lost_and_found, question, complaint, suggestion, general
+- Priority levels: low, medium, high, urgent
+- Status tracking: open, in_progress, resolved
+- Full bilingual support (Spanish/English) with 20+ translation keys in dedicated admin.ts locale files
+- All user-facing text uses translation system - no hard-coded strings
+- Proper data-testid attributes throughout for future testing
+- Admin response capability built-in (awaiting admin role implementation for full functionality)
+- Architect-verified as secure - no cross-tenant data exposure or unauthorized access possible
+
+**Previous Changes (October 13, 2025):**
 
 **Legal Documentation Pages Implementation:**
 - Created Terms & Conditions page (`/terms`) with full legal content extracted from official PDF
@@ -114,6 +132,7 @@ Preferred communication style: Simple, everyday language.
 - **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
 - **One-Click Booking**: Calendar interface with time slot selection and availability checking.
 - **Messaging System**: Complete inbox page for viewing all conversations, MessagingModal for direct communication between providers and consumers, message history with timestamps.
+- **Admin Communication System**: Contact Admin page for lost & found, questions, complaints, suggestions, and general inquiries. Category and priority selection, message history, admin response tracking, status management (open/in_progress/resolved). Secure user isolation with authorization checks.
 - **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
 - **Legal Documentation**: Comprehensive Terms & Conditions and Privacy Policy pages with ARCO rights, cookie policy, and full bilingual support. Accessible via footer navigation.
 - **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences.
