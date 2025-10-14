@@ -1084,6 +1084,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update provider profile - PROTECTED ENDPOINT
+  app.patch("/api/providers/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get the provider to check ownership
+      const provider = await storage.getProvider(id);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+      
+      // Authorization: Only the provider's owner can update it
+      if (!(req.user as any)?.claims?.sub || (req.user as any).claims.sub !== provider.userId) {
+        return res.status(403).json({ message: "Forbidden - You can only update your own provider profile" });
+      }
+      
+      // Input validation: Allow specific provider profile fields to be updated
+      const providerUpdateSchema = z.object({
+        title: z.string().min(5, "El título debe tener al menos 5 caracteres").optional(),
+        description: z.string().min(20, "La descripción debe tener al menos 20 caracteres").optional(),
+        hourlyRate: z.string().optional(), // Accept as string from form, will be stored as decimal
+        experience: z.string().optional(),
+        serviceRadiusKm: z.number().int().min(1).max(100).optional(), // Service delivery radius (1-100 km)
+      }).strict();
+      
+      const validatedData = providerUpdateSchema.parse(req.body);
+      
+      // Update provider data with only validated fields
+      const updatedProvider = await storage.updateProvider(id, validatedData);
+      if (!updatedProvider) {
+        return res.status(500).json({ message: "Failed to update provider" });
+      }
+      
+      res.json(updatedProvider);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(422).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Provider update error:", error);
+      res.status(500).json({ message: "Failed to update provider" });
+    }
+  });
+
   // Users
   app.post("/api/users", async (req, res) => {
     try {
@@ -1196,6 +1242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apartment: z.string().min(1, "El apartamento es requerido").optional(),
         address: z.string().min(10, "La dirección debe ser más específica").optional(),
         profilePicture: z.string().optional(),
+        serviceRadiusKm: z.number().int().min(1).max(100).optional(), // Service reception radius (1-100 km)
       }).strict(); // .strict() rejects extra keys
       
       const validatedData = profileUpdateSchema.parse(req.body);
