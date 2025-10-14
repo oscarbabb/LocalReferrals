@@ -4,6 +4,19 @@
 
 ## Recent Changes (October 14, 2025)
 
+**Geographical Service Radius Feature Implementation:**
+- Added optional service radius field (1-100 km) for both providers and consumers
+- Database: Added `serviceRadiusKm` integer nullable field to both `users` and `providers` tables
+- Backend API: Updated PATCH /api/users/:id, PATCH /api/providers/:id, and POST /api/providers routes with radius validation (.nullable().optional())
+- Frontend Forms: Provider setup and user profile pages include radius input fields with proper validation
+- Frontend Display: Service radius shown on provider cards and detail pages with Globe icon (Lucide React)
+- Validation: Frontend uses z.preprocess to convert empty strings to undefined, backend accepts null/missing values
+- Optional field: Users and providers can leave radius blank or set 1-100 km range
+- Full bilingual support (Spanish/English) with translation keys in profile.ts and index.ts locale files
+- Proper data-testid attributes for testing (input-service-radius, input-user-service-radius, text-service-radius)
+- Architect-verified: Validation correctly handles empty values, valid integers (1-100), and rejects invalid inputs (0, negatives, >100, decimals)
+- Use cases: Providers set maximum service delivery radius, consumers set maximum service reception radius
+
 **Admin Communication System Implementation:**
 - Created comprehensive admin messaging feature for lost & found, questions, and community support
 - Database: Added `admin_messages` table with userId, subject, category, message, status, priority, adminResponse fields
@@ -133,6 +146,7 @@ Preferred communication style: Simple, everyday language.
 - **One-Click Booking**: Calendar interface with time slot selection and availability checking.
 - **Messaging System**: Complete inbox page for viewing all conversations, MessagingModal for direct communication between providers and consumers, message history with timestamps.
 - **Admin Communication System**: Contact Admin page for lost & found, questions, complaints, suggestions, and general inquiries. Category and priority selection, message history, admin response tracking, status management (open/in_progress/resolved). Secure user isolation with authorization checks.
+- **Geographical Service Radius**: Optional radius preference (1-100 km) for both providers (service delivery range) and consumers (service reception range). Displayed on provider cards and detail pages with Globe icon. Fully validated on both frontend and backend with proper handling of optional values.
 - **Provider Tools**: Availability Management (weekly schedules, CRUD operations), Menu Management (items, document uploads), Multi-Category Registration (many-to-many relationship).
 - **Legal Documentation**: Comprehensive Terms & Conditions and Privacy Policy pages with ARCO rights, cookie policy, and full bilingual support. Accessible via footer navigation.
 - **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences.
