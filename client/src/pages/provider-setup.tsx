@@ -25,6 +25,7 @@ const providerSetupSchema = z.object({
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
   experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
+  serviceRadiusKm: z.coerce.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional(),
   
   // Payment method selection
   paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"], {
@@ -1079,6 +1080,34 @@ export default function ProviderSetup() {
                       </FormControl>
                       <p className="text-sm text-gray-600">
                         Menciona tu experiencia, certificaciones, logros o cualquier detalle que demuestre tu profesionalismo.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Service Radius */}
+                <FormField
+                  control={form.control}
+                  name="serviceRadiusKm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        <span>Radio de Servicio (km)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="10"
+                          min="1"
+                          max="100"
+                          {...field}
+                          data-testid="input-service-radius"
+                        />
+                      </FormControl>
+                      <p className="text-sm text-gray-600">
+                        Distancia máxima en kilómetros para entregar tus servicios. Esto ayuda a los clientes a saber si estás disponible en su área.
                       </p>
                       <FormMessage />
                     </FormItem>
