@@ -1,6 +1,7 @@
 import { bookings } from './bookings';
 import { messages } from './messages';
 import { profile } from './profile';
+import { admin } from './admin';
 
 export const en = {
   // Navigation (existing)
@@ -14,6 +15,7 @@ export const en = {
   'nav.logout': 'Sign Out',
   'nav.bookings': 'My Bookings',
   'nav.messages': 'Messages',
+  'nav.contactAdmin': 'Contact Admin',
   'nav.tour': 'Take Platform Tour',
   'nav.logoutToastTitle': 'Logged out',
   'nav.logoutToastSuccess': 'You have successfully logged out.',
@@ -169,4 +171,5 @@ export const en = {
   ...bookings,
   ...messages,
   ...profile,
+  ...admin,
 };

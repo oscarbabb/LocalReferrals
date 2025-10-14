@@ -34,6 +34,8 @@ import {
   type ProviderCategory,
   type InsertProviderCategory,
   type Conversation,
+  type AdminMessage,
+  type InsertAdminMessage,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -43,6 +45,7 @@ import {
   providerAvailability,
   appointments,
   messages,
+  adminMessages,
   verificationDocuments,
   backgroundChecks,
   verificationReviews,
@@ -291,6 +294,30 @@ export class DatabaseStorage implements IStorage {
   async createMessage(message: InsertMessage): Promise<Message> {
     const [newMessage] = await db.insert(messages).values(message).returning();
     return newMessage;
+  }
+
+  // Admin Messages
+  async getAdminMessages(): Promise<AdminMessage[]> {
+    return await db.select().from(adminMessages).orderBy(adminMessages.createdAt);
+  }
+
+  async getAdminMessagesByUser(userId: string): Promise<AdminMessage[]> {
+    return await db.select().from(adminMessages).where(eq(adminMessages.userId, userId)).orderBy(adminMessages.createdAt);
+  }
+
+  async getAdminMessage(id: string): Promise<AdminMessage | undefined> {
+    const [message] = await db.select().from(adminMessages).where(eq(adminMessages.id, id));
+    return message || undefined;
+  }
+
+  async createAdminMessage(message: InsertAdminMessage): Promise<AdminMessage> {
+    const [newMessage] = await db.insert(adminMessages).values(message).returning();
+    return newMessage;
+  }
+
+  async updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined> {
+    const [updatedMessage] = await db.update(adminMessages).set({...message, updatedAt: new Date()}).where(eq(adminMessages.id, id)).returning();
+    return updatedMessage || undefined;
   }
 
   // Verification Documents

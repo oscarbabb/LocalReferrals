@@ -265,6 +265,22 @@ export const menuItemVariations = pgTable("menu_item_variations", {
   sortOrder: integer("sort_order").default(0),
 });
 
+// Admin messages for community communication (lost & found, questions, etc.)
+export const adminMessages = pgTable("admin_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  category: varchar("category").notNull(), // lost_and_found, question, general, complaint, suggestion
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: varchar("status").default("open").notNull(), // open, in_progress, resolved, closed
+  priority: varchar("priority").default("medium"), // low, medium, high, urgent
+  adminResponse: text("admin_response"),
+  respondedBy: varchar("responded_by").references(() => users.id),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -355,6 +371,14 @@ export const insertProviderCategorySchema = createInsertSchema(providerCategorie
   createdAt: true,
 });
 
+export const insertAdminMessageSchema = createInsertSchema(adminMessages).omit({
+  id: true,
+  status: true,
+  respondedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
@@ -389,6 +413,8 @@ export type MenuItemVariation = typeof menuItemVariations.$inferSelect;
 export type InsertMenuItemVariation = z.infer<typeof insertMenuItemVariationSchema>;
 export type ProviderCategory = typeof providerCategories.$inferSelect;
 export type InsertProviderCategory = z.infer<typeof insertProviderCategorySchema>;
+export type AdminMessage = typeof adminMessages.$inferSelect;
+export type InsertAdminMessage = z.infer<typeof insertAdminMessageSchema>;
 
 // Conversation type for message inbox
 export interface Conversation {

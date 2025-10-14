@@ -21,6 +21,7 @@ import {
   insertProviderAvailabilitySchema,
   insertAppointmentSchema,
   insertMessageSchema,
+  insertAdminMessageSchema,
   insertPaymentMethodSchema,
   insertMenuItemSchema,
   insertMenuItemVariationSchema
@@ -1860,6 +1861,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch conversations" });
     }
   });
+
+  // Admin Messages
+  app.post("/api/admin-messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertAdminMessageSchema.parse({
+        ...req.body,
+        userId
+      });
+      const message = await storage.createAdminMessage(validatedData);
+      res.status(201).json(message);
+    } catch (error: any) {
+      console.error("Failed to create admin message:", error);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ message: "Invalid message data", details: error.issues });
+      } else {
+        res.status(500).json({ message: "Failed to create admin message" });
+      }
+    }
+  });
+
+  app.get("/api/admin-messages/user/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user can only access their own messages
+      if (req.user.claims.sub !== req.params.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const messages = await storage.getAdminMessagesByUser(req.params.userId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Failed to fetch admin messages:", error);
+      res.status(500).json({ message: "Failed to fetch admin messages" });
+    }
+  });
+
+  // ADMIN-ONLY ROUTES (commented out until admin role is implemented)
+  // These routes are restricted to prevent unauthorized access to all admin messages
+  
+  // app.get("/api/admin-messages", isAuthenticated, async (req: any, res) => {
+  //   try {
+  //     const messages = await storage.getAdminMessages();
+  //     res.json(messages);
+  //   } catch (error) {
+  //     console.error("Failed to fetch all admin messages:", error);
+  //     res.status(500).json({ message: "Failed to fetch admin messages" });
+  //   }
+  // });
+
+  // app.patch("/api/admin-messages/:id", isAuthenticated, async (req: any, res) => {
+  //   try {
+  //     const updatedMessage = await storage.updateAdminMessage(req.params.id, req.body);
+  //     if (!updatedMessage) {
+  //       return res.status(404).json({ message: "Message not found" });
+  //     }
+  //     res.json(updatedMessage);
+  //   } catch (error) {
+  //     console.error("Failed to update admin message:", error);
+  //     res.status(500).json({ message: "Failed to update admin message" });
+  //   }
+  // });
 
   // Photo upload endpoints
   app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {

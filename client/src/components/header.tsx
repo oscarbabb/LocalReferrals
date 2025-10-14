@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle } from "lucide-react";
+import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle, HelpCircle } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
 import InviteButton from "@/components/invite-button";
@@ -44,6 +44,7 @@ export default function Header() {
     { href: "/providers", label: t('nav.providers') },
     { href: "/bookings", label: t('nav.bookings') },
     { href: "/messages", label: t('nav.messages'), icon: MessageCircle },
+    { href: "/contact-admin", label: t('nav.contactAdmin'), icon: HelpCircle },
     { href: "/testimonials", label: t('nav.testimonials') },
   ];
 

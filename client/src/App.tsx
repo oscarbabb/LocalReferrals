@@ -28,6 +28,7 @@ import TestPayments from "@/pages/test-payments";
 import ProductionSeed from "@/pages/production-seed";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import ContactAdmin from "@/pages/contact-admin";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding, OnboardingProvider } from "@/hooks/use-onboarding";
@@ -58,6 +59,7 @@ function Router() {
         <Route path="/menu-management" component={MenuManagement} />
         <Route path="/availability-management" component={AvailabilityManagement} />
         <Route path="/messages" component={Messages} />
+        <Route path="/contact-admin" component={ContactAdmin} />
         <Route path="/profile" component={Profile} />
         <Route path="/auth" component={Auth} />
         <Route path="/terms" component={Terms} />

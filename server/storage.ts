@@ -34,6 +34,8 @@ import {
   type ProviderCategory,
   type InsertProviderCategory,
   type Conversation,
+  type AdminMessage,
+  type InsertAdminMessage,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -43,6 +45,7 @@ import {
   providerAvailability,
   appointments,
   messages,
+  adminMessages,
   verificationDocuments,
   backgroundChecks,
   verificationReviews,
@@ -114,6 +117,13 @@ export interface IStorage {
   getConversation(userId1: string, userId2: string): Promise<Message[]>;
   getUserConversations(userId: string): Promise<Conversation[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+
+  // Admin Messages
+  getAdminMessages(): Promise<AdminMessage[]>;
+  getAdminMessagesByUser(userId: string): Promise<AdminMessage[]>;
+  getAdminMessage(id: string): Promise<AdminMessage | undefined>;
+  createAdminMessage(message: InsertAdminMessage): Promise<AdminMessage>;
+  updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined>;
 
   // Verification Documents
   getVerificationDocuments(providerId: string): Promise<VerificationDocument[]>;
@@ -742,6 +752,37 @@ export class MemStorage implements IStorage {
     };
     this.messages.set(id, message);
     return message;
+  }
+
+  // Admin Messages - stubbed for MemStorage (not used in production)
+  async getAdminMessages(): Promise<AdminMessage[]> {
+    return [];
+  }
+
+  async getAdminMessagesByUser(userId: string): Promise<AdminMessage[]> {
+    return [];
+  }
+
+  async getAdminMessage(id: string): Promise<AdminMessage | undefined> {
+    return undefined;
+  }
+
+  async createAdminMessage(message: InsertAdminMessage): Promise<AdminMessage> {
+    const id = randomUUID();
+    return {
+      ...message,
+      id,
+      status: 'open',
+      adminResponse: null,
+      respondedBy: null,
+      respondedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as AdminMessage;
+  }
+
+  async updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined> {
+    return undefined;
   }
 
   // Payment Methods - stubbed for MemStorage (not used in production)
