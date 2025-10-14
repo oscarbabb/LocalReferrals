@@ -7,4 +7,11 @@ export const profile = {
   'profile.authRequired': 'Not authenticated',
   'profile.loginMessage': 'You must sign in to view your profile.',
   'profile.loginBtn': 'Go to Sign In',
+  'profile.serviceRadius': 'Service Radius',
+  'profile.serviceRadiusLabel': 'Service radius (km)',
+  'profile.serviceRadiusDescription': 'Maximum distance to receive services from your location',
+  'profile.serviceRadiusPlaceholder': 'e.g. 5',
+  'profile.serviceRadiusUnit': 'km',
+  'profile.serviceRadiusMin': 'Radius must be at least 1 km',
+  'profile.serviceRadiusMax': 'Radius cannot exceed 100 km',
 };

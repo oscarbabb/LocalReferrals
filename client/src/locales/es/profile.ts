@@ -7,4 +7,11 @@ export const profile = {
   'profile.authRequired': 'No autenticado',
   'profile.loginMessage': 'Debes iniciar sesión para ver tu perfil.',
   'profile.loginBtn': 'Ir a Iniciar Sesión',
+  'profile.serviceRadius': 'Radio de Servicio',
+  'profile.serviceRadiusLabel': 'Radio de servicio (km)',
+  'profile.serviceRadiusDescription': 'Distancia máxima para recibir servicios desde tu ubicación',
+  'profile.serviceRadiusPlaceholder': 'Ej: 5',
+  'profile.serviceRadiusUnit': 'km',
+  'profile.serviceRadiusMin': 'El radio debe ser al menos 1 km',
+  'profile.serviceRadiusMax': 'El radio no puede exceder 100 km',
 };

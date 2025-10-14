@@ -135,6 +135,12 @@ export const en = {
   'providers.hourlyRate': 'Hourly rate',
   'providers.viewProfile': 'View Profile',
   'providers.noResults': 'No providers found',
+  'providers.serviceRadius': 'Service radius',
+  'providers.serviceRadiusLabel': 'Service radius (km)',
+  'providers.serviceRadiusDescription': 'Maximum distance to deliver services from your location',
+  'providers.serviceRadiusPlaceholder': 'e.g. 10',
+  'providers.serviceArea': 'Service area',
+  'providers.servicesWithin': 'Services within',
   
   // Common (existing)
   'common.search': 'Search',

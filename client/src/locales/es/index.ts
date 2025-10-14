@@ -135,6 +135,12 @@ export const es = {
   'providers.hourlyRate': 'Tarifa por hora',
   'providers.viewProfile': 'Ver Perfil',
   'providers.noResults': 'No se encontraron proveedores',
+  'providers.serviceRadius': 'Radio de servicio',
+  'providers.serviceRadiusLabel': 'Radio de servicio (km)',
+  'providers.serviceRadiusDescription': 'Distancia máxima para entregar servicios desde tu ubicación',
+  'providers.serviceRadiusPlaceholder': 'Ej: 10',
+  'providers.serviceArea': 'Área de servicio',
+  'providers.servicesWithin': 'Servicios dentro de',
   
   // Common (existing)
   'common.search': 'Buscar',
