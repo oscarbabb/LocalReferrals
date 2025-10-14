@@ -35,14 +35,8 @@ export default function InviteButton() {
     const body = `${inviteMessage}\n\n${shareUrl}`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
-    // Try to open mailto link - works better across browsers
-    const link = document.createElement('a');
-    link.href = mailtoUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Open mailto link directly - works across all browsers
+    window.location.href = mailtoUrl;
   };
 
   const handleCopyLink = async () => {
