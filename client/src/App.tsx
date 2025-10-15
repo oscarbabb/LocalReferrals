@@ -29,6 +29,7 @@ import ProductionSeed from "@/pages/production-seed";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import ContactAdmin from "@/pages/contact-admin";
+import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding, OnboardingProvider } from "@/hooks/use-onboarding";
@@ -60,6 +61,7 @@ function Router() {
         <Route path="/availability-management" component={AvailabilityManagement} />
         <Route path="/messages" component={Messages} />
         <Route path="/contact-admin" component={ContactAdmin} />
+        <Route path="/admin-dashboard" component={AdminDashboard} />
         <Route path="/profile" component={Profile} />
         <Route path="/auth" component={Auth} />
         <Route path="/terms" component={Terms} />

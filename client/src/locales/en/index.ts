@@ -16,6 +16,7 @@ export const en = {
   'nav.bookings': 'My Bookings',
   'nav.messages': 'Messages',
   'nav.contactAdmin': 'Contact Admin',
+  'nav.adminDashboard': 'Admin Dashboard',
   'nav.tour': 'Take Platform Tour',
   'nav.logoutToastTitle': 'Logged out',
   'nav.logoutToastSuccess': 'You have successfully logged out.',

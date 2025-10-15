@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle, HelpCircle } from "lucide-react";
+import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle, HelpCircle, Shield } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
 import InviteButton from "@/components/invite-button";
@@ -47,6 +47,9 @@ export default function Header() {
     { href: "/contact-admin", label: t('nav.contactAdmin'), icon: HelpCircle },
     { href: "/testimonials", label: t('nav.testimonials') },
   ];
+  
+  // Admin-only navigation item
+  const adminNavItem = { href: "/admin-dashboard", label: t('nav.adminDashboard'), icon: Shield };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -76,6 +79,20 @@ export default function Header() {
                 </span>
               </Link>
             ))}
+            {(user as any)?.isAdmin && (
+              <Link
+                href={adminNavItem.href}
+                className={`nav-tab nav-item-enter ${
+                  location === adminNavItem.href ? "active" : ""
+                } px-2 py-2 relative text-xs font-medium whitespace-nowrap flex items-center gap-1`}
+                data-testid="nav-link-admin-dashboard"
+              >
+                <Shield className="w-3 h-3" />
+                <span className="nav-tab-text">
+                  {adminNavItem.label}
+                </span>
+              </Link>
+            )}
           </nav>
 
           <div className="hidden md:flex items-center space-x-2">
@@ -145,6 +162,23 @@ export default function Header() {
                     </span>
                   </Link>
                 ))}
+                {(user as any)?.isAdmin && (
+                  <Link
+                    href={adminNavItem.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform flex items-center gap-2 ${
+                      location === adminNavItem.href
+                        ? "text-primary bg-gradient-to-r from-primary/10 to-accent/5 font-semibold border-l-4 border-primary shadow-sm scale-105"
+                        : "text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 hover:scale-102 hover:shadow-sm"
+                    }`}
+                    data-testid="nav-link-admin-dashboard-mobile"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span className="block transition-transform duration-200">
+                      {adminNavItem.label}
+                    </span>
+                  </Link>
+                )}
                 <hr className="my-4" />
                 <div className="flex items-center justify-center mb-4">
                   <LanguageToggle />

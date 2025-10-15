@@ -298,7 +298,24 @@ export class DatabaseStorage implements IStorage {
 
   // Admin Messages
   async getAdminMessages(): Promise<AdminMessage[]> {
-    return await db.select().from(adminMessages).orderBy(adminMessages.createdAt);
+    const results = await db
+      .select({
+        message: adminMessages,
+        user: {
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          fullName: users.fullName,
+        }
+      })
+      .from(adminMessages)
+      .leftJoin(users, eq(adminMessages.userId, users.id))
+      .orderBy(adminMessages.createdAt);
+    
+    return results.map(r => ({
+      ...r.message,
+      user: r.user
+    })) as any;
   }
 
   async getAdminMessagesByUser(userId: string): Promise<AdminMessage[]> {

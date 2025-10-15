@@ -16,6 +16,7 @@ export const es = {
   'nav.bookings': 'Mis Reservas',
   'nav.messages': 'Mensajes',
   'nav.contactAdmin': 'Contactar Admin',
+  'nav.adminDashboard': 'Panel de Admin',
   'nav.tour': 'Ver Tour de la Plataforma',
   'nav.logoutToastTitle': 'Sesión cerrada',
   'nav.logoutToastSuccess': 'Has cerrado sesión exitosamente.',
