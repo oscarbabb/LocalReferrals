@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,11 +82,11 @@ const paymentMethodSchema = z.object({
   cancellationPolicy: z.string().optional(),
 });
 
-const menuItemSchema = z.object({
-  categoryName: z.string().min(1, "Nombre de categoría requerido"),
-  itemName: z.string().min(1, "Nombre del artículo requerido"),
+const menuItemSchema = (t: any) => z.object({
+  categoryName: z.string().min(1, t('paymentMethods.validation.categoryNameRequired')),
+  itemName: z.string().min(1, t('paymentMethods.validation.itemNameRequired')),
   description: z.string().optional(),
-  price: z.string().min(1, "Precio requerido"),
+  price: z.string().min(1, t('paymentMethods.validation.priceRequired')),
   duration: z.number().optional(),
   isAvailable: z.boolean(),
   hasVariations: z.boolean(),
@@ -95,7 +96,7 @@ const menuItemSchema = z.object({
 });
 
 type PaymentMethodFormData = z.infer<typeof paymentMethodSchema>;
-type MenuItemFormData = z.infer<typeof menuItemSchema>;
+type MenuItemFormData = z.infer<ReturnType<typeof menuItemSchema>>;
 
 // This would come from authentication in a real app
 // For now using the first provider as example
@@ -103,6 +104,7 @@ const getProviderIdFromAuth = () => "57da14c6-07b1-4827-bf3e-8a3291096790";
 
 export default function PaymentMethods() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showMenuForm, setShowMenuForm] = useState(false);
@@ -133,7 +135,7 @@ export default function PaymentMethods() {
 
   // Menu item form
   const menuForm = useForm<MenuItemFormData>({
-    resolver: zodResolver(menuItemSchema),
+    resolver: zodResolver(menuItemSchema(t)),
     defaultValues: {
       isAvailable: true,
       hasVariations: false,
@@ -149,8 +151,8 @@ export default function PaymentMethods() {
     },
     onSuccess: () => {
       toast({
-        title: "Método de Pago Creado",
-        description: "El método de pago se ha configurado correctamente.",
+        title: t('paymentMethods.toast.created.title'),
+        description: t('paymentMethods.toast.created.description'),
       });
       queryClient.invalidateQueries({
         queryKey: ["/api/providers", getProviderIdFromAuth(), "payment-methods"],
@@ -160,8 +162,8 @@ export default function PaymentMethods() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "No se pudo crear el método de pago.",
+        title: t('paymentMethods.toast.createError.title'),
+        description: t('paymentMethods.toast.createError.description'),
         variant: "destructive",
       });
     },
@@ -174,8 +176,8 @@ export default function PaymentMethods() {
     },
     onSuccess: () => {
       toast({
-        title: "Artículo de Menú Creado",
-        description: "El artículo se ha agregado al menú correctamente.",
+        title: t('paymentMethods.toast.menuCreated.title'),
+        description: t('paymentMethods.toast.menuCreated.description'),
       });
       queryClient.invalidateQueries({
         queryKey: ["/api/providers", getProviderIdFromAuth(), "menu-items"],
@@ -185,8 +187,8 @@ export default function PaymentMethods() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "No se pudo crear el artículo del menú.",
+        title: t('paymentMethods.toast.menuCreateError.title'),
+        description: t('paymentMethods.toast.menuCreateError.description'),
         variant: "destructive",
       });
     },
@@ -210,11 +212,11 @@ export default function PaymentMethods() {
   const getPaymentTypeLabel = (type: string) => {
     switch (type) {
       case "hourly":
-        return "Por Hora";
+        return t('paymentMethods.type.hourly');
       case "fixed_job":
-        return "Trabajo Fijo";
+        return t('paymentMethods.type.fixedJob');
       case "menu_based":
-        return "Menú de Servicios";
+        return t('paymentMethods.type.menuBased');
       default:
         return type;
     }
@@ -239,7 +241,7 @@ export default function PaymentMethods() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Cargando métodos de pago...</p>
+            <p className="mt-4 text-gray-600" data-testid="text-loading">{t('paymentMethods.loading')}</p>
           </div>
         </div>
       </div>
@@ -252,11 +254,11 @@ export default function PaymentMethods() {
         
         {/* Header */}
         <div className="text-center py-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Configuración de Pagos
+          <h1 className="text-4xl font-bold text-gray-900 mb-4" data-testid="text-page-title">
+            {t('paymentMethods.title')}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Configura tus métodos de pago y precios para diferentes tipos de servicios
+            {t('paymentMethods.description')}
           </p>
         </div>
 
@@ -266,10 +268,10 @@ export default function PaymentMethods() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-6 h-6 text-orange-500" />
-                Métodos de Pago
+                {t('paymentMethods.title')}
               </CardTitle>
               <CardDescription>
-                Configura cómo cobrar por tus servicios: por hora, trabajo fijo o menú de servicios
+                {t('paymentMethods.description')}
               </CardDescription>
             </div>
             <Button 
@@ -278,25 +280,26 @@ export default function PaymentMethods() {
               data-testid="button-add-payment-method"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Agregar Método
+              {t('paymentMethods.addButton')}
             </Button>
           </CardHeader>
           <CardContent>
             {(!Array.isArray(paymentMethods) || paymentMethods.length === 0) ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No hay métodos de pago configurados
+                <h3 className="text-lg font-medium text-gray-900 mb-2" data-testid="text-empty-title">
+                  {t('paymentMethods.empty.title')}
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  Agrega tu primer método de pago para empezar a recibir solicitudes
+                  {t('paymentMethods.empty.description')}
                 </p>
                 <Button 
                   onClick={() => setShowPaymentForm(true)}
                   className="bg-orange-500 hover:bg-orange-600"
+                  data-testid="button-add-first-method"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Configurar Método de Pago
+                  {t('paymentMethods.empty.button')}
                 </Button>
               </div>
             ) : (
@@ -312,7 +315,7 @@ export default function PaymentMethods() {
                               {getPaymentTypeLabel(method.paymentType)}
                             </h3>
                             <Badge className={getPaymentTypeBadgeColor(method.paymentType)}>
-                              {method.isActive ? "Activo" : "Inactivo"}
+                              {method.isActive ? t('paymentMethods.card.active') : t('paymentMethods.card.inactive')}
                             </Badge>
                           </div>
                         </div>
@@ -323,14 +326,14 @@ export default function PaymentMethods() {
                           <>
                             {method.hourlyRate && (
                               <div className="p-3 bg-blue-50 rounded-lg">
-                                <p className="text-sm font-medium text-blue-700">Tarifa por Hora</p>
+                                <p className="text-sm font-medium text-blue-700">{t('paymentMethods.card.hourlyRate')}</p>
                                 <p className="text-lg font-bold text-blue-900">MXN ${method.hourlyRate}</p>
                               </div>
                             )}
                             {method.minimumHours && (
                               <div className="p-3 bg-gray-50 rounded-lg">
-                                <p className="text-sm text-gray-600">Mínimo de Horas</p>
-                                <p className="font-semibold">{method.minimumHours} horas</p>
+                                <p className="text-sm text-gray-600">{t('paymentMethods.card.minimumHours')}</p>
+                                <p className="font-semibold">{method.minimumHours} {t('paymentMethods.card.hours')}</p>
                               </div>
                             )}
                           </>
@@ -340,20 +343,20 @@ export default function PaymentMethods() {
                           <>
                             {method.fixedJobRate && (
                               <div className="p-3 bg-green-50 rounded-lg">
-                                <p className="text-sm font-medium text-green-700">Precio del Trabajo</p>
+                                <p className="text-sm font-medium text-green-700">{t('paymentMethods.card.fixedRate')}</p>
                                 <p className="text-lg font-bold text-green-900">MXN ${method.fixedJobRate}</p>
                               </div>
                             )}
                             {method.jobDescription && (
                               <div className="p-3 bg-gray-50 rounded-lg">
-                                <p className="text-sm text-gray-600">Descripción</p>
+                                <p className="text-sm text-gray-600">{t('checkout.summary.description')}</p>
                                 <p className="text-sm">{method.jobDescription}</p>
                               </div>
                             )}
                             {method.estimatedDuration && (
                               <div className="p-3 bg-gray-50 rounded-lg">
-                                <p className="text-sm text-gray-600">Duración Estimada</p>
-                                <p className="font-semibold">{method.estimatedDuration} minutos</p>
+                                <p className="text-sm text-gray-600">{t('paymentMethods.card.estimatedDuration')}</p>
+                                <p className="font-semibold">{method.estimatedDuration} {t('paymentMethods.menu.minutes')}</p>
                               </div>
                             )}
                           </>
@@ -363,14 +366,14 @@ export default function PaymentMethods() {
                           <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg">
                             <Shield className="w-4 h-4 text-amber-600" />
                             <span className="text-sm text-amber-700">
-                              Requiere depósito del {method.depositPercentage}%
+                              {t('paymentMethods.card.depositPercentage')} {method.depositPercentage}%
                             </span>
                           </div>
                         )}
 
                         {method.cancellationPolicy && (
                           <div className="p-3 bg-gray-50 rounded-lg">
-                            <p className="text-sm text-gray-600">Política de Cancelación</p>
+                            <p className="text-sm text-gray-600">{t('paymentMethods.card.cancellationPolicy')}</p>
                             <p className="text-sm">{method.cancellationPolicy}</p>
                           </div>
                         )}
@@ -384,7 +387,7 @@ export default function PaymentMethods() {
                           data-testid={`button-edit-payment-${method.id}`}
                         >
                           <Edit3 className="w-4 h-4 mr-2" />
-                          Editar
+                          {t('paymentMethods.card.editButton')}
                         </Button>
                         <Button 
                           variant="outline" 

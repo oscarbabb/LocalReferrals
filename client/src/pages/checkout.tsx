@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard, Shield, Clock } from "lucide-react";
@@ -49,6 +50,7 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -70,14 +72,14 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
 
     if (error) {
       toast({
-        title: "Error en el Pago",
-        description: error.message || "Hubo un problema procesando tu pago. Inténtalo de nuevo.",
+        title: t('checkout.toast.errorTitle'),
+        description: error.message || t('checkout.toast.errorDescription'),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "¡Pago Exitoso!",
-        description: "Tu pago ha sido procesado correctamente. Te redirigiremos a los detalles de tu reserva.",
+        title: t('checkout.toast.successTitle'),
+        description: t('checkout.toast.successDescription'),
       });
     }
     
@@ -91,11 +93,12 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
           variant="ghost" 
           onClick={() => setLocation('/bookings')}
           className="flex items-center space-x-2"
+          data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Volver</span>
+          <span>{t('checkout.back')}</span>
         </Button>
-        <h1 className="text-2xl font-bold text-gray-900">Completar Pago</h1>
+        <h1 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">{t('checkout.title')}</h1>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -104,29 +107,29 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Shield className="w-5 h-5 text-green-600" />
-              <span>Resumen del Servicio</span>
+              <span>{t('checkout.summary.title')}</span>
             </CardTitle>
             <CardDescription>
-              Detalles de tu reserva
+              {t('checkout.summary.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span className="text-gray-600">Proveedor:</span>
-              <span className="font-medium">{serviceDetails.providerName}</span>
+              <span className="text-gray-600">{t('checkout.summary.provider')}</span>
+              <span className="font-medium" data-testid="text-provider-name">{serviceDetails.providerName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Servicio:</span>
-              <span className="font-medium">{serviceDetails.serviceName}</span>
+              <span className="text-gray-600">{t('checkout.summary.service')}</span>
+              <span className="font-medium" data-testid="text-service-name">{serviceDetails.serviceName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Descripción:</span>
-              <span className="text-sm text-gray-700">{serviceDetails.description}</span>
+              <span className="text-gray-600">{t('checkout.summary.description')}</span>
+              <span className="text-sm text-gray-700" data-testid="text-service-description">{serviceDetails.description}</span>
             </div>
             <hr />
             <div className="flex justify-between text-lg font-bold">
-              <span>Total:</span>
-              <span className="text-primary">MXN ${serviceDetails.amount.toLocaleString()}</span>
+              <span>{t('checkout.summary.total')}</span>
+              <span className="text-primary" data-testid="text-total-amount">MXN ${serviceDetails.amount.toLocaleString()}</span>
             </div>
           </CardContent>
         </Card>
@@ -136,10 +139,10 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <CreditCard className="w-5 h-5 text-blue-600" />
-              <span>Información de Pago</span>
+              <span>{t('checkout.payment.title')}</span>
             </CardTitle>
             <CardDescription>
-              Pago seguro procesado por Stripe
+              {t('checkout.payment.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -148,21 +151,22 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
               
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Shield className="w-4 h-4" />
-                <span>Tu información de pago está protegida con encriptación de nivel bancario</span>
+                <span>{t('checkout.payment.security')}</span>
               </div>
 
               <Button 
                 type="submit" 
                 disabled={!stripe || isProcessing} 
                 className="w-full bg-primary hover:bg-blue-700 text-white py-3"
+                data-testid="button-submit-payment"
               >
                 {isProcessing ? (
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 animate-spin" />
-                    <span>Procesando...</span>
+                    <span>{t('checkout.button.processing')}</span>
                   </div>
                 ) : (
-                  `Pagar MXN $${serviceDetails.amount.toLocaleString()}`
+                  `${t('checkout.button.pay')}${serviceDetails.amount.toLocaleString()}`
                 )}
               </Button>
             </form>
@@ -174,21 +178,22 @@ const CheckoutForm = ({ serviceDetails }: CheckoutFormProps) => {
 };
 
 export default function Checkout() {
+  const { t } = useLanguage();
   const [clientSecret, setClientSecret] = useState("");
   const [serviceDetails, setServiceDetails] = useState({
-    providerName: "Proveedor de Servicio",
-    serviceName: "Servicio Profesional", 
+    providerName: t('checkout.defaults.provider'),
+    serviceName: t('checkout.defaults.service'), 
     amount: 1500,
-    description: "Servicio profesional de calidad"
+    description: t('checkout.defaults.description')
   });
 
   useEffect(() => {
     // Get service details from URL params or state
     const params = new URLSearchParams(window.location.search);
     const amount = parseInt(params.get('amount') || '1500');
-    const providerName = params.get('provider') || 'Proveedor de Servicio';
-    const serviceName = params.get('service') || 'Servicio Profesional';
-    const description = params.get('description') || 'Servicio profesional de calidad';
+    const providerName = params.get('provider') || t('checkout.defaults.provider');
+    const serviceName = params.get('service') || t('checkout.defaults.service');
+    const description = params.get('description') || t('checkout.defaults.description');
 
     setServiceDetails({
       providerName,
@@ -213,14 +218,14 @@ export default function Checkout() {
       .catch((error) => {
         console.error("Error creating payment intent:", error);
       });
-  }, []);
+  }, [t]);
 
   if (!clientSecret) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-          <p className="text-gray-600">Preparando el pago seguro...</p>
+          <p className="text-gray-600" data-testid="text-loading">{t('checkout.loading')}</p>
         </div>
       </div>
     );
