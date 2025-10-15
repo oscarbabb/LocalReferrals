@@ -51,11 +51,12 @@ export default function AdminDashboard() {
   });
 
   const respondMutation = useMutation({
-    mutationFn: async (data: { id: string; adminResponse: string; status: string }) => {
-      return apiRequest("PATCH", `/api/admin-messages/${data.id}`, {
-        adminResponse: data.adminResponse,
-        status: data.status,
-      });
+    mutationFn: async (data: { id: string; adminResponse?: string; status: string }) => {
+      const payload: { status: string; adminResponse?: string } = { status: data.status };
+      if (data.adminResponse) {
+        payload.adminResponse = data.adminResponse;
+      }
+      return apiRequest("PATCH", `/api/admin-messages/${data.id}`, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin-messages"] });
