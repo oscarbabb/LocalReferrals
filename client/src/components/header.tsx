@@ -61,14 +61,14 @@ export default function Header() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-2">
+          <nav className="hidden lg:flex space-x-1">
             {navItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`nav-tab nav-item-enter ${
                   location === item.href ? "active" : ""
-                } px-2 py-2 relative text-xs font-medium whitespace-nowrap`}
+                } px-1.5 py-2 relative text-xs font-medium whitespace-nowrap`}
                 style={{
                   animationDelay: `${index * 0.1}s`
                 }}
@@ -84,7 +84,7 @@ export default function Header() {
                 href={adminNavItem.href}
                 className={`nav-tab nav-item-enter ${
                   location === adminNavItem.href ? "active" : ""
-                } px-2 py-2 relative text-xs font-medium whitespace-nowrap flex items-center gap-1`}
+                } px-1.5 py-2 relative text-xs font-medium whitespace-nowrap flex items-center gap-1`}
                 data-testid="nav-link-admin-dashboard"
               >
                 <Shield className="w-3 h-3" />
@@ -95,7 +95,7 @@ export default function Header() {
             )}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden lg:flex items-center space-x-1.5">
             <LanguageToggle />
             <InviteButton />
             
@@ -137,7 +137,7 @@ export default function Header() {
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
