@@ -17,6 +17,7 @@ export const es = {
   'nav.messages': 'Mensajes',
   'nav.contactAdmin': 'Contactar Admin',
   'nav.adminDashboard': 'Panel de Admin',
+  'nav.more': 'Más',
   'nav.tour': 'Ver Tour de la Plataforma',
   'nav.logoutToastTitle': 'Sesión cerrada',
   'nav.logoutToastSuccess': 'Has cerrado sesión exitosamente.',

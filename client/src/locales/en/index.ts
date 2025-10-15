@@ -17,6 +17,7 @@ export const en = {
   'nav.messages': 'Messages',
   'nav.contactAdmin': 'Contact Admin',
   'nav.adminDashboard': 'Admin Dashboard',
+  'nav.more': 'More',
   'nav.tour': 'Take Platform Tour',
   'nav.logoutToastTitle': 'Logged out',
   'nav.logoutToastSuccess': 'You have successfully logged out.',
