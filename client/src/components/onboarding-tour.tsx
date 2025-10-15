@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, ArrowLeft, ArrowRight, ChevronDown, Sparkles, Users, Search, Calendar, Shield, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/hooks/use-language";
 import type { ServiceCategory } from "@shared/schema";
 
 interface OnboardingTourProps {
@@ -12,45 +13,47 @@ interface OnboardingTourProps {
   onClose: () => void;
 }
 
-const tourSteps = [
+const getTourSteps = (t: (key: string) => string) => [
   {
     id: "welcome",
-    title: "¡Bienvenido a Referencias Locales!",
-    description: "Descubre servicios de confianza en tu comunidad residencial",
+    title: t('components.onboarding.welcomeTitle'),
+    description: t('components.onboarding.welcomeDesc'),
     icon: Sparkles,
     color: "from-blue-500 to-purple-600"
   },
   {
     id: "categories",
-    title: "26+ Categorías de Servicios",
-    description: "Desde limpieza hasta servicios profesionales, encuentra todo lo que necesitas",
+    title: t('components.onboarding.categoriesTitle'),
+    description: t('components.onboarding.categoriesDesc'),
     icon: Search,
     color: "from-green-500 to-teal-600"
   },
   {
     id: "providers",
-    title: "Proveedores Verificados",
-    description: "Todos nuestros proveedores pasan por verificación de antecedentes",
+    title: t('components.onboarding.providersTitle'),
+    description: t('components.onboarding.providersDesc'),
     icon: Shield,
     color: "from-orange-500 to-red-600"
   },
   {
     id: "community",
-    title: "Tu Comunidad Local",
-    description: "Conecta con vecinos de tu edificio y barrio",
+    title: t('components.onboarding.communityTitle'),
+    description: t('components.onboarding.communityDesc'),
     icon: Users,
     color: "from-purple-500 to-pink-600"
   },
   {
     id: "booking",
-    title: "Plataforma Social de Conexión",
-    description: "Esta es una plataforma social que conecta proveedores y consumidores. Puedes hacer solicitudes de servicio, pero no son reservas confirmadas",
+    title: t('components.onboarding.bookingTitle'),
+    description: t('components.onboarding.bookingDesc'),
     icon: Calendar,
     color: "from-teal-500 to-blue-600"
   }
 ];
 
 export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
+  const { t } = useLanguage();
+  const tourSteps = getTourSteps(t);
   const [currentStep, setCurrentStep] = useState(0);
   const [showcaseCategories, setShowcaseCategories] = useState<ServiceCategory[]>([]);
   
@@ -143,7 +146,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                 {/* Progress bar */}
                 <div className="mt-6">
                   <div className="flex justify-between text-sm text-orange-100 mb-2">
-                    <span>Paso {currentStep + 1} de {tourSteps.length}</span>
+                    <span>{t('components.onboarding.step')} {currentStep + 1} {t('components.onboarding.of')} {tourSteps.length}</span>
                     <span>{Math.round(((currentStep + 1) / tourSteps.length) * 100)}%</span>
                   </div>
                   <div className="w-full bg-orange-600/30 rounded-full h-2">
@@ -183,30 +186,29 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                         </motion.div>
                         <div className="space-y-4">
                           <h3 className="text-2xl font-bold text-gray-900">
-                            Tu plataforma de servicios comunitarios
+                            {t('components.onboarding.platformTitle')}
                           </h3>
                           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Conectamos vecinos de edificios y barrios con proveedores de servicios locales verificados. 
-                            Desde limpieza hasta servicios profesionales, encuentra todo en tu comunidad.
+                            {t('components.onboarding.platformDesc')}
                           </p>
                           <div className="grid grid-cols-3 gap-4 mt-8 max-w-md mx-auto">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                                 <Users className="w-6 h-6 text-blue-600" />
                               </div>
-                              <p className="text-sm text-gray-600">Comunidad</p>
+                              <p className="text-sm text-gray-600">{t('components.onboarding.community')}</p>
                             </div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                                 <Shield className="w-6 h-6 text-green-600" />
                               </div>
-                              <p className="text-sm text-gray-600">Verificado</p>
+                              <p className="text-sm text-gray-600">{t('components.onboarding.verified')}</p>
                             </div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                                 <Calendar className="w-6 h-6 text-purple-600" />
                               </div>
-                              <p className="text-sm text-gray-600">Fácil</p>
+                              <p className="text-sm text-gray-600">{t('components.onboarding.easy')}</p>
                             </div>
                           </div>
                         </div>
@@ -217,10 +219,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       <div className="space-y-6">
                         <div className="text-center mb-8">
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Explora Nuestras Categorías
+                            {t('components.onboarding.exploreCategories')}
                           </h3>
                           <p className="text-gray-600">
-                            Más de 26 categorías especializadas para todas tus necesidades
+                            {t('components.onboarding.categoriesCount')}
                           </p>
                         </div>
                         
@@ -255,7 +257,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
 
                         <div className="text-center">
                           <Badge variant="outline" className="text-orange-600 border-orange-200">
-                            +20 categorías más disponibles
+                            {t('components.onboarding.moreCategories')}
                           </Badge>
                         </div>
                       </div>
@@ -265,10 +267,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       <div className="space-y-6">
                         <div className="text-center mb-8">
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Proveedores Verificados
+                            {t('components.onboarding.verifiedProviders')}
                           </h3>
                           <p className="text-gray-600">
-                            Todos nuestros proveedores pasan por un proceso riguroso de verificación
+                            {t('components.onboarding.verifiedProvidersDesc')}
                           </p>
                         </div>
 
@@ -279,8 +281,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Shield className="w-4 h-4 text-green-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Validación de Experiencias Reales</h4>
-                                <p className="text-sm text-gray-600">Verificamos experiencias laborales auténticas y comprobables</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.experienceValidation')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.experienceValidationDesc')}</p>
                               </div>
                             </div>
                             
@@ -289,8 +291,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Users className="w-4 h-4 text-blue-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Registro Estadístico de Trabajos</h4>
-                                <p className="text-sm text-gray-600">Mantenemos un historial completo de servicios realizados</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.workRegistry')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.workRegistryDesc')}</p>
                               </div>
                             </div>
 
@@ -299,8 +301,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Sparkles className="w-4 h-4 text-purple-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Medición de la Reputación Pública</h4>
-                                <p className="text-sm text-gray-600">Evaluamos y rastreamos la reputación de cada proveedor</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.reputationTracking')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.reputationTrackingDesc')}</p>
                               </div>
                             </div>
 
@@ -309,8 +311,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <Users className="w-4 h-4 text-orange-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Referencias Reales de Personas Reales</h4>
-                                <p className="text-sm text-gray-600">Referencias verificadas de clientes reales de la comunidad</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.realReferences')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.realReferencesDesc')}</p>
                               </div>
                             </div>
                           </div>
@@ -320,9 +322,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <MessageSquare className="w-8 h-8 text-white" />
                               </div>
-                              <h4 className="font-bold text-green-900 mb-2">Referencias Reales de Personas Reales</h4>
+                              <h4 className="font-bold text-green-900 mb-2">{t('components.onboarding.realReferences')}</h4>
                               <p className="text-sm text-green-700">
-                                Solo proveedores que completan nuestro proceso de verificación pueden ofrecer servicios
+                                {t('components.onboarding.verificationRequired')}
                               </p>
                             </div>
                           </div>
@@ -334,10 +336,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       <div className="space-y-6">
                         <div className="text-center mb-8">
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Tu Comunidad Local
+                            {t('components.onboarding.localCommunity')}
                           </h3>
                           <p className="text-gray-600">
-                            Conecta con vecinos de tu edificio y barrio
+                            {t('components.onboarding.localCommunityDesc')}
                           </p>
                         </div>
 
@@ -351,9 +353,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                             <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                               <Users className="w-6 h-6 text-white" />
                             </div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Vecinos Confiables</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('components.onboarding.trustableNeighbors')}</h4>
                             <p className="text-sm text-gray-600">
-                              Servicios recomendados por personas de tu mismo edificio
+                              {t('components.onboarding.trustableNeighborsDesc')}
                             </p>
                           </motion.div>
 
@@ -366,9 +368,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                             <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                               <Search className="w-6 h-6 text-white" />
                             </div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Busqueda Local</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('components.onboarding.localSearch')}</h4>
                             <p className="text-sm text-gray-600">
-                              Encuentra servicios específicos para tu zona residencial
+                              {t('components.onboarding.localSearchDesc')}
                             </p>
                           </motion.div>
 
@@ -381,9 +383,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                             <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                               <Sparkles className="w-6 h-6 text-white" />
                             </div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Reseñas Reales</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('components.onboarding.realReviews')}</h4>
                             <p className="text-sm text-gray-600">
-                              Lee reseñas auténticas de tus vecinos
+                              {t('components.onboarding.realReviewsDesc')}
                             </p>
                           </motion.div>
                         </div>
@@ -394,9 +396,9 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                               <Users className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-900">¿Eres proveedor de servicios?</h4>
+                              <h4 className="font-semibold text-gray-900">{t('components.onboarding.areYouProvider')}</h4>
                               <p className="text-sm text-gray-600">
-                                Únete a nuestra comunidad y ofrece tus servicios a vecinos de confianza
+                                {t('components.onboarding.areYouProviderDesc')}
                               </p>
                             </div>
                           </div>
@@ -408,10 +410,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       <div className="space-y-6">
                         <div className="text-center mb-8">
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Plataforma Social de Conexión
+                            {t('components.onboarding.socialPlatform')}
                           </h3>
                           <p className="text-gray-600">
-                            Esta es una plataforma social que conecta proveedores y consumidores. Puedes hacer solicitudes de servicio, pero no son reservas confirmadas
+                            {t('components.onboarding.socialPlatformDesc')}
                           </p>
                         </div>
 
@@ -422,8 +424,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 1
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Explora Servicios</h4>
-                                <p className="text-sm text-gray-600">Navega por categorías y proveedores verificados</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.exploreServices')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.exploreServicesDesc')}</p>
                               </div>
                             </div>
 
@@ -432,8 +434,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 2
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Solicita Servicio</h4>
-                                <p className="text-sm text-gray-600">Envía una solicitud al proveedor de tu elección</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.requestService')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.requestServiceDesc')}</p>
                               </div>
                             </div>
 
@@ -442,8 +444,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 3
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">Espera Confirmación</h4>
-                                <p className="text-sm text-gray-600">El proveedor responderá tu solicitud directamente</p>
+                                <h4 className="font-semibold text-gray-900">{t('components.onboarding.waitConfirmation')}</h4>
+                                <p className="text-sm text-gray-600">{t('components.onboarding.waitConfirmationDesc')}</p>
                               </div>
                             </div>
                           </div>
@@ -457,16 +459,16 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                               >
                                 <Users className="w-8 h-8 text-white" />
                               </motion.div>
-                              <h4 className="font-bold text-orange-900 mb-2">¡Conecta con tu Comunidad!</h4>
+                              <h4 className="font-bold text-orange-900 mb-2">{t('components.onboarding.connectCommunity')}</h4>
                               <p className="text-sm text-orange-700 mb-4">
-                                Encuentra servicios confiables recomendados por tus vecinos
+                                {t('components.onboarding.connectCommunityDesc')}
                               </p>
                               <Button 
                                 className="bg-orange-500 hover:bg-orange-600 text-white"
                                 onClick={nextStep}
                                 data-testid="button-start-exploring"
                               >
-                                Explorar Servicios
+                                {t('components.onboarding.exploreServicesButton')}
                                 <ArrowRight className="w-4 h-4 ml-2" />
                               </Button>
                             </div>
@@ -503,8 +505,8 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       data-testid="button-prev-step"
                     >
                       <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Anterior</span>
-                      <span className="sm:hidden">Atrás</span>
+                      <span className="hidden sm:inline">{t('components.onboarding.previous')}</span>
+                      <span className="sm:hidden">{t('components.onboarding.back')}</span>
                     </Button>
 
                     <Button
@@ -513,10 +515,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                       data-testid="button-next-step"
                     >
                       <span className="hidden sm:inline">
-                        {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente'}
+                        {currentStep === tourSteps.length - 1 ? t('components.onboarding.finish') : t('components.onboarding.next')}
                       </span>
                       <span className="sm:hidden">
-                        {currentStep === tourSteps.length - 1 ? 'Fin' : 'Sig'}
+                        {currentStep === tourSteps.length - 1 ? t('components.onboarding.end') : t('components.onboarding.nextShort')}
                       </span>
                       <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
                     </Button>

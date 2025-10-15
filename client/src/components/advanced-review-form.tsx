@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Star, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import type { UploadResult } from "@uppy/core";
 
 const advancedReviewSchema = z.object({
@@ -77,6 +78,7 @@ export default function AdvancedReviewForm({
 }: AdvancedReviewFormProps) {
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   const form = useForm<AdvancedReviewData>({
@@ -101,8 +103,8 @@ export default function AdvancedReviewForm({
     },
     onSuccess: () => {
       toast({
-        title: "¡Reseña enviada!",
-        description: "Gracias por tu reseña detallada.",
+        title: t('components.advancedReview.successTitle'),
+        description: t('components.advancedReview.successDescription'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId] });
       onSubmit?.();
@@ -111,17 +113,17 @@ export default function AdvancedReviewForm({
       // Handle 401 authentication errors specifically
       if (error.message.includes("401")) {
         toast({
-          title: "Autenticación requerida",
-          description: "Por favor inicia sesión para dejar una reseña.",
+          title: t('components.advancedReview.authRequired'),
+          description: t('components.advancedReview.authRequiredDesc'),
           variant: "destructive",
         });
         return;
       }
       
       // Extract error message from the response (format: "status: message")
-      const errorMessage = error.message.replace(/^\d+:\s*/, '') || "No se pudo enviar la reseña. Intenta nuevamente.";
+      const errorMessage = error.message.replace(/^\d+:\s*/, '') || t('components.advancedReview.submitError');
       toast({
-        title: "Error",
+        title: t('components.advancedReview.error'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -152,8 +154,8 @@ export default function AdvancedReviewForm({
       } catch (error) {
         console.error("Error setting photo ACL:", error);
         toast({
-          title: "Error al subir foto",
-          description: "No se pudo configurar la foto. Intenta nuevamente.",
+          title: t('components.advancedReview.photoUploadError'),
+          description: t('components.advancedReview.photoUploadErrorDesc'),
           variant: "destructive",
         });
       }
@@ -173,7 +175,7 @@ export default function AdvancedReviewForm({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="w-5 h-5 text-yellow-400" />
-          Escribir una Reseña Detallada
+          {t('components.advancedReview.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -185,12 +187,12 @@ export default function AdvancedReviewForm({
               name="rating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Calificación General</FormLabel>
+                  <FormLabel>{t('components.advancedReview.overallRating')}</FormLabel>
                   <FormControl>
                     <StarRating
                       value={field.value}
                       onChange={field.onChange}
-                      label="General"
+                      label={t('components.advancedReview.general')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -200,7 +202,7 @@ export default function AdvancedReviewForm({
 
             {/* Detailed Ratings */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Calificaciones Detalladas</h4>
+              <h4 className="font-semibold text-gray-900">{t('components.advancedReview.detailedRatings')}</h4>
               
               <FormField
                 control={form.control}
@@ -211,7 +213,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Calidad del Servicio"
+                        label={t('components.advancedReview.serviceQuality')}
                       />
                     </FormControl>
                   </FormItem>
@@ -227,7 +229,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Comunicación"
+                        label={t('components.advancedReview.communication')}
                       />
                     </FormControl>
                   </FormItem>
@@ -243,7 +245,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Puntualidad"
+                        label={t('components.advancedReview.punctuality')}
                       />
                     </FormControl>
                   </FormItem>
@@ -259,7 +261,7 @@ export default function AdvancedReviewForm({
                       <StarRating
                         value={field.value || 5}
                         onChange={field.onChange}
-                        label="Relación Calidad-Precio"
+                        label={t('components.advancedReview.valueForMoney')}
                       />
                     </FormControl>
                   </FormItem>
@@ -273,10 +275,10 @@ export default function AdvancedReviewForm({
               name="comment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reseña Escrita</FormLabel>
+                  <FormLabel>{t('components.advancedReview.writtenReview')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Comparte tu experiencia con este proveedor de servicios..."
+                      placeholder={t('components.advancedReview.reviewPlaceholder')}
                       className="min-h-[120px]"
                       data-testid="textarea-review-comment"
                       {...field}
@@ -289,7 +291,7 @@ export default function AdvancedReviewForm({
 
             {/* Photo Upload */}
             <div className="space-y-4">
-              <FormLabel>Fotos</FormLabel>
+              <FormLabel>{t('components.advancedReview.photos')}</FormLabel>
               
               {uploadedPhotos.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -322,7 +324,7 @@ export default function AdvancedReviewForm({
                 buttonClassName="bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-dashed border-gray-300"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                Agregar Fotos
+                {t('components.advancedReview.addPhotos')}
               </ObjectUploader>
             </div>
 
@@ -333,7 +335,7 @@ export default function AdvancedReviewForm({
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div>
-                    <FormLabel>¿Recomendarías a este proveedor de servicios?</FormLabel>
+                    <FormLabel>{t('components.advancedReview.wouldRecommend')}</FormLabel>
                   </div>
                   <FormControl>
                     <Switch
@@ -354,7 +356,7 @@ export default function AdvancedReviewForm({
                 className="flex-1"
                 data-testid="button-submit-review"
               >
-                {createReviewMutation.isPending ? "Enviando..." : "Enviar Reseña"}
+                {createReviewMutation.isPending ? t('components.advancedReview.submitting') : t('components.advancedReview.submitReview')}
               </Button>
               {onCancel && (
                 <Button 
@@ -363,7 +365,7 @@ export default function AdvancedReviewForm({
                   onClick={onCancel}
                   data-testid="button-cancel-review"
                 >
-                  Cancelar
+                  {t('components.advancedReview.cancel')}
                 </Button>
               )}
             </div>

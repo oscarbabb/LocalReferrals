@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Clock } from "lucide-react";
 import BookingCalendar from "./booking-calendar";
+import { useLanguage } from "@/hooks/use-language";
 import type { Provider } from "@shared/schema";
 
 interface QuickBookingButtonProps {
@@ -20,6 +21,7 @@ export default function QuickBookingButton({
   size = "default" 
 }: QuickBookingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   // Get current user
   const { data: user } = useQuery({
@@ -41,14 +43,14 @@ export default function QuickBookingButton({
           data-testid="button-quick-booking"
         >
           <Calendar className="w-4 h-4 mr-2" />
-          Reservar Ahora
+          {t('components.quickBooking.bookNow')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-orange-500" />
-            Reserva rápida - {provider.title}
+            {t('components.quickBooking.quickBooking')} - {provider.title}
           </DialogTitle>
         </DialogHeader>
         <BookingCalendar 

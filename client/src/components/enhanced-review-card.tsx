@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Star, CheckCircle, ThumbsUp } from "lucide-react";
 import { parseSafeDate } from "@/lib/date-utils";
+import { useLanguage } from "@/hooks/use-language";
 import type { Review } from "@shared/schema";
 
 interface EnhancedReviewCardProps {
@@ -34,11 +35,13 @@ function StarRating({ rating, size = "w-4 h-4" }: { rating: number; size?: strin
 }
 
 function DetailedRatings({ review }: { review: Review }) {
+  const { t } = useLanguage();
+  
   const ratings = [
-    { label: "Calidad del Servicio", value: review.serviceQuality },
-    { label: "Comunicación", value: review.communication },
-    { label: "Puntualidad", value: review.punctuality },
-    { label: "Relación Calidad-Precio", value: review.valueForMoney },
+    { label: t('components.enhancedReview.serviceQuality'), value: review.serviceQuality },
+    { label: t('components.enhancedReview.communication'), value: review.communication },
+    { label: t('components.enhancedReview.punctuality'), value: review.punctuality },
+    { label: t('components.enhancedReview.valueForMoney'), value: review.valueForMoney },
   ];
 
   return (
@@ -78,6 +81,7 @@ function PhotoGallery({ photos }: { photos: string[] }) {
 }
 
 export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) {
+  const { t } = useLanguage();
   const reviewDate = parseSafeDate(review.createdAt).toLocaleDateString();
   const hasDetailedRatings = review.serviceQuality || review.communication || 
                             review.punctuality || review.valueForMoney;
@@ -104,13 +108,13 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
                   {review.isVerified && (
                     <Badge variant="secondary" className="text-green-600 bg-green-50">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Verificado
+                      {t('components.enhancedReview.verified')}
                     </Badge>
                   )}
                   {review.wouldRecommend && (
                     <Badge variant="secondary" className="text-blue-600 bg-blue-50">
                       <ThumbsUp className="w-3 h-3 mr-1" />
-                      Recomienda
+                      {t('components.enhancedReview.recommends')}
                     </Badge>
                   )}
                 </div>
@@ -128,7 +132,7 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
               <div className="text-right">
                 <StarRating rating={review.rating} />
                 <div className="text-sm text-gray-500 mt-1" data-testid="text-overall-rating">
-                  {review.rating}/5 General
+                  {review.rating}/5 {t('components.enhancedReview.general')}
                 </div>
               </div>
             </div>
@@ -143,7 +147,7 @@ export default function EnhancedReviewCard({ review }: EnhancedReviewCardProps) 
             {/* Detailed ratings */}
             {hasDetailedRatings && (
               <div>
-                <h5 className="text-sm font-medium text-gray-900 mb-2">Calificaciones Detalladas</h5>
+                <h5 className="text-sm font-medium text-gray-900 mb-2">{t('components.enhancedReview.detailedRatings')}</h5>
                 <DetailedRatings review={review} />
               </div>
             )}

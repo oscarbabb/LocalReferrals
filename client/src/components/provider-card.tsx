@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin, Globe } from "lucide-react";
 import { Link } from "wouter";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Provider {
   id: string;
@@ -27,6 +28,8 @@ interface ProviderCardProps {
 }
 
 export default function ProviderCard({ provider, categoryName }: ProviderCardProps) {
+  const { t } = useLanguage();
+  
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -65,7 +68,7 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
                 <div className="flex items-center space-x-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-medium">{provider.averageRating}</span>
-                  <span className="text-xs text-gray-500">({provider.reviewCount} reseñas)</span>
+                  <span className="text-xs text-gray-500">({provider.reviewCount} {t('components.providerCard.reviews')})</span>
                 </div>
               </div>
             )}
@@ -84,20 +87,20 @@ export default function ProviderCard({ provider, categoryName }: ProviderCardPro
             <span className="text-2xl font-bold text-gray-900">
               MXN ${provider.hourlyRate}
             </span>
-            <span className="text-sm text-gray-500">/hora</span>
+            <span className="text-sm text-gray-500">{t('components.providerCard.perHour')}</span>
           </div>
         </div>
 
         {provider.serviceRadiusKm && (
           <div className="flex items-center text-sm text-gray-500 mb-4">
             <Globe className="w-4 h-4 mr-1" />
-            <span>Radio de servicio: {provider.serviceRadiusKm} km</span>
+            <span>{t('components.providerCard.serviceRadius')}: {provider.serviceRadiusKm} km</span>
           </div>
         )}
 
         <Link href={`/providers/${provider.id}`}>
           <Button className="w-full bg-primary text-white hover:bg-blue-700 btn-animate hover-scale" data-testid="button-view-profile">
-            Ver Perfil
+            {t('components.providerCard.viewProfile')}
           </Button>
         </Link>
       </CardContent>

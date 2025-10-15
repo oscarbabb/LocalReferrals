@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { CreditCard, Clock, Shield } from "lucide-react";
 
 interface PayForServiceButtonProps {
@@ -23,13 +24,14 @@ export default function PayForServiceButton({
 }: PayForServiceButtonProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePayForService = async () => {
     if (!hourlyRate) {
       toast({
-        title: "Precio no disponible",
-        description: "Este proveedor no ha configurado sus precios. Contacta directamente.",
+        title: t('components.payForService.priceUnavailable'),
+        description: t('components.payForService.priceUnavailableDesc'),
         variant: "destructive",
       });
       return;
@@ -53,8 +55,8 @@ export default function PayForServiceButton({
     } catch (error) {
       console.error("Error initiating payment:", error);
       toast({
-        title: "Error",
-        description: "No se pudo iniciar el proceso de pago. Inténtalo de nuevo.",
+        title: t('components.payForService.error'),
+        description: t('components.payForService.errorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -62,18 +64,18 @@ export default function PayForServiceButton({
     }
   };
 
-  const displayRate = hourlyRate ? `MXN $${parseFloat(hourlyRate.replace(/[^0-9.-]+/g, "")).toLocaleString()}` : "Precio por consultar";
+  const displayRate = hourlyRate ? `MXN $${parseFloat(hourlyRate.replace(/[^0-9.-]+/g, "")).toLocaleString()}` : t('components.payForService.priceOnRequest');
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border">
         <div className="flex items-center space-x-2">
           <Shield className="w-4 h-4 text-green-600" />
-          <span className="text-sm font-medium text-gray-700">Pago seguro con Stripe</span>
+          <span className="text-sm font-medium text-gray-700">{t('components.payForService.securePayment')}</span>
         </div>
         <div className="text-right">
-          <div className="text-sm text-gray-600">Desde</div>
-          <div className="text-lg font-bold text-primary">{displayRate}/hora</div>
+          <div className="text-sm text-gray-600">{t('components.payForService.from')}</div>
+          <div className="text-lg font-bold text-primary">{displayRate}{t('components.payForService.perHour')}</div>
         </div>
       </div>
 
@@ -85,12 +87,12 @@ export default function PayForServiceButton({
         {isLoading ? (
           <div className="flex items-center space-x-2">
             <Clock className="w-4 h-4 animate-spin" />
-            <span>Cargando...</span>
+            <span>{t('components.payForService.loading')}</span>
           </div>
         ) : (
           <div className="flex items-center space-x-2">
             <CreditCard className="w-4 h-4" />
-            <span>Reservar y Pagar</span>
+            <span>{t('components.payForService.bookAndPay')}</span>
           </div>
         )}
       </Button>
@@ -98,12 +100,12 @@ export default function PayForServiceButton({
       <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
         <div className="flex items-center space-x-1">
           <Shield className="w-3 h-3" />
-          <span>Pago 100% seguro</span>
+          <span>{t('components.payForService.securePayment100')}</span>
         </div>
         <div>•</div>
-        <div>Procesado por Stripe</div>
+        <div>{t('components.payForService.processedByStripe')}</div>
         <div>•</div>
-        <div>Garantía de satisfacción</div>
+        <div>{t('components.payForService.satisfactionGuarantee')}</div>
       </div>
     </div>
   );
