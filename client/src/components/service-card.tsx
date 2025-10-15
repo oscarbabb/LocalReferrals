@@ -6,6 +6,8 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
+import { useLanguage } from "@/hooks/use-language";
+import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
 
 interface ServiceCardProps {
   category: ServiceCategory;
@@ -67,6 +69,7 @@ const getHoverColorForCategory = (categoryId: string): string => {
 };
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
+  const { language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 400 });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -209,7 +212,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
                 data-testid={`subcategory-${subcategory.id}`}
                 onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
               >
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{subcategory.name}</span>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{getSubcategoryLabel(subcategory.id, language, subcategory.name)}</span>
                 <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
               </div>
             ))}
@@ -241,7 +244,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           
           {/* Content */}
           <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-            {category.name}
+            {getCategoryLabel(category.id, language, category.name)}
           </h3>
           <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
             {category.description}

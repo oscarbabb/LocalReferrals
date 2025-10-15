@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
 import type { ServiceCategory } from "@shared/schema";
+import { getCategoryLabel } from "@/lib/serviceTranslations";
 
 interface OnboardingTourProps {
   isOpen: boolean;
@@ -52,7 +53,7 @@ const getTourSteps = (t: (key: string) => string) => [
 ];
 
 export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const tourSteps = getTourSteps(t);
   const [currentStep, setCurrentStep] = useState(0);
   const [showcaseCategories, setShowcaseCategories] = useState<ServiceCategory[]>([]);
@@ -239,12 +240,12 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                 <CardContent className="p-4 text-center">
                                   <div 
                                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 mx-auto"
-                                    style={{ backgroundColor: category.color }}
+                                    style={{ backgroundColor: category.color || '#f3f4f6' }}
                                   >
                                     <span className="text-2xl">{category.icon}</span>
                                   </div>
                                   <h4 className="font-semibold text-gray-900 mb-1">
-                                    {category.name}
+                                    {getCategoryLabel(category.id, language, category.name)}
                                   </h4>
                                   <p className="text-xs text-gray-600 line-clamp-2">
                                     {category.description}

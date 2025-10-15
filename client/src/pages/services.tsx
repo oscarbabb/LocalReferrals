@@ -7,12 +7,13 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
+import { getCategoryLabel, categoryMatchesSearch } from "@/lib/serviceTranslations";
 
 export default function Services() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const { data: categories = [], isLoading } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
@@ -29,7 +30,7 @@ export default function Services() {
   }, {});
 
   const filteredCategories = categories.filter(category => {
-    const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = categoryMatchesSearch(category.id, searchTerm) ||
                          (category.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || selectedCategory === "all" || category.id === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -84,7 +85,7 @@ export default function Services() {
                 <SelectItem value="all">{t('services.allCategories')}</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
-                    {category.name}
+                    {getCategoryLabel(category.id, language, category.name)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
+import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
 
 // Provider setup form schema with conditional payment method fields
 const providerSetupSchema = (t: any) => z.object({
@@ -93,7 +94,7 @@ type SelectedCategory = {
 export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   
@@ -408,7 +409,7 @@ export default function ProviderSetup() {
                               <SelectItem key={category.id} value={category.id}>
                                 <div className="flex items-center space-x-2">
                                   <span>{category.icon}</span>
-                                  <span>{category.name}</span>
+                                  <span>{getCategoryLabel(category.id, language, category.name)}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -434,7 +435,7 @@ export default function ProviderSetup() {
                               ) : (
                                 tempSubcategories.map((subcategory) => (
                                   <SelectItem key={subcategory.id} value={subcategory.id}>
-                                    {subcategory.name}
+                                    {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
                                   </SelectItem>
                                 ))
                               )}

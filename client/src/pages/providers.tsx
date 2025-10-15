@@ -8,9 +8,10 @@ import { Search, Filter } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
+import { getCategoryLabel } from "@/lib/serviceTranslations";
 
 export default function Providers() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("rating");
@@ -25,10 +26,10 @@ export default function Providers() {
 
   const categoriesMap = useMemo(() => {
     return categories.reduce((acc, category) => {
-      acc[category.id] = category.name;
+      acc[category.id] = getCategoryLabel(category.id, language, category.name);
       return acc;
     }, {} as Record<string, string>);
-  }, [categories]);
+  }, [categories, language]);
 
   const filteredAndSortedProviders = useMemo(() => {
     let filtered = providers.filter((provider: any) => {
@@ -114,7 +115,7 @@ export default function Providers() {
                   <SelectItem value="all">{t('providers.filter.allCategories')}</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      {getCategoryLabel(category.id, language, category.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>
