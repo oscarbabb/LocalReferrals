@@ -9,7 +9,7 @@ import {
 import { z } from "zod";
 import Stripe from "stripe";
 import { randomBytes } from "crypto";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
 import { db } from "./db";
 import { serviceCategories, serviceSubcategories } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
@@ -1944,31 +1944,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ADMIN-ONLY ROUTES (commented out until admin role is implemented)
-  // These routes are restricted to prevent unauthorized access to all admin messages
+  // ADMIN-ONLY ROUTES - Restricted to users with admin role
   
-  // app.get("/api/admin-messages", isAuthenticated, async (req: any, res) => {
-  //   try {
-  //     const messages = await storage.getAdminMessages();
-  //     res.json(messages);
-  //   } catch (error) {
-  //     console.error("Failed to fetch all admin messages:", error);
-  //     res.status(500).json({ message: "Failed to fetch admin messages" });
-  //   }
-  // });
+  app.get("/api/admin-messages", isAdmin, async (req: any, res) => {
+    try {
+      const messages = await storage.getAdminMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Failed to fetch all admin messages:", error);
+      res.status(500).json({ message: "Failed to fetch admin messages" });
+    }
+  });
 
-  // app.patch("/api/admin-messages/:id", isAuthenticated, async (req: any, res) => {
-  //   try {
-  //     const updatedMessage = await storage.updateAdminMessage(req.params.id, req.body);
-  //     if (!updatedMessage) {
-  //       return res.status(404).json({ message: "Message not found" });
-  //     }
-  //     res.json(updatedMessage);
-  //   } catch (error) {
-  //     console.error("Failed to update admin message:", error);
-  //     res.status(500).json({ message: "Failed to update admin message" });
-  //   }
-  // });
+  app.patch("/api/admin-messages/:id", isAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const updateData = {
+        ...req.body,
+        respondedBy: adminId,
+        respondedAt: new Date(),
+      };
+      const updatedMessage = await storage.updateAdminMessage(req.params.id, updateData);
+      if (!updatedMessage) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error("Failed to update admin message:", error);
+      res.status(500).json({ message: "Failed to update admin message" });
+    }
+  });
 
   // Photo upload endpoints
   app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {

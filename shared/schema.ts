@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   building: text("building"),
   phone: text("phone"),
   isProvider: boolean("is_provider").default(false),
+  isAdmin: boolean("is_admin").default(false),
   avatar: text("avatar"),
   serviceRadiusKm: integer("service_radius_km"), // Service reception radius in km for consumers
   // Detailed Mexican Address Fields
