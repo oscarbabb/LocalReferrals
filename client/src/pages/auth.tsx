@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { Mail, Lock, User, Phone, Briefcase, Eye, EyeOff } from "lucide-react";
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isProviderRegistration, setIsProviderRegistration] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -39,8 +41,8 @@ export default function Auth() {
     },
     onSuccess: (data) => {
       toast({
-        title: "¡Cuenta creada exitosamente!",
-        description: "Bienvenido a Referencias Locales. Ya puedes empezar a explorar servicios.",
+        title: t('auth.toast.registerSuccess.title'),
+        description: t('auth.toast.registerSuccess.description'),
       });
       
       // Store provider setup token for secure provider creation
@@ -53,8 +55,8 @@ export default function Auth() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error al crear la cuenta",
-        description: error.message || "Hubo un problema al crear tu cuenta. Inténtalo de nuevo.",
+        title: t('auth.toast.registerError.title'),
+        description: error.message || t('auth.toast.registerError.description'),
         variant: "destructive",
       });
     },
@@ -83,15 +85,15 @@ export default function Auth() {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       
       toast({
-        title: "¡Bienvenido de vuelta!",
-        description: "Has iniciado sesión exitosamente.",
+        title: t('auth.toast.loginSuccess.title'),
+        description: t('auth.toast.loginSuccess.description'),
       });
       setLocation("/");
     },
     onError: (error: any) => {
       toast({
-        title: "Error al iniciar sesión",
-        description: error.message || "Credenciales incorrectas. Verifica tu email y contraseña.",
+        title: t('auth.toast.loginError.title'),
+        description: error.message || t('auth.toast.loginError.description'),
         variant: "destructive",
       });
     },
@@ -118,8 +120,8 @@ export default function Auth() {
     
     if (password !== confirmPassword) {
       toast({
-        title: "Error en contraseñas",
-        description: "Las contraseñas no coinciden. Por favor verifica e inténtalo de nuevo.",
+        title: t('auth.toast.passwordMismatch.title'),
+        description: t('auth.toast.passwordMismatch.description'),
         variant: "destructive",
       });
       return;
@@ -158,14 +160,14 @@ export default function Auth() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-3 mb-6">
-            <img src="/logo.png" alt="Referencias Locales" className="w-14 h-14" />
-            <span className="text-2xl font-bold text-gray-900">Referencias Locales</span>
+            <img src="/logo.png" alt={t('auth.header.title')} className="w-14 h-14" />
+            <span className="text-2xl font-bold text-gray-900">{t('auth.header.title')}</span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900">
-            Únete a tu comunidad
+            {t('auth.header.joinCommunity')}
           </h2>
           <p className="mt-2 text-gray-600">
-            Conecta con servicios de confianza en tu edificio
+            {t('auth.header.connectServices')}
           </p>
         </div>
 
@@ -173,28 +175,28 @@ export default function Auth() {
           <CardContent className="p-6">
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-                <TabsTrigger value="register">Registrarse</TabsTrigger>
+                <TabsTrigger value="login">{t('auth.login.tab')}</TabsTrigger>
+                <TabsTrigger value="register">{t('auth.register.tab')}</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
               <TabsContent value="login">
                 <CardHeader>
-                  <CardTitle>Iniciar Sesión</CardTitle>
+                  <CardTitle>{t('auth.login.title')}</CardTitle>
                   <CardDescription>
-                    Ingresa tus credenciales para acceder a tu cuenta
+                    {t('auth.login.description')}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email">{t('auth.login.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="login-email"
                         name="email"
                         type="email"
-                        placeholder="tu@email.com"
+                        placeholder={t('auth.login.emailPlaceholder')}
                         className="pl-10"
                         required
                         data-testid="input-email"
@@ -202,7 +204,7 @@ export default function Auth() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Contraseña</Label>
+                    <Label htmlFor="login-password">{t('auth.login.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
@@ -227,11 +229,11 @@ export default function Auth() {
                     <div className="flex items-center space-x-2">
                       <Checkbox id="remember-me" />
                       <Label htmlFor="remember-me" className="text-sm">
-                        Recordarme
+                        {t('auth.login.rememberMe')}
                       </Label>
                     </div>
                     <a href="#" className="text-sm text-primary hover:underline">
-                      ¿Olvidaste tu contraseña?
+                      {t('auth.login.forgotPassword')}
                     </a>
                   </div>
                   <Button 
@@ -240,7 +242,7 @@ export default function Auth() {
                     disabled={loginMutation.isPending}
                     data-testid="button-login"
                   >
-                    {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
+                    {loginMutation.isPending ? t('auth.login.buttonLoading') : t('auth.login.button')}
                   </Button>
                 </form>
               </TabsContent>
@@ -248,132 +250,132 @@ export default function Auth() {
               {/* Register Tab */}
               <TabsContent value="register">
                 <CardHeader>
-                  <CardTitle>Crear Cuenta</CardTitle>
+                  <CardTitle>{t('auth.register.title')}</CardTitle>
                   <CardDescription>
-                    Únete a tu comunidad de servicios locales
+                    {t('auth.register.description')}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleRegister} className="space-y-4" data-provider-form="true">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="first-name">Nombre</Label>
+                      <Label htmlFor="first-name">{t('auth.register.firstName')}</Label>
                       <Input
                         id="first-name"
                         name="firstName"
                         type="text"
-                        placeholder="Juan"
+                        placeholder={t('auth.register.firstNamePlaceholder')}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="last-name">Apellido</Label>
+                      <Label htmlFor="last-name">{t('auth.register.lastName')}</Label>
                       <Input
                         id="last-name"
                         name="lastName"
                         type="text"
-                        placeholder="Pérez"
+                        placeholder={t('auth.register.lastNamePlaceholder')}
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="username">Nombre de Usuario</Label>
+                    <Label htmlFor="username">{t('auth.register.username')}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="username"
                         name="username"
                         type="text"
-                        placeholder="juanperez"
+                        placeholder={t('auth.register.usernamePlaceholder')}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
+                    <Label htmlFor="register-email">{t('auth.register.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="register-email"
                         name="email"
                         type="email"
-                        placeholder="tu@email.com"
+                        placeholder={t('auth.register.emailPlaceholder')}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
+                    <Label htmlFor="phone">{t('auth.register.phone')}</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         id="phone"
                         name="phone"
                         type="tel"
-                        placeholder="+1234567890"
+                        placeholder={t('auth.register.phonePlaceholder')}
                         className="pl-10"
                       />
                     </div>
                   </div>
                   {/* Mexican Address Structure */}
                   <div className="space-y-4 border-t pt-4">
-                    <h3 className="font-semibold text-gray-700">Dirección</h3>
+                    <h3 className="font-semibold text-gray-700">{t('auth.register.addressSection')}</h3>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="condominio-maestro">Condominio Maestro</Label>
+                        <Label htmlFor="condominio-maestro">{t('auth.register.condominioMaestro')}</Label>
                         <Input
                           id="condominio-maestro"
                           name="condominioMaestro"
                           type="text"
-                          placeholder="Ej: Las Flores"
+                          placeholder={t('auth.register.condominioMaestroPlaceholder')}
                           data-testid="input-condominio-maestro"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="condominio">Condominio</Label>
+                        <Label htmlFor="condominio">{t('auth.register.condominio')}</Label>
                         <Input
                           id="condominio"
                           name="condominio"
                           type="text"
-                          placeholder="Ej: Sección A"
+                          placeholder={t('auth.register.condominioPlaceholder')}
                           data-testid="input-condominio"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="edificio-area">Edificio o Área</Label>
+                      <Label htmlFor="edificio-area">{t('auth.register.edificioOArea')}</Label>
                       <Input
                         id="edificio-area"
                         name="edificioOArea"
                         type="text"
-                        placeholder="Ej: Torre Norte"
+                        placeholder={t('auth.register.edificioOAreaPlaceholder')}
                         data-testid="input-edificio-area"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="calle">Calle</Label>
+                        <Label htmlFor="calle">{t('auth.register.calle')}</Label>
                         <Input
                           id="calle"
                           name="calle"
                           type="text"
-                          placeholder="Ej: Av. Principal"
+                          placeholder={t('auth.register.callePlaceholder')}
                           required
                           data-testid="input-calle"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="colonia">Colonia</Label>
+                        <Label htmlFor="colonia">{t('auth.register.colonia')}</Label>
                         <Input
                           id="colonia"
                           name="colonia"
                           type="text"
-                          placeholder="Ej: Centro"
+                          placeholder={t('auth.register.coloniaPlaceholder')}
                           required
                           data-testid="input-colonia"
                         />
@@ -382,34 +384,34 @@ export default function Auth() {
 
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="codigo-postal">C.P.</Label>
+                        <Label htmlFor="codigo-postal">{t('auth.register.codigoPostal')}</Label>
                         <Input
                           id="codigo-postal"
                           name="codigoPostal"
                           type="text"
-                          placeholder="01000"
+                          placeholder={t('auth.register.codigoPostalPlaceholder')}
                           required
                           data-testid="input-codigo-postal"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="numero-exterior">Núm. Exterior</Label>
+                        <Label htmlFor="numero-exterior">{t('auth.register.numeroExterior')}</Label>
                         <Input
                           id="numero-exterior"
                           name="numeroExterior"
                           type="text"
-                          placeholder="123"
+                          placeholder={t('auth.register.numeroExteriorPlaceholder')}
                           required
                           data-testid="input-numero-exterior"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="numero-interior">Núm. Interior</Label>
+                        <Label htmlFor="numero-interior">{t('auth.register.numeroInterior')}</Label>
                         <Input
                           id="numero-interior"
                           name="numeroInterior"
                           type="text"
-                          placeholder="305"
+                          placeholder={t('auth.register.numeroInteriorPlaceholder')}
                           data-testid="input-numero-interior"
                         />
                       </div>
@@ -417,23 +419,23 @@ export default function Auth() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="municipio">Municipio</Label>
+                        <Label htmlFor="municipio">{t('auth.register.municipio')}</Label>
                         <Input
                           id="municipio"
                           name="municipio"
                           type="text"
-                          placeholder="Ej: Benito Juárez"
+                          placeholder={t('auth.register.municipioPlaceholder')}
                           required
                           data-testid="input-municipio"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="estado">Estado</Label>
+                        <Label htmlFor="estado">{t('auth.register.estado')}</Label>
                         <Input
                           id="estado"
                           name="estado"
                           type="text"
-                          placeholder="Ej: CDMX"
+                          placeholder={t('auth.register.estadoPlaceholder')}
                           required
                           data-testid="input-estado"
                         />
@@ -441,18 +443,18 @@ export default function Auth() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address-notes">Notas adicionales</Label>
+                      <Label htmlFor="address-notes">{t('auth.register.addressNotes')}</Label>
                       <Input
                         id="address-notes"
                         name="addressNotes"
                         type="text"
-                        placeholder="Ej: Entre calles X y Y, portón verde"
+                        placeholder={t('auth.register.addressNotesPlaceholder')}
                         data-testid="input-address-notes"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="register-password">Contraseña</Label>
+                    <Label htmlFor="register-password">{t('auth.register.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
@@ -473,7 +475,7 @@ export default function Auth() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirmar Contraseña</Label>
+                    <Label htmlFor="confirm-password">{t('auth.register.confirmPassword')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
@@ -500,29 +502,28 @@ export default function Auth() {
                       <div className="flex items-center space-x-2">
                         <Briefcase className="w-5 h-5 text-orange-600" />
                         <Label htmlFor="provider-option" className="text-base font-semibold text-gray-800 cursor-pointer">
-                          ¿Quieres ofrecer servicios profesionales?
+                          {t('auth.register.providerOption')}
                         </Label>
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 ml-8">
-                      Únete como proveedor de servicios y conecta con vecinos que necesitan tu trabajo. 
-                      Perfectecto para limpieza, tutorías, mantenimiento, cuidado infantil y más.
+                      {t('auth.register.providerDescription')}
                     </p>
                     <div className="flex items-center space-x-2 ml-8">
                       <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-                        💰 Gana dinero extra
+                        {t('auth.register.providerBenefit1')}
                       </span>
                       <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-                        👥 Ayuda a tu comunidad
+                        {t('auth.register.providerBenefit2')}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="terms" required />
                     <Label htmlFor="terms" className="text-sm">
-                      Acepto los{" "}
+                      {t('auth.register.termsPrefix')}{" "}
                       <a href="#" className="text-primary hover:underline">
-                        términos y condiciones
+                        {t('auth.register.termsLink')}
                       </a>
                     </Label>
                   </div>
@@ -531,7 +532,7 @@ export default function Auth() {
                     className="w-full bg-primary text-white hover:bg-blue-700"
                     disabled={registerMutation.isPending}
                   >
-                    {registerMutation.isPending ? "Creando cuenta..." : "Crear Cuenta"}
+                    {registerMutation.isPending ? t('auth.register.buttonLoading') : t('auth.register.button')}
                   </Button>
                 </form>
               </TabsContent>
@@ -541,7 +542,7 @@ export default function Auth() {
 
         <div className="text-center">
           <Link href="/" className="text-primary hover:underline">
-            ← Volver al inicio
+            {t('auth.header.backHome')}
           </Link>
         </div>
       </div>

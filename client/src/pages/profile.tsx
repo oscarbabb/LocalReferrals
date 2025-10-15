@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseSafeDate } from "@/lib/date-utils";
@@ -24,29 +25,30 @@ import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 import type { UploadResult } from "@uppy/core";
 import type { MenuItem } from "@shared/schema";
 
-// Profile form schema
-const profileSchema = z.object({
-  fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  username: z.string().min(3, "El nombre de usuario debe tener al menos 3 caracteres"),
-  email: z.string().email("Email inválido"),
-  phone: z.string().min(10, "Teléfono debe tener al menos 10 dígitos"),
-  building: z.string().min(1, "El edificio es requerido"),
-  apartment: z.string().min(1, "El apartamento es requerido"),
-  address: z.string().min(10, "La dirección debe ser más específica"),
+// Profile form schema - accepts translation function
+const profileSchema = (t: any) => z.object({
+  fullName: z.string().min(2, t('profile.validation.nameMin')),
+  username: z.string().min(3, t('profile.validation.usernameMin')),
+  email: z.string().email(t('profile.validation.emailInvalid')),
+  phone: z.string().min(10, t('profile.validation.phoneMin')),
+  building: z.string().min(1, t('profile.validation.buildingRequired')),
+  apartment: z.string().min(1, t('profile.validation.apartmentRequired')),
+  address: z.string().min(10, t('profile.validation.addressMin')),
   serviceRadiusKm: z.preprocess(
     (val) => {
       if (val === "" || val === null || val === undefined) return undefined;
       const num = Number(val);
       return isNaN(num) ? undefined : num;
     },
-    z.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional()
+    z.number().int().min(1, t('profile.validation.radiusMin')).max(100, t('profile.validation.radiusMax')).optional()
   ),
 });
 
-type ProfileForm = z.infer<typeof profileSchema>;
+type ProfileForm = z.infer<ReturnType<typeof profileSchema>>;
 
 export default function Profile() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [isUpdating, setIsUpdating] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export default function Profile() {
 
   // Profile form
   const profileForm = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(profileSchema(t)),
     defaultValues: {
       fullName: user?.fullName || "",
       username: user?.username || "",
@@ -116,10 +118,10 @@ export default function Profile() {
       const data = await response.json();
       
       toast({
-        title: "Rol actualizado",
+        title: t('profile.toast.roleUpdated.title'),
         description: data.user?.isProvider 
-          ? "Ahora puedes ofrecer servicios como proveedor" 
-          : "Has cambiado a modo consumidor",
+          ? t('profile.toast.roleUpdated.provider')
+          : t('profile.toast.roleUpdated.consumer'),
       });
       
       // Refresh user data
@@ -133,8 +135,8 @@ export default function Profile() {
     },
     onError: (error) => {
       toast({
-        title: "Error al cambiar rol",
-        description: "No se pudo actualizar tu rol. Inténtalo de nuevo.",
+        title: t('profile.toast.roleError.title'),
+        description: t('profile.toast.roleError.description'),
         variant: "destructive",
       });
     },
@@ -172,14 +174,14 @@ export default function Profile() {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         
         toast({
-          title: "Foto de perfil actualizada",
-          description: "Tu foto de perfil se ha actualizado exitosamente.",
+          title: t('profile.toast.photoUpdated.title'),
+          description: t('profile.toast.photoUpdated.description'),
         });
       } catch (error) {
         console.error("Error updating profile picture:", error);
         toast({
-          title: "Error al actualizar foto",
-          description: "Hubo un problema al actualizar tu foto de perfil.",
+          title: t('profile.toast.photoError.title'),
+          description: t('profile.toast.photoError.description'),
           variant: "destructive",
         });
       } finally {
@@ -197,15 +199,15 @@ export default function Profile() {
     },
     onSuccess: () => {
       toast({
-        title: "Perfil actualizado",
-        description: "Tus cambios han sido guardados exitosamente.",
+        title: t('profile.toast.profileUpdated.title'),
+        description: t('profile.toast.profileUpdated.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Error al actualizar perfil",
-        description: error.message || "No se pudo actualizar tu perfil. Inténtalo de nuevo.",
+        title: t('profile.toast.profileError.title'),
+        description: error.message || t('profile.toast.profileError.description'),
         variant: "destructive",
       });
     },
@@ -246,10 +248,10 @@ export default function Profile() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Acceso Requerido</h1>
-          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tu perfil.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('profile.access.title')}</h1>
+          <p className="text-gray-600 mb-6">{t('profile.access.message')}</p>
           <Button onClick={() => setLocation('/auth')} data-testid="button-login-redirect">
-            Iniciar Sesión
+            {t('profile.access.button')}
           </Button>
         </div>
       </div>
@@ -259,8 +261,8 @@ export default function Profile() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mi Perfil</h1>
-          <p className="text-gray-600">Gestiona tu información personal y configuración</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('profile.header.title')}</h1>
+          <p className="text-gray-600">{t('profile.header.description')}</p>
         </div>
 
         {/* Role Status Card */}
@@ -281,19 +283,19 @@ export default function Profile() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {user?.isProvider ? 'Modo Proveedor' : 'Modo Consumidor'}
+                    {user?.isProvider ? t('profile.role.providerMode') : t('profile.role.consumerMode')}
                   </h3>
                   <p className="text-gray-600">
                     {user?.isProvider 
-                      ? 'Puedes ofrecer servicios y gestionar tus clientes'
-                      : 'Puedes buscar y contratar servicios locales'
+                      ? t('profile.role.providerDescription')
+                      : t('profile.role.consumerDescription')
                     }
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <span className="text-sm font-medium text-gray-700">
-                  {user?.isProvider ? 'Proveedor' : 'Consumidor'}
+                  {user?.isProvider ? t('profile.role.provider') : t('profile.role.consumer')}
                 </span>
                 <Switch
                   checked={user?.isProvider}
@@ -302,14 +304,14 @@ export default function Profile() {
                   data-testid="switch-role"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  {user?.isProvider ? 'Consumidor' : 'Proveedor'}
+                  {user?.isProvider ? t('profile.role.consumer') : t('profile.role.provider')}
                 </span>
               </div>
             </div>
             {roleSwitchMutation.isPending && (
               <div className="mt-4 flex items-center space-x-2 text-sm text-gray-600">
                 <div className="animate-spin w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-                <span>Actualizando rol...</span>
+                <span>{t('profile.role.updating')}</span>
               </div>
             )}
           </CardContent>
@@ -319,19 +321,19 @@ export default function Profile() {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
-              Perfil
+              {t('profile.tab.profile')}
             </TabsTrigger>
             <TabsTrigger value="provider">
               <Star className="w-4 h-4 mr-2" />
-              Proveedor
+              {t('profile.tab.provider')}
             </TabsTrigger>
             <TabsTrigger value="requests">
               <Calendar className="w-4 h-4 mr-2" />
-              Solicitudes
+              {t('profile.tab.requests')}
             </TabsTrigger>
             <TabsTrigger value="settings">
               <Settings className="w-4 h-4 mr-2" />
-              Configuración
+              {t('profile.tab.settings')}
             </TabsTrigger>
           </TabsList>
 
@@ -341,13 +343,13 @@ export default function Profile() {
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Información Personal</CardTitle>
+                    <CardTitle>{t('profile.personal.title')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="flex items-center space-x-6">
                       <Avatar className="w-20 h-20">
                         {(profilePicture || user?.avatar) ? (
-                          <AvatarImage src={profilePicture || user?.avatar} alt="Foto de perfil" />
+                          <AvatarImage src={profilePicture || user?.avatar} alt={t('profile.provider.profile.photo')} />
                         ) : (
                           <AvatarFallback className="bg-primary text-white text-xl">
                             {getInitials(user?.fullName)}
@@ -363,11 +365,11 @@ export default function Profile() {
                           buttonClassName="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
                         >
                           <Camera className="w-4 h-4 mr-2" />
-                          {profilePicture ? 'Cambiar Foto' : 'Subir Foto'}
+                          {profilePicture ? t('profile.personal.changePhoto') : t('profile.personal.uploadPhoto')}
                         </ObjectUploader>
-                        <p className="text-sm text-gray-500">JPG, PNG. Máximo 2MB.</p>
+                        <p className="text-sm text-gray-500">{t('profile.personal.photoRequirements')}</p>
                         {isUploadingPicture && (
-                          <p className="text-sm text-blue-600">Subiendo foto...</p>
+                          <p className="text-sm text-blue-600">{t('profile.personal.uploadingPhoto')}</p>
                         )}
                       </div>
                     </div>
@@ -380,7 +382,7 @@ export default function Profile() {
                             name="fullName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Nombre Completo</FormLabel>
+                                <FormLabel>{t('profile.personal.fullName')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} data-testid="input-fullname" />
                                 </FormControl>
@@ -393,7 +395,7 @@ export default function Profile() {
                             name="username"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Nombre de Usuario</FormLabel>
+                                <FormLabel>{t('profile.personal.username')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} data-testid="input-username" />
                                 </FormControl>
@@ -406,7 +408,7 @@ export default function Profile() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>{t('profile.personal.email')}</FormLabel>
                                 <FormControl>
                                   <Input type="email" {...field} data-testid="input-email" />
                                 </FormControl>
@@ -419,7 +421,7 @@ export default function Profile() {
                             name="phone"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Teléfono</FormLabel>
+                                <FormLabel>{t('profile.personal.phone')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} data-testid="input-phone" />
                                 </FormControl>
@@ -432,7 +434,7 @@ export default function Profile() {
                             name="building"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Edificio</FormLabel>
+                                <FormLabel>{t('profile.personal.building')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} data-testid="input-building" />
                                 </FormControl>
@@ -445,7 +447,7 @@ export default function Profile() {
                             name="apartment"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Apartamento</FormLabel>
+                                <FormLabel>{t('profile.personal.apartment')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} data-testid="input-apartment" />
                                 </FormControl>
@@ -458,12 +460,12 @@ export default function Profile() {
                             name="address"
                             render={({ field }) => (
                               <FormItem className="md:col-span-2">
-                                <FormLabel>Dirección</FormLabel>
+                                <FormLabel>{t('profile.personal.address')}</FormLabel>
                                 <FormControl>
                                   <AppleMapsAddressInput
                                     value={field.value}
                                     onChange={field.onChange}
-                                    placeholder="Dirección completa"
+                                    placeholder={t('profile.personal.addressPlaceholder')}
                                     data-testid="input-address"
                                   />
                                 </FormControl>
@@ -476,11 +478,11 @@ export default function Profile() {
                             name="serviceRadiusKm"
                             render={({ field }) => (
                               <FormItem className="md:col-span-2">
-                                <FormLabel>Radio de Servicio (km)</FormLabel>
+                                <FormLabel>{t('profile.personal.serviceRadius')}</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="number"
-                                    placeholder="Ej: 5"
+                                    placeholder={t('profile.personal.serviceRadiusPlaceholder')}
                                     min="1"
                                     max="100"
                                     {...field}
@@ -488,7 +490,7 @@ export default function Profile() {
                                   />
                                 </FormControl>
                                 <p className="text-sm text-gray-600">
-                                  Distancia máxima para recibir servicios desde tu ubicación (opcional)
+                                  {t('profile.personal.serviceRadiusHelp')}
                                 </p>
                                 <FormMessage />
                               </FormItem>
@@ -502,7 +504,7 @@ export default function Profile() {
                           disabled={updateProfileMutation.isPending}
                           data-testid="button-save-profile"
                         >
-                          {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+                          {updateProfileMutation.isPending ? t('profile.personal.saving') : t('profile.personal.saveButton')}
                         </Button>
                       </form>
                     </Form>
@@ -513,26 +515,26 @@ export default function Profile() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Estado de Cuenta</CardTitle>
+                    <CardTitle>{t('profile.account.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Miembro desde</span>
-                        <span className="font-medium">Enero 2024</span>
+                        <span className="text-gray-600">{t('profile.account.memberSince')}</span>
+                        <span className="font-medium">{t('profile.account.memberSinceValue')}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Servicios solicitados</span>
+                        <span className="text-gray-600">{t('profile.account.servicesRequested')}</span>
                         <span className="font-medium">12</span>
                       </div>
                       {user?.isProvider && (
                         <>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Servicios ofrecidos</span>
+                            <span className="text-gray-600">{t('profile.account.servicesOffered')}</span>
                             <span className="font-medium">28</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Calificación promedio</span>
+                            <span className="text-gray-600">{t('profile.account.averageRating')}</span>
                             <div className="flex items-center">
                               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
                               <span className="font-medium">4.8</span>
@@ -546,20 +548,20 @@ export default function Profile() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Verificación</CardTitle>
+                    <CardTitle>{t('profile.verification.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Email verificado</span>
+                        <span className="text-sm">{t('profile.verification.emailVerified')}</span>
                         <Badge className="bg-green-100 text-green-800">✓</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Teléfono verificado</span>
+                        <span className="text-sm">{t('profile.verification.phoneVerified')}</span>
                         <Badge className="bg-green-100 text-green-800">✓</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Dirección verificada</span>
+                        <span className="text-sm">{t('profile.verification.addressVerified')}</span>
                         <Badge className="bg-green-100 text-green-800">✓</Badge>
                       </div>
                     </div>
@@ -574,15 +576,15 @@ export default function Profile() {
             {!user?.isProvider ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Configuración de Proveedor</CardTitle>
+                  <CardTitle>{t('profile.provider.notProvider.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center py-8">
                   <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No eres un proveedor actualmente
+                    {t('profile.provider.notProvider.message')}
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Activa el modo proveedor en la parte superior para empezar a ofrecer servicios
+                    {t('profile.provider.notProvider.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -876,7 +878,7 @@ export default function Profile() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Notificaciones</CardTitle>
+                  <CardTitle>{t('profile.settings.notifications.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -905,7 +907,7 @@ export default function Profile() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Privacidad</CardTitle>
+                  <CardTitle>{t('profile.settings.privacy.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -927,12 +929,12 @@ export default function Profile() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Cuenta</CardTitle>
+                  <CardTitle>{t('profile.settings.account.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button variant="outline">Cambiar Contraseña</Button>
-                  <Button variant="outline">Descargar Mis Datos</Button>
-                  <Button variant="destructive">Eliminar Cuenta</Button>
+                  <Button variant="outline">{t('profile.settings.account.changePassword')}</Button>
+                  <Button variant="outline">{t('profile.settings.account.downloadData')}</Button>
+                  <Button variant="destructive">{t('profile.settings.account.deleteAccount')}</Button>
                 </CardContent>
               </Card>
             </div>
