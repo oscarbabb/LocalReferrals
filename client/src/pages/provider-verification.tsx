@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   Shield, 
   CheckCircle, 
@@ -42,6 +43,7 @@ export default function ProviderVerification() {
   const [selectedProviderId, setSelectedProviderId] = useState<string>("");
   const [verificationNotes, setVerificationNotes] = useState("");
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   // Fetch all providers
@@ -93,15 +95,15 @@ export default function ProviderVerification() {
     },
     onSuccess: () => {
       toast({
-        title: "Estado actualizado",
-        description: "El estado de verificación se actualizó correctamente",
+        title: t('providerVerification.toast.success.title'),
+        description: t('providerVerification.toast.success.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", selectedProviderId] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "No se pudo actualizar el estado de verificación",
+        title: t('providerVerification.toast.error.title'),
+        description: t('providerVerification.toast.error.description'),
         variant: "destructive",
       });
     },
@@ -109,10 +111,10 @@ export default function ProviderVerification() {
 
   const getVerificationStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { label: "Pendiente", variant: "secondary" as const, icon: Clock },
-      verified: { label: "Verificado", variant: "default" as const, icon: CheckCircle },
-      rejected: { label: "Rechazado", variant: "destructive" as const, icon: XCircle },
-      suspended: { label: "Suspendido", variant: "destructive" as const, icon: AlertTriangle },
+      pending: { label: t('providerVerification.status.pending'), variant: "secondary" as const, icon: Clock },
+      verified: { label: t('providerVerification.status.verified'), variant: "default" as const, icon: CheckCircle },
+      rejected: { label: t('providerVerification.status.rejected'), variant: "destructive" as const, icon: XCircle },
+      suspended: { label: t('providerVerification.status.suspended'), variant: "destructive" as const, icon: AlertTriangle },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -128,10 +130,10 @@ export default function ProviderVerification() {
 
   const getBackgroundCheckBadge = (status: string) => {
     const statusConfig = {
-      not_started: { label: "No iniciado", variant: "secondary" as const },
-      in_progress: { label: "En progreso", variant: "secondary" as const },
-      passed: { label: "Aprobado", variant: "default" as const },
-      failed: { label: "Fallido", variant: "destructive" as const },
+      not_started: { label: t('providerVerification.backgroundCheck.notStarted'), variant: "secondary" as const },
+      in_progress: { label: t('providerVerification.backgroundCheck.inProgress'), variant: "secondary" as const },
+      passed: { label: t('providerVerification.backgroundCheck.passed'), variant: "default" as const },
+      failed: { label: t('providerVerification.backgroundCheck.failed'), variant: "destructive" as const },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.not_started;
@@ -153,10 +155,10 @@ export default function ProviderVerification() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Shield className="text-blue-600" size={32} />
-            Sistema de Verificación de Proveedores
+            {t('providerVerification.title')}
           </h1>
           <p className="text-gray-600 mt-2">
-            Gestiona la verificación y antecedentes de proveedores de servicios
+            {t('providerVerification.subtitle')}
           </p>
         </div>
 
@@ -167,13 +169,13 @@ export default function ProviderVerification() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User size={20} />
-                  Proveedores
+                  {t('providerVerification.providerList.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {providersLoading ? (
-                    <div className="text-center py-4">Cargando proveedores...</div>
+                    <div className="text-center py-4">{t('providerVerification.providerList.loading')}</div>
                   ) : (
                     providers.map((provider) => (
                       <div
@@ -191,7 +193,7 @@ export default function ProviderVerification() {
                           {getVerificationStatusBadge(provider.verificationStatus || "pending")}
                         </div>
                         <div className="text-xs text-gray-500 mb-2">
-                          Nivel: {provider.verificationLevel || "básico"}
+                          {t('providerVerification.providerList.level')} {provider.verificationLevel || t('providerVerification.providerList.levelBasic')}
                         </div>
                         <Progress 
                           value={calculateVerificationProgress(provider)} 
@@ -214,12 +216,12 @@ export default function ProviderVerification() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User size={20} />
-                      Información del Proveedor
+                      {t('providerVerification.providerDetails.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {providerLoading ? (
-                      <div className="text-center py-4">Cargando detalles...</div>
+                      <div className="text-center py-4">{t('providerVerification.providerDetails.loading')}</div>
                     ) : selectedProvider ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
@@ -231,7 +233,7 @@ export default function ProviderVerification() {
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <MapPin size={16} />
                             {selectedProvider.user?.building && selectedProvider.user?.apartment && 
-                              `${selectedProvider.user.building} - Apto ${selectedProvider.user.apartment}`
+                              `${selectedProvider.user.building} - ${t('providerVerification.providerDetails.apartment')} ${selectedProvider.user.apartment}`
                             }
                           </div>
                           
@@ -242,30 +244,30 @@ export default function ProviderVerification() {
                           
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Star size={16} />
-                            {selectedProvider.averageRating?.toFixed(1)} ({selectedProvider.reviewCount} reseñas)
+                            {selectedProvider.averageRating?.toFixed(1)} ({selectedProvider.reviewCount} {t('providerVerification.providerDetails.reviews')})
                           </div>
                         </div>
 
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Estado de Verificación
+                              {t('providerVerification.providerDetails.verificationStatus')}
                             </label>
                             {getVerificationStatusBadge(selectedProvider.verificationStatus || "pending")}
                           </div>
                           
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Nivel de Verificación
+                              {t('providerVerification.providerDetails.verificationLevel')}
                             </label>
                             <Badge variant="outline">
-                              {selectedProvider.verificationLevel || "básico"}
+                              {selectedProvider.verificationLevel || t('providerVerification.providerList.levelBasic')}
                             </Badge>
                           </div>
                           
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Antecedentes
+                              {t('providerVerification.providerDetails.backgroundCheck')}
                             </label>
                             {getBackgroundCheckBadge(selectedProvider.backgroundCheckStatus || "not_started")}
                           </div>
@@ -273,7 +275,7 @@ export default function ProviderVerification() {
                           {selectedProvider.lastVerificationDate && (
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Calendar size={16} />
-                              Verificado: {parseSafeDate(selectedProvider.lastVerificationDate).toLocaleDateString()}
+                              {t('providerVerification.providerDetails.verifiedOn')} {parseSafeDate(selectedProvider.lastVerificationDate).toLocaleDateString()}
                             </div>
                           )}
                         </div>
@@ -287,14 +289,14 @@ export default function ProviderVerification() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield size={20} />
-                      Progreso de Verificación
+                      {t('providerVerification.progress.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {selectedProvider && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">Progreso Total</span>
+                          <span className="text-sm font-medium">{t('providerVerification.progress.total')}</span>
                           <span className="text-sm text-gray-500">
                             {calculateVerificationProgress(selectedProvider)}%
                           </span>
@@ -304,26 +306,26 @@ export default function ProviderVerification() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                           <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <FileText size={24} className="mx-auto mb-2 text-blue-600" />
-                            <div className="text-sm font-medium">Documentos</div>
+                            <div className="text-sm font-medium">{t('providerVerification.progress.documents')}</div>
                             <div className="text-xs text-gray-500">
-                              {selectedProvider.documentsSubmitted ? "Enviados" : "Pendientes"}
+                              {selectedProvider.documentsSubmitted ? t('providerVerification.progress.documentsSubmitted') : t('providerVerification.progress.documentsPending')}
                             </div>
                           </div>
                           
                           <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <Shield size={24} className="mx-auto mb-2 text-green-600" />
-                            <div className="text-sm font-medium">Antecedentes</div>
+                            <div className="text-sm font-medium">{t('providerVerification.progress.backgroundCheck')}</div>
                             <div className="text-xs text-gray-500">
-                              {selectedProvider.backgroundCheckStatus === 'passed' ? "Aprobados" : 
-                               selectedProvider.backgroundCheckStatus === 'in_progress' ? "En proceso" : "Pendientes"}
+                              {selectedProvider.backgroundCheckStatus === 'passed' ? t('providerVerification.progress.backgroundCheckApproved') : 
+                               selectedProvider.backgroundCheckStatus === 'in_progress' ? t('providerVerification.progress.backgroundCheckInProgress') : t('providerVerification.progress.backgroundCheckPending')}
                             </div>
                           </div>
                           
                           <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <CheckCircle size={24} className="mx-auto mb-2 text-purple-600" />
-                            <div className="text-sm font-medium">Verificación</div>
+                            <div className="text-sm font-medium">{t('providerVerification.progress.verification')}</div>
                             <div className="text-xs text-gray-500">
-                              {selectedProvider.verificationStatus === 'verified' ? "Completada" : "Pendiente"}
+                              {selectedProvider.verificationStatus === 'verified' ? t('providerVerification.progress.verificationComplete') : t('providerVerification.progress.verificationPending')}
                             </div>
                           </div>
                         </div>
@@ -335,7 +337,7 @@ export default function ProviderVerification() {
                 {/* Verification Actions */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Acciones de Verificación</CardTitle>
+                    <CardTitle>{t('providerVerification.actions.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -350,7 +352,7 @@ export default function ProviderVerification() {
                           data-testid="button-approve-verification"
                         >
                           <CheckCircle size={16} className="mr-2" />
-                          Aprobar
+                          {t('providerVerification.actions.approve')}
                         </Button>
                         
                         <Button
@@ -363,7 +365,7 @@ export default function ProviderVerification() {
                           data-testid="button-reject-verification"
                         >
                           <XCircle size={16} className="mr-2" />
-                          Rechazar
+                          {t('providerVerification.actions.reject')}
                         </Button>
                         
                         <Button
@@ -376,7 +378,7 @@ export default function ProviderVerification() {
                           data-testid="button-pending-verification"
                         >
                           <Clock size={16} className="mr-2" />
-                          Pendiente
+                          {t('providerVerification.actions.pending')}
                         </Button>
                         
                         <Button
@@ -389,18 +391,18 @@ export default function ProviderVerification() {
                           data-testid="button-suspend-verification"
                         >
                           <AlertTriangle size={16} className="mr-2" />
-                          Suspender
+                          {t('providerVerification.actions.suspend')}
                         </Button>
                       </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Notas de Verificación
+                          {t('providerVerification.actions.notesLabel')}
                         </label>
                         <Textarea
                           value={verificationNotes}
                           onChange={(e) => setVerificationNotes(e.target.value)}
-                          placeholder="Agregar notas sobre la verificación..."
+                          placeholder={t('providerVerification.actions.notesPlaceholder')}
                           className="min-h-[100px]"
                           data-testid="textarea-verification-notes"
                         />
@@ -415,7 +417,7 @@ export default function ProviderVerification() {
                     <Link href={`/provider/${selectedProviderId}`}>
                       <Button variant="outline" className="w-full" data-testid="button-view-profile">
                         <Eye size={16} className="mr-2" />
-                        Ver Perfil Completo del Proveedor
+                        {t('providerVerification.actions.viewProfile')}
                       </Button>
                     </Link>
                   </CardContent>
@@ -425,7 +427,7 @@ export default function ProviderVerification() {
               <Card className="h-96 flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <User size={48} className="mx-auto mb-4 text-gray-300" />
-                  <p>Selecciona un proveedor para ver sus detalles de verificación</p>
+                  <p>{t('providerVerification.emptyState')}</p>
                 </div>
               </Card>
             )}

@@ -7,6 +7,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,23 +36,31 @@ import { ObjectUploader } from "@/components/ObjectUploader";
 import type { UploadResult } from "@uppy/core";
 
 // Menu item form schema
-const menuItemSchema = z.object({
-  categoryName: z.string().min(1, "Selecciona una categoría"),
-  itemName: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
-  price: z.string().min(1, "Ingresa el precio").refine((val) => {
+const createMenuItemSchema = (t: (key: string) => string) => z.object({
+  categoryName: z.string().min(1, t('menuManagement.validation.categoryRequired')),
+  itemName: z.string().min(3, t('menuManagement.validation.nameMin')),
+  description: z.string().min(10, t('menuManagement.validation.descriptionMin')),
+  price: z.string().min(1, t('menuManagement.validation.priceRequired')).refine((val) => {
     const num = parseFloat(val);
     return !isNaN(num) && num > 0;
-  }, "El precio debe ser un número válido mayor a 0"),
+  }, t('menuManagement.validation.priceValid')),
   duration: z.string().optional(),
   isAvailable: z.boolean().default(true)
 });
 
-type MenuItemForm = z.infer<typeof menuItemSchema>;
+type MenuItemForm = {
+  categoryName: string;
+  itemName: string;
+  description: string;
+  price: string;
+  duration?: string;
+  isAvailable: boolean;
+};
 
 export default function MenuManagement() {
   const { toast } = useToast();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
@@ -67,15 +76,15 @@ export default function MenuManagement() {
   useEffect(() => {
     if (providerError && isUnauthorizedError(providerError)) {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to manage your menu.",
+        title: t('menuManagement.toast.authRequired.title'),
+        description: t('menuManagement.toast.authRequired.description'),
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 1000);
     }
-  }, [providerError, toast]);
+  }, [providerError, toast, t]);
 
   const providerId = provider?.id;
 
@@ -85,7 +94,7 @@ export default function MenuManagement() {
   });
 
   const form = useForm<MenuItemForm>({
-    resolver: zodResolver(menuItemSchema),
+    resolver: zodResolver(createMenuItemSchema(t)),
     defaultValues: {
       categoryName: "",
       itemName: "",
@@ -108,8 +117,8 @@ export default function MenuManagement() {
     },
     onSuccess: () => {
       toast({
-        title: "¡Artículo agregado exitosamente!",
-        description: "Tu nuevo servicio/producto ya está disponible en tu menú.",
+        title: t('menuManagement.toast.added.title'),
+        description: t('menuManagement.toast.added.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId, "menu-items"] });
       setIsDialogOpen(false);
@@ -119,8 +128,8 @@ export default function MenuManagement() {
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Authentication Required",
-          description: "Please log in again to manage your menu.",
+          title: t('menuManagement.toast.authRequired.title'),
+          description: t('menuManagement.toast.authRequired.descriptionAgain'),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -129,8 +138,8 @@ export default function MenuManagement() {
         return;
       }
       toast({
-        title: "Error al agregar artículo",
-        description: error.message || "Hubo un problema al agregar el artículo.",
+        title: t('menuManagement.toast.addError.title'),
+        description: error.message || t('menuManagement.toast.addError.description'),
         variant: "destructive",
       });
     },
@@ -149,8 +158,8 @@ export default function MenuManagement() {
     },
     onSuccess: () => {
       toast({
-        title: "¡Artículo actualizado exitosamente!",
-        description: "Los cambios se han guardado correctamente.",
+        title: t('menuManagement.toast.updated.title'),
+        description: t('menuManagement.toast.updated.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId, "menu-items"] });
       setIsDialogOpen(false);
@@ -160,8 +169,8 @@ export default function MenuManagement() {
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Authentication Required",
-          description: "Please log in again to manage your menu.",
+          title: t('menuManagement.toast.authRequired.title'),
+          description: t('menuManagement.toast.authRequired.descriptionAgain'),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -170,8 +179,8 @@ export default function MenuManagement() {
         return;
       }
       toast({
-        title: "Error al actualizar artículo",
-        description: error.message || "Hubo un problema al actualizar el artículo.",
+        title: t('menuManagement.toast.updateError.title'),
+        description: error.message || t('menuManagement.toast.updateError.description'),
         variant: "destructive",
       });
     },
@@ -184,16 +193,16 @@ export default function MenuManagement() {
     },
     onSuccess: () => {
       toast({
-        title: "Artículo eliminado",
-        description: "El artículo ha sido eliminado de tu menú.",
+        title: t('menuManagement.toast.deleted.title'),
+        description: t('menuManagement.toast.deleted.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId, "menu-items"] });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Authentication Required",
-          description: "Please log in again to manage your menu.",
+          title: t('menuManagement.toast.authRequired.title'),
+          description: t('menuManagement.toast.authRequired.descriptionAgain'),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -202,8 +211,8 @@ export default function MenuManagement() {
         return;
       }
       toast({
-        title: "Error al eliminar artículo",
-        description: error.message || "Hubo un problema al eliminar el artículo.",
+        title: t('menuManagement.toast.deleteError.title'),
+        description: error.message || t('menuManagement.toast.deleteError.description'),
         variant: "destructive",
       });
     },
@@ -220,17 +229,17 @@ export default function MenuManagement() {
     },
     onSuccess: (_, menuDocumentUrl) => {
       toast({
-        title: menuDocumentUrl ? "Menú actualizado" : "Menú eliminado",
+        title: menuDocumentUrl ? t('menuManagement.toast.documentUpdated') : t('menuManagement.toast.documentDeleted'),
         description: menuDocumentUrl 
-          ? "Tu documento de menú se ha subido exitosamente." 
-          : "El documento de menú ha sido eliminado.",
+          ? t('menuManagement.toast.documentUploaded')
+          : t('menuManagement.toast.documentRemoved'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Hubo un problema al actualizar el menú.",
+        title: t('common.error'),
+        description: error.message || t('menuManagement.toast.documentError'),
         variant: "destructive",
       });
     },
@@ -264,8 +273,8 @@ export default function MenuManagement() {
       } catch (error) {
         console.error("Error uploading menu document:", error);
         toast({
-          title: "Error al subir documento",
-          description: "Hubo un problema al subir el documento del menú.",
+          title: t('menuManagement.toast.uploadError.title'),
+          description: t('menuManagement.toast.uploadError.description'),
           variant: "destructive",
         });
       } finally {
@@ -275,7 +284,7 @@ export default function MenuManagement() {
   };
 
   const handleDeleteMenuDocument = () => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar el documento del menú?")) {
+    if (window.confirm(t('menuManagement.confirmDeleteDocument'))) {
       updateMenuDocumentMutation.mutate(null);
     }
   };
@@ -304,19 +313,19 @@ export default function MenuManagement() {
   };
 
   const handleDelete = (itemId: string) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este artículo?")) {
+    if (window.confirm(t('menuManagement.confirmDeleteItem'))) {
       deleteMenuItemMutation.mutate(itemId);
     }
   };
 
   const categoryOptions = [
-    "Alimentos y Bebidas",
-    "Servicios de Belleza",
-    "Servicios de Limpieza",
-    "Reparaciones",
-    "Tutorías y Clases",
-    "Cuidado Personal",
-    "Otros Servicios"
+    { value: "Alimentos y Bebidas", label: t('menuManagement.categories.food') },
+    { value: "Servicios de Belleza", label: t('menuManagement.categories.beauty') },
+    { value: "Servicios de Limpieza", label: t('menuManagement.categories.cleaning') },
+    { value: "Reparaciones", label: t('menuManagement.categories.repairs') },
+    { value: "Tutorías y Clases", label: t('menuManagement.categories.tutoring') },
+    { value: "Cuidado Personal", label: t('menuManagement.categories.personalCare') },
+    { value: "Otros Servicios", label: t('menuManagement.categories.other') }
   ];
 
   return (
@@ -331,11 +340,11 @@ export default function MenuManagement() {
                   <Menu className="w-6 h-6 text-orange-600" />
                 </div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Gestión de Menú
+                  {t('menuManagement.title')}
                 </h1>
               </div>
               <p className="text-gray-600">
-                Administra los servicios y productos que ofreces a tus clientes
+                {t('menuManagement.subtitle')}
               </p>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -345,18 +354,18 @@ export default function MenuManagement() {
                   data-testid="button-add-menu-item"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Agregar Artículo
+                  {t('menuManagement.addButton')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingItem ? 'Editar Artículo' : 'Agregar Nuevo Artículo'}
+                    {editingItem ? t('menuManagement.dialog.titleEdit') : t('menuManagement.dialog.titleAdd')}
                   </DialogTitle>
                   <DialogDescription>
                     {editingItem 
-                      ? 'Modifica los detalles de tu artículo' 
-                      : 'Agrega un nuevo servicio o producto a tu menú'
+                      ? t('menuManagement.dialog.descriptionEdit')
+                      : t('menuManagement.dialog.descriptionAdd')
                     }
                   </DialogDescription>
                 </DialogHeader>
@@ -369,17 +378,17 @@ export default function MenuManagement() {
                       name="categoryName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Categoría</FormLabel>
+                          <FormLabel>{t('menuManagement.form.categoryLabel')}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-menu-category">
-                                <SelectValue placeholder="Selecciona una categoría" />
+                                <SelectValue placeholder={t('menuManagement.form.categoryPlaceholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {categoryOptions.map((category) => (
-                                <SelectItem key={category} value={category}>
-                                  {category}
+                                <SelectItem key={category.value} value={category.value}>
+                                  {category.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -395,10 +404,10 @@ export default function MenuManagement() {
                       name="itemName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nombre del Servicio/Producto</FormLabel>
+                          <FormLabel>{t('menuManagement.form.nameLabel')}</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Ej: Corte de cabello, Limpieza profunda, Clases de inglés"
+                              placeholder={t('menuManagement.form.namePlaceholder')}
                               {...field}
                               data-testid="input-menu-item-name"
                             />
@@ -414,10 +423,10 @@ export default function MenuManagement() {
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Descripción</FormLabel>
+                          <FormLabel>{t('menuManagement.form.descriptionLabel')}</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Describe los detalles del servicio o producto..."
+                              placeholder={t('menuManagement.form.descriptionPlaceholder')}
                               {...field}
                               data-testid="textarea-menu-description"
                             />
@@ -434,7 +443,7 @@ export default function MenuManagement() {
                         name="price"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Precio (MXN)</FormLabel>
+                            <FormLabel>{t('menuManagement.form.priceLabel')}</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -454,7 +463,7 @@ export default function MenuManagement() {
                         name="duration"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Duración (minutos) - Opcional</FormLabel>
+                            <FormLabel>{t('menuManagement.form.durationLabel')}</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -463,7 +472,7 @@ export default function MenuManagement() {
                                 data-testid="input-menu-duration"
                               />
                             </FormControl>
-                            <p className="text-xs text-gray-500 mt-1">Solo para servicios con tiempo específico</p>
+                            <p className="text-xs text-gray-500 mt-1">{t('menuManagement.form.durationHelp')}</p>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -480,7 +489,7 @@ export default function MenuManagement() {
                           form.reset();
                         }}
                       >
-                        Cancelar
+                        {t('menuManagement.form.cancelButton')}
                       </Button>
                       <Button
                         type="submit"
@@ -489,8 +498,8 @@ export default function MenuManagement() {
                         data-testid="button-save-menu-item"
                       >
                         {createMenuItemMutation.isPending 
-                          ? 'Guardando...' 
-                          : editingItem ? 'Actualizar' : 'Agregar'
+                          ? t('menuManagement.form.saving')
+                          : editingItem ? t('menuManagement.form.updateButton') : t('menuManagement.form.addButton')
                         }
                       </Button>
                     </div>
@@ -509,9 +518,9 @@ export default function MenuManagement() {
                 <FileText className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <CardTitle>Documento de Menú Completo</CardTitle>
+                <CardTitle>{t('menuManagement.document.title')}</CardTitle>
                 <CardDescription>
-                  Sube un PDF o imagen de tu menú completo (opcional)
+                  {t('menuManagement.document.description')}
                 </CardDescription>
               </div>
             </div>
@@ -526,16 +535,16 @@ export default function MenuManagement() {
                         <>
                           <FileText className="w-8 h-8 text-red-600" />
                           <div>
-                            <p className="font-medium text-gray-900">Menú en PDF</p>
-                            <p className="text-sm text-gray-500">Documento del menú subido</p>
+                            <p className="font-medium text-gray-900">{t('menuManagement.document.pdfTitle')}</p>
+                            <p className="text-sm text-gray-500">{t('menuManagement.document.pdfSubtitle')}</p>
                           </div>
                         </>
                       ) : (
                         <>
                           <Image className="w-8 h-8 text-blue-600" />
                           <div>
-                            <p className="font-medium text-gray-900">Menú en Imagen</p>
-                            <p className="text-sm text-gray-500">Imagen del menú subida</p>
+                            <p className="font-medium text-gray-900">{t('menuManagement.document.imageTitle')}</p>
+                            <p className="text-sm text-gray-500">{t('menuManagement.document.imageSubtitle')}</p>
                           </div>
                         </>
                       )}
@@ -548,7 +557,7 @@ export default function MenuManagement() {
                         data-testid="button-view-menu-document"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Ver/Descargar
+                        {t('menuManagement.document.viewButton')}
                       </Button>
                       <Button
                         variant="outline"
@@ -558,7 +567,7 @@ export default function MenuManagement() {
                         data-testid="button-delete-menu-document"
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Eliminar
+                        {t('menuManagement.document.deleteButton')}
                       </Button>
                     </div>
                   </div>
@@ -577,7 +586,7 @@ export default function MenuManagement() {
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600">
-                  Puedes subir una imagen (JPG, PNG) o PDF de tu menú completo para que tus clientes lo vean.
+                  {t('menuManagement.document.uploadHelp')}
                 </p>
                 <ObjectUploader
                   onGetUploadParameters={handleMenuDocumentUpload}
@@ -586,10 +595,10 @@ export default function MenuManagement() {
                   buttonClassName="bg-orange-600 hover:bg-orange-700"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Subir Menú (PDF/Imagen)
+                  {t('menuManagement.document.uploadButton')}
                 </ObjectUploader>
                 {isUploadingDocument && (
-                  <p className="text-sm text-gray-500">Subiendo documento...</p>
+                  <p className="text-sm text-gray-500">{t('menuManagement.document.uploading')}</p>
                 )}
               </div>
             )}
@@ -601,7 +610,7 @@ export default function MenuManagement() {
           {isLoading ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <p className="text-gray-500">Cargando tu menú...</p>
+                <p className="text-gray-500">{t('menuManagement.list.loading')}</p>
               </CardContent>
             </Card>
           ) : menuItems.length === 0 ? (
@@ -609,10 +618,10 @@ export default function MenuManagement() {
               <CardContent className="p-8 text-center">
                 <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No tienes artículos en tu menú
+                  {t('menuManagement.list.emptyTitle')}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Comienza agregando tus primeros servicios o productos
+                  {t('menuManagement.list.emptyDescription')}
                 </p>
                 <Button 
                   onClick={() => setIsDialogOpen(true)}
@@ -620,7 +629,7 @@ export default function MenuManagement() {
                   data-testid="button-add-first-item"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Agregar Primer Artículo
+                  {t('menuManagement.list.emptyButton')}
                 </Button>
               </CardContent>
             </Card>
@@ -634,7 +643,7 @@ export default function MenuManagement() {
                         <div className="flex items-center space-x-2 mb-2">
                           <CardTitle className="text-lg">{item.itemName}</CardTitle>
                           <Badge variant={item.isAvailable ? "default" : "secondary"}>
-                            {item.isAvailable ? 'Disponible' : 'No disponible'}
+                            {item.isAvailable ? t('menuManagement.list.available') : t('menuManagement.list.unavailable')}
                           </Badge>
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -648,7 +657,7 @@ export default function MenuManagement() {
                           {item.duration && (
                             <div className="flex items-center">
                               <Clock className="w-4 h-4 mr-1" />
-                              {item.duration} min
+                              {item.duration} {t('menuManagement.list.minutes')}
                             </div>
                           )}
                         </div>

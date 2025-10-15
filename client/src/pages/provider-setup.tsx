@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,35 +22,35 @@ import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
 
 // Provider setup form schema with conditional payment method fields
-const providerSetupSchema = z.object({
-  title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
-  description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
-  experience: z.string().min(10, "Describe tu experiencia (mínimo 10 caracteres)"),
+const providerSetupSchema = (t: any) => z.object({
+  title: z.string().min(3, t('providerSetup.validation.titleMin')),
+  description: z.string().min(20, t('providerSetup.validation.descriptionMin')),
+  experience: z.string().min(10, t('providerSetup.validation.experienceMin')),
   serviceRadiusKm: z.preprocess(
     (val) => {
       if (val === "" || val === null || val === undefined) return undefined;
       const num = Number(val);
       return isNaN(num) ? undefined : num;
     },
-    z.number().int().min(1, "El radio debe ser al menos 1 km").max(100, "El radio no puede exceder 100 km").optional()
+    z.number().int().min(1, t('providerSetup.validation.radiusMin')).max(100, t('providerSetup.validation.radiusMax')).optional()
   ),
   
   // Payment method selection
   paymentType: z.enum(["hourly", "fixed_job", "menu_based", "per_event"], {
-    required_error: "Selecciona un método de pago"
+    required_error: t('providerSetup.validation.paymentMethodRequired')
   }),
   
   // Hourly payment fields
-  hourlyRate: z.coerce.number().positive("La tarifa debe ser mayor a 0").optional(),
-  minimumHours: z.coerce.number().positive("Las horas mínimas deben ser mayor a 0").optional(),
+  hourlyRate: z.coerce.number().positive(t('providerSetup.validation.ratePositive')).optional(),
+  minimumHours: z.coerce.number().positive(t('providerSetup.validation.minimumHoursPositive')).optional(),
   
   // Fixed job payment fields
-  fixedJobRate: z.coerce.number().positive("El precio debe ser mayor a 0").optional(),
+  fixedJobRate: z.coerce.number().positive(t('providerSetup.validation.pricePositive')).optional(),
   jobDescription: z.string().optional(),
-  estimatedDuration: z.coerce.number().positive("La duración debe ser mayor a 0").optional(),
+  estimatedDuration: z.coerce.number().positive(t('providerSetup.validation.durationPositive')).optional(),
   
   // Per-event payment fields
-  eventRate: z.coerce.number().positive("El precio del evento debe ser mayor a 0").optional(),
+  eventRate: z.coerce.number().positive(t('providerSetup.validation.eventPricePositive')).optional(),
   eventDescription: z.string().optional(),
 }).refine((data) => {
   // Validate hourly payment fields when paymentType is hourly
@@ -58,7 +59,7 @@ const providerSetupSchema = z.object({
   }
   return true;
 }, {
-  message: "Para pago por hora, ingresa una tarifa válida y horas mínimas",
+  message: t('providerSetup.validation.hourlyRequired'),
   path: ["hourlyRate"]
 }).refine((data) => {
   // Validate fixed job payment fields when paymentType is fixed_job
@@ -67,7 +68,7 @@ const providerSetupSchema = z.object({
   }
   return true;
 }, {
-  message: "Para trabajo fijo, completa todos los campos requeridos",
+  message: t('providerSetup.validation.fixedJobRequired'),
   path: ["fixedJobRate"]
 }).refine((data) => {
   // Validate per-event payment fields when paymentType is per_event
@@ -76,11 +77,11 @@ const providerSetupSchema = z.object({
   }
   return true;
 }, {
-  message: "Para pago por evento, completa todos los campos requeridos",
+  message: t('providerSetup.validation.eventRequired'),
   path: ["eventRate"]
 });
 
-type ProviderSetupForm = z.infer<typeof providerSetupSchema>;
+type ProviderSetupForm = z.infer<ReturnType<typeof providerSetupSchema>>;
 
 // Type for selected categories
 type SelectedCategory = {
@@ -92,6 +93,7 @@ type SelectedCategory = {
 export default function ProviderSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   
@@ -152,14 +154,14 @@ export default function ProviderSetup() {
         setProfilePicture(data.objectPath);
         
         toast({
-          title: "Foto de perfil subida exitosamente",
-          description: "Tu foto de perfil se aplicará cuando complete el registro.",
+          title: t('providerSetup.toast.photoSuccess.title'),
+          description: t('providerSetup.toast.photoSuccess.description'),
         });
       } catch (error) {
         console.error("Error processing profile picture:", error);
         toast({
-          title: "Error al procesar la foto",
-          description: "Hubo un problema al procesar tu foto de perfil.",
+          title: t('providerSetup.toast.photoError.title'),
+          description: t('providerSetup.toast.photoError.description'),
           variant: "destructive",
         });
       } finally {
@@ -169,7 +171,7 @@ export default function ProviderSetup() {
   };
 
   const form = useForm<ProviderSetupForm>({
-    resolver: zodResolver(providerSetupSchema),
+    resolver: zodResolver(providerSetupSchema(t)),
     defaultValues: {
       title: "",
       description: "",
@@ -192,8 +194,8 @@ export default function ProviderSetup() {
   const handleAddCategory = () => {
     if (!tempCategoryId) {
       toast({
-        title: "Selecciona una categoría",
-        description: "Debes seleccionar al menos una categoría para agregar.",
+        title: t('providerSetup.toast.categorySelectError.title'),
+        description: t('providerSetup.toast.categorySelectError.description'),
         variant: "destructive",
       });
       return;
@@ -207,8 +209,8 @@ export default function ProviderSetup() {
 
     if (exists) {
       toast({
-        title: "Categoría ya agregada",
-        description: "Esta categoría ya está en tu lista de servicios.",
+        title: t('providerSetup.toast.categoryExists.title'),
+        description: t('providerSetup.toast.categoryExists.description'),
         variant: "destructive",
       });
       return;
@@ -228,8 +230,8 @@ export default function ProviderSetup() {
     setTempSubcategoryId("");
     
     toast({
-      title: "Servicio agregado",
-      description: "El servicio se agregó a tu lista.",
+      title: t('providerSetup.toast.categoryAdded.title'),
+      description: t('providerSetup.toast.categoryAdded.description'),
     });
   };
 
@@ -256,25 +258,14 @@ export default function ProviderSetup() {
 
   // Get category name by ID
   const getCategoryName = (categoryId: string) => {
-    return categories.find(c => c.id === categoryId)?.name || "Categoría desconocida";
-  };
-
-  // Get subcategory name by ID
-  const getSubcategoryName = async (categoryId: string, subcategoryId: string) => {
-    try {
-      const response = await fetch(`/api/categories/${categoryId}/subcategories`);
-      const subcategories = await response.json();
-      return subcategories.find((s: ServiceSubcategory) => s.id === subcategoryId)?.name || "";
-    } catch {
-      return "";
-    }
+    return categories.find(c => c.id === categoryId)?.name || t('providerSetup.categories.emptyState');
   };
 
   const createProviderMutation = useMutation({
     mutationFn: async (providerData: ProviderSetupForm) => {
       // Validate that at least one category is selected
       if (selectedCategories.length === 0) {
-        throw new Error("Debes seleccionar al menos una categoría de servicio");
+        throw new Error(t('providerSetup.validation.categoryRequired'));
       }
 
       // Find the primary category (for backwards compatibility with single category fields)
@@ -320,22 +311,18 @@ export default function ProviderSetup() {
       return createdProvider;
     },
     onSuccess: async (createdProvider) => {
-      const paymentTypeLabels = {
-        hourly: "pago por hora",
-        fixed_job: "trabajo fijo",
-        menu_based: "menú de servicios",
-        per_event: "pago por evento"
-      };
+      const paymentTypeKey = `providerSetup.paymentType.${form.getValues().paymentType.replace('_', '')}` as const;
+      const descriptionKey = `providerSetup.toast.success.description${form.getValues().paymentType === 'hourly' ? 'Hourly' : form.getValues().paymentType === 'fixed_job' ? 'FixedJob' : form.getValues().paymentType === 'menu_based' ? 'Menu' : 'Event'}` as const;
       
-      let description = `Tu perfil con ${paymentTypeLabels[form.getValues().paymentType]} está listo. Ya puedes empezar a ofrecer servicios.`;
+      let description = t(descriptionKey);
       
       // Add confirmation if profile picture was uploaded
       if (profilePicture && createdProvider.profilePhotoPath) {
-        description += " Tu foto de perfil también fue configurada correctamente.";
+        description += " " + t('providerSetup.toast.success.photoConfirmation');
       }
       
       toast({
-        title: "¡Perfil de proveedor creado exitosamente!",
+        title: t('providerSetup.toast.success.title'),
         description: description,
       });
       
@@ -350,8 +337,8 @@ export default function ProviderSetup() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error al crear perfil de proveedor",
-        description: error.message || "Hubo un problema al crear tu perfil. Inténtalo de nuevo.",
+        title: t('providerSetup.toast.error.title'),
+        description: error.message || t('providerSetup.toast.error.description'),
         variant: "destructive",
       });
     },
@@ -372,10 +359,10 @@ export default function ProviderSetup() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Configura tu Perfil de Proveedor
+            {t('providerSetup.title')}
           </h1>
           <p className="text-gray-600">
-            Completa tu perfil para empezar a ofrecer servicios profesionales a tu comunidad
+            {t('providerSetup.subtitle')}
           </p>
         </div>
 
@@ -383,10 +370,10 @@ export default function ProviderSetup() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Star className="w-5 h-5 text-orange-600" />
-              <span>Información de tu Servicio</span>
+              <span>{t('providerSetup.infoCard.title')}</span>
             </CardTitle>
             <CardDescription>
-              Esta información ayudará a los vecinos a encontrar y confiar en tus servicios
+              {t('providerSetup.infoCard.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -395,9 +382,9 @@ export default function ProviderSetup() {
                 {/* Multiple Categories Section */}
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-base font-medium text-gray-900 mb-1">Servicios que ofreces</h3>
+                    <h3 className="text-base font-medium text-gray-900 mb-1">{t('providerSetup.categories.title')}</h3>
                     <p className="text-sm text-gray-600">
-                      Selecciona todas las categorías de servicios que ofreces. Puedes agregar varias.
+                      {t('providerSetup.categories.description')}
                     </p>
                   </div>
 
@@ -405,7 +392,7 @@ export default function ProviderSetup() {
                   <div className="border rounded-lg p-4 bg-gray-50 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="temp-category" className="text-sm font-medium">Categoría</Label>
+                        <Label htmlFor="temp-category" className="text-sm font-medium">{t('providerSetup.categories.categoryLabel')}</Label>
                         <Select 
                           value={tempCategoryId}
                           onValueChange={(value) => {
@@ -414,7 +401,7 @@ export default function ProviderSetup() {
                           }}
                         >
                           <SelectTrigger id="temp-category" data-testid="select-category">
-                            <SelectValue placeholder="Selecciona una categoría" />
+                            <SelectValue placeholder={t('providerSetup.categories.selectCategory')} />
                           </SelectTrigger>
                           <SelectContent>
                             {categories.map((category) => (
@@ -431,18 +418,18 @@ export default function ProviderSetup() {
 
                       {tempCategoryId && tempSubcategories.length > 0 && (
                         <div>
-                          <Label htmlFor="temp-subcategory" className="text-sm font-medium">Subcategoría (Opcional)</Label>
+                          <Label htmlFor="temp-subcategory" className="text-sm font-medium">{t('providerSetup.categories.subcategoryLabel')}</Label>
                           <Select 
                             value={tempSubcategoryId}
                             onValueChange={setTempSubcategoryId}
                           >
                             <SelectTrigger id="temp-subcategory" data-testid="select-subcategory">
-                              <SelectValue placeholder="Selecciona una subcategoría" />
+                              <SelectValue placeholder={t('providerSetup.categories.selectSubcategory')} />
                             </SelectTrigger>
                             <SelectContent className="max-h-[300px]">
                               {tempSubcategoriesLoading ? (
                                 <div className="p-4 text-center text-sm text-gray-500">
-                                  Cargando subcategorías...
+                                  {t('providerSetup.categories.loadingSubcategories')}
                                 </div>
                               ) : (
                                 tempSubcategories.map((subcategory) => (
@@ -465,14 +452,14 @@ export default function ProviderSetup() {
                       data-testid="button-add-category"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Agregar Servicio
+                      {t('providerSetup.categories.addButton')}
                     </Button>
                   </div>
 
                   {/* Selected Categories Display */}
                   {selectedCategories.length > 0 ? (
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Servicios seleccionados ({selectedCategories.length})</Label>
+                      <Label className="text-sm font-medium">{t('providerSetup.categories.selectedCount')} ({selectedCategories.length})</Label>
                       <div className="space-y-2">
                         {selectedCategories.map((category, index) => {
                           const categoryName = getCategoryName(category.categoryId);
@@ -500,7 +487,7 @@ export default function ProviderSetup() {
                                       {category.isPrimary && (
                                         <Badge variant="default" className="bg-orange-600">
                                           <Check className="w-3 h-3 mr-1" />
-                                          Principal
+                                          {t('providerSetup.categories.primaryBadge')}
                                         </Badge>
                                       )}
                                     </div>
@@ -516,7 +503,7 @@ export default function ProviderSetup() {
                                         htmlFor={`primary-${index}`}
                                         className="text-sm text-gray-600 cursor-pointer"
                                       >
-                                        Marcar como servicio principal
+                                        {t('providerSetup.categories.markAsPrimary')}
                                       </Label>
                                     </div>
                                   </div>
@@ -542,21 +529,21 @@ export default function ProviderSetup() {
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <Briefcase className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                       <p className="text-sm text-gray-600">
-                        No has agregado servicios aún. Selecciona una categoría y haz clic en "Agregar Servicio".
+                        {t('providerSetup.categories.emptyHelp')}
                       </p>
                     </div>
                   )}
 
                   {selectedCategories.length === 0 && (
                     <p className="text-sm text-red-600">
-                      * Debes seleccionar al menos una categoría de servicio
+                      * {t('providerSetup.validation.categoryRequired')}
                     </p>
                   )}
                 </div>
 
                 {/* Profile Picture Upload */}
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium">Foto de Perfil (Opcional)</Label>
+                  <Label className="text-sm font-medium">{t('providerSetup.photo.title')}</Label>
                   <div className="flex flex-col space-y-3">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
@@ -564,7 +551,7 @@ export default function ProviderSetup() {
                           <div className="relative">
                             <img 
                               src={profilePicture} 
-                              alt="Vista previa de foto de perfil" 
+                              alt="Profile preview" 
                               className="w-16 h-16 rounded-full object-cover border-2 border-orange-200"
                               data-testid="img-profile-preview"
                             />
@@ -587,16 +574,15 @@ export default function ProviderSetup() {
                           buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
                         >
                           <Camera className="w-4 h-4 mr-2" />
-                          {profilePicture ? 'Cambiar Foto' : 'Subir Foto de Perfil'}
+                          {t('providerSetup.photo.uploadButton')}
                         </ObjectUploader>
                       </div>
                     </div>
                     <p className="text-sm text-gray-500">
-                      Una foto de perfil profesional ayuda a generar confianza con tus clientes. 
-                      Tamaño máximo: 5MB. Formatos: JPG, PNG.
+                      {t('providerSetup.photo.description')}
                     </p>
                     {isUploadingPicture && (
-                      <p className="text-sm text-orange-600">Procesando foto...</p>
+                      <p className="text-sm text-orange-600">{t('providerSetup.photo.uploading')}</p>
                     )}
                   </div>
                 </div>
@@ -607,10 +593,10 @@ export default function ProviderSetup() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Título de tu Servicio</FormLabel>
+                      <FormLabel>{t('providerSetup.form.titleLabel')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Ej: Limpieza profesional de apartamentos, Clases de matemáticas personalizadas"
+                          placeholder={t('providerSetup.form.titlePlaceholder')}
                           {...field}
                           data-testid="input-title"
                         />
@@ -626,10 +612,10 @@ export default function ProviderSetup() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descripción de tu Servicio</FormLabel>
+                      <FormLabel>{t('providerSetup.form.descriptionLabel')}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Describe detalladamente qué servicios ofreces, tu metodología, qué incluye el servicio, etc. Una buena descripción ayuda a generar confianza."
+                          placeholder={t('providerSetup.form.descriptionPlaceholder')}
                           className="min-h-[120px]"
                           {...field}
                           data-testid="textarea-description"
@@ -646,7 +632,7 @@ export default function ProviderSetup() {
                   name="paymentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">Método de Pago</FormLabel>
+                      <FormLabel className="text-base font-medium">{t('providerSetup.form.paymentMethodLabel')}</FormLabel>
                       <FormControl>
                         <div className="grid grid-cols-1 gap-4 mt-3">
                           {/* Hourly Payment Option */}
@@ -677,12 +663,9 @@ export default function ProviderSetup() {
                                   }`} />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-medium text-gray-900">Pago por Hora</h3>
+                                  <h3 className="font-medium text-gray-900">{t('providerSetup.payment.hourly.title')}</h3>
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Cobra por tiempo trabajado con una tarifa por hora y mínimo de horas.
-                                  </p>
-                                  <p className="text-sm text-orange-600 mt-1 font-medium">
-                                    Ideal para: Limpieza, tutoring, cuidado de mascotas
+                                    {t('providerSetup.payment.hourly.description')}
                                   </p>
                                 </div>
                               </div>
@@ -717,12 +700,9 @@ export default function ProviderSetup() {
                                   }`} />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-medium text-gray-900">Trabajo Fijo</h3>
+                                  <h3 className="font-medium text-gray-900">{t('providerSetup.payment.fixedJob.title')}</h3>
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Precio fijo por un trabajo específico con descripción clara del servicio.
-                                  </p>
-                                  <p className="text-sm text-orange-600 mt-1 font-medium">
-                                    Ideal para: Reparaciones, instalaciones, proyectos específicos
+                                    {t('providerSetup.payment.fixedJob.description')}
                                   </p>
                                 </div>
                               </div>
@@ -757,12 +737,9 @@ export default function ProviderSetup() {
                                   }`} />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-medium text-gray-900">Menú de Servicios</h3>
+                                  <h3 className="font-medium text-gray-900">{t('providerSetup.payment.menu.title')}</h3>
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Ofrece múltiples servicios con precios individuales desde un menú.
-                                  </p>
-                                  <p className="text-sm text-orange-600 mt-1 font-medium">
-                                    Ideal para: Salón de belleza, restaurant, servicios variados
+                                    {t('providerSetup.payment.menu.description')}
                                   </p>
                                 </div>
                               </div>
@@ -797,12 +774,9 @@ export default function ProviderSetup() {
                                   }`} />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-medium text-gray-900">Pago por Evento</h3>
+                                  <h3 className="font-medium text-gray-900">{t('providerSetup.payment.event.title')}</h3>
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Precio fijo por evento específico con descripción detallada del servicio.
-                                  </p>
-                                  <p className="text-sm text-orange-600 mt-1 font-medium">
-                                    Ideal para: Fiestas, eventos, servicios especiales, celebraciones
+                                    {t('providerSetup.payment.event.description')}
                                   </p>
                                 </div>
                               </div>
@@ -820,7 +794,7 @@ export default function ProviderSetup() {
                   <div className="space-y-4 border rounded-lg p-4 bg-orange-50">
                     <h3 className="font-medium text-gray-900 flex items-center space-x-2">
                       <Clock className="w-5 h-5 text-orange-600" />
-                      <span>Configuración de Pago por Hora</span>
+                      <span>{t('providerSetup.payment.hourly.title')}</span>
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -831,7 +805,7 @@ export default function ProviderSetup() {
                           <FormItem>
                             <FormLabel className="flex items-center space-x-2">
                               <DollarSign className="w-4 h-4" />
-                              <span>Tarifa por Hora (MXN)</span>
+                              <span>{t('providerSetup.payment.hourly.rateLabel')}</span>
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -853,31 +827,21 @@ export default function ProviderSetup() {
                           <FormItem>
                             <FormLabel className="flex items-center space-x-2">
                               <Timer className="w-4 h-4" />
-                              <span>Horas Mínimas</span>
+                              <span>{t('providerSetup.payment.hourly.minimumLabel')}</span>
                             </FormLabel>
                             <FormControl>
-                              <Select onValueChange={(value) => field.onChange(parseFloat(value))} defaultValue={field.value?.toString()}>
-                                <SelectTrigger data-testid="select-minimum-hours">
-                                  <SelectValue placeholder="Selecciona" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="0.5">0.5 horas (30 min)</SelectItem>
-                                  <SelectItem value="1">1 hora</SelectItem>
-                                  <SelectItem value="1.5">1.5 horas</SelectItem>
-                                  <SelectItem value="2">2 horas</SelectItem>
-                                  <SelectItem value="3">3 horas</SelectItem>
-                                  <SelectItem value="4">4 horas</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <Input
+                                type="number"
+                                placeholder="2"
+                                {...field}
+                                data-testid="input-minimum-hours"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <p className="text-sm text-gray-600">
-                      Define tu tarifa por hora y el mínimo de horas que cobrarás por servicio.
-                    </p>
                   </div>
                 )}
                 
@@ -885,7 +849,7 @@ export default function ProviderSetup() {
                   <div className="space-y-4 border rounded-lg p-4 bg-blue-50">
                     <h3 className="font-medium text-gray-900 flex items-center space-x-2">
                       <FileText className="w-5 h-5 text-blue-600" />
-                      <span>Configuración de Trabajo Fijo</span>
+                      <span>{t('providerSetup.payment.fixedJob.title')}</span>
                     </h3>
                     
                     <FormField
@@ -895,7 +859,7 @@ export default function ProviderSetup() {
                         <FormItem>
                           <FormLabel className="flex items-center space-x-2">
                             <DollarSign className="w-4 h-4" />
-                            <span>Precio del Trabajo (MXN)</span>
+                            <span>{t('providerSetup.payment.fixedJob.priceLabel')}</span>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -915,18 +879,15 @@ export default function ProviderSetup() {
                       name="jobDescription"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Descripción del Trabajo</FormLabel>
+                          <FormLabel>{t('providerSetup.payment.fixedJob.jobDescriptionLabel')}</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Ej: Limpieza completa de apartamento de 2 habitaciones, incluye cocina, baños y sala. No incluye limpieza de alfombras."
+                              placeholder={t('providerSetup.form.descriptionPlaceholder')}
                               className="min-h-[80px]"
                               {...field}
                               data-testid="textarea-job-description"
                             />
                           </FormControl>
-                          <p className="text-sm text-gray-600">
-                            Describe exactamente qué incluye el trabajo y qué no.
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -939,53 +900,32 @@ export default function ProviderSetup() {
                         <FormItem>
                           <FormLabel className="flex items-center space-x-2">
                             <Timer className="w-4 h-4" />
-                            <span>Duración Estimada (minutos)</span>
+                            <span>{t('providerSetup.payment.fixedJob.durationLabel')}</span>
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
-                              placeholder="120"
+                              placeholder="2"
                               {...field}
-                              data-testid="input-estimated-duration"
+                              data-testid="input-fixed-job-duration"
                             />
                           </FormControl>
-                          <p className="text-sm text-gray-600">
-                            ¿Cuánto tiempo tomará completar este trabajo?
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
                 )}
-                
+
                 {selectedPaymentType === "menu_based" && (
                   <div className="space-y-4 border rounded-lg p-4 bg-green-50">
                     <h3 className="font-medium text-gray-900 flex items-center space-x-2">
                       <Menu className="w-5 h-5 text-green-600" />
-                      <span>Menú de Servicios</span>
+                      <span>{t('providerSetup.payment.menu.title')}</span>
                     </h3>
-                    <div className="bg-white rounded-lg p-4 border border-green-200">
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-green-100 p-2 rounded-full">
-                          <Menu className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">Configurarás tu menú después</h4>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Una vez que completes el registro, podrás acceder a la sección de 
-                            "Gestión de Menú" donde podrás agregar tus servicios, precios, 
-                            categorías y opciones.
-                          </p>
-                          <ul className="text-sm text-gray-600 mt-2 space-y-1">
-                            <li>• Añade múltiples servicios</li>
-                            <li>• Organiza por categorías</li>
-                            <li>• Define precios individuales</li>
-                            <li>• Añade descripciones e imágenes</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-600">
+                      {t('providerSetup.payment.menu.description')}
+                    </p>
                   </div>
                 )}
                 
@@ -993,7 +933,7 @@ export default function ProviderSetup() {
                   <div className="space-y-4 border rounded-lg p-4 bg-purple-50">
                     <h3 className="font-medium text-gray-900 flex items-center space-x-2">
                       <Star className="w-5 h-5 text-purple-600" />
-                      <span>Configuración de Pago por Evento</span>
+                      <span>{t('providerSetup.payment.event.title')}</span>
                     </h3>
                     
                     <FormField
@@ -1003,7 +943,7 @@ export default function ProviderSetup() {
                         <FormItem>
                           <FormLabel className="flex items-center space-x-2">
                             <DollarSign className="w-4 h-4" />
-                            <span>Precio por Evento (MXN)</span>
+                            <span>{t('providerSetup.payment.event.priceLabel')}</span>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -1023,18 +963,15 @@ export default function ProviderSetup() {
                       name="eventDescription"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Descripción del Evento</FormLabel>
+                          <FormLabel>{t('providerSetup.payment.event.descriptionLabel')}</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Ej: Fiesta de cumpleaños para 20 personas, incluye decoración, música, animación por 4 horas. No incluye comida ni bebidas."
+                              placeholder={t('providerSetup.form.descriptionPlaceholder')}
                               className="min-h-[80px]"
                               {...field}
                               data-testid="textarea-event-description"
                             />
                           </FormControl>
-                          <p className="text-sm text-gray-600">
-                            Describe exactamente qué incluye el evento y qué no.
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1047,7 +984,7 @@ export default function ProviderSetup() {
                         <FormItem>
                           <FormLabel className="flex items-center space-x-2">
                             <Timer className="w-4 h-4" />
-                            <span>Duración Estimada (minutos)</span>
+                            <span>{t('providerSetup.payment.fixedJob.durationLabel')}</span>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -1057,9 +994,6 @@ export default function ProviderSetup() {
                               data-testid="input-event-duration"
                             />
                           </FormControl>
-                          <p className="text-sm text-gray-600">
-                            ¿Cuánto tiempo durará el evento?
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1075,19 +1009,16 @@ export default function ProviderSetup() {
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <Clock className="w-4 h-4" />
-                        <span>Tu Experiencia</span>
+                        <span>{t('providerSetup.form.experienceLabel')}</span>
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Ej: 5 años de experiencia en limpieza residencial, certificación en productos ecológicos, trabajé en hoteles de lujo..."
+                          placeholder={t('providerSetup.form.experiencePlaceholder')}
                           className="min-h-[100px]"
                           {...field}
                           data-testid="textarea-experience"
                         />
                       </FormControl>
-                      <p className="text-sm text-gray-600">
-                        Menciona tu experiencia, certificaciones, logros o cualquier detalle que demuestre tu profesionalismo.
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1101,7 +1032,7 @@ export default function ProviderSetup() {
                     <FormItem>
                       <FormLabel className="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                        <span>Radio de Servicio (km)</span>
+                        <span>{t('providerSetup.form.radiusLabel')}</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -1114,7 +1045,7 @@ export default function ProviderSetup() {
                         />
                       </FormControl>
                       <p className="text-sm text-gray-600">
-                        Distancia máxima en kilómetros para entregar tus servicios. Esto ayuda a los clientes a saber si estás disponible en su área.
+                        {t('providerSetup.form.radiusHelp')}
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -1129,9 +1060,9 @@ export default function ProviderSetup() {
                     data-testid="button-create-provider"
                   >
                     {createProviderMutation.isPending ? (
-                      "Creando perfil..."
+                      t('providerSetup.submitting')
                     ) : (
-                      "Crear Perfil de Proveedor"
+                      t('providerSetup.submitButton')
                     )}
                   </Button>
                 </div>
@@ -1139,21 +1070,6 @@ export default function ProviderSetup() {
             </Form>
           </CardContent>
         </Card>
-
-        {/* Skip option */}
-        <div className="text-center mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => {
-              sessionStorage.removeItem('providerSetupToken');
-              setLocation('/');
-            }}
-            className="text-gray-600 hover:text-gray-800"
-            data-testid="button-skip-setup"
-          >
-            Configurar más tarde
-          </Button>
-        </div>
       </div>
     </div>
   );

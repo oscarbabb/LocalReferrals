@@ -7,6 +7,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,10 +21,10 @@ import { Calendar, Plus, Trash2, Clock, Edit2 } from "lucide-react";
 import type { ProviderAvailability, InsertProviderAvailability } from "@shared/schema";
 
 // Time slot form schema
-const timeSlotSchema = z.object({
-  dayOfWeek: z.string().min(1, "Selecciona un día"),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato inválido (HH:MM)"),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato inválido (HH:MM)"),
+const createTimeSlotSchema = (t: (key: string) => string) => z.object({
+  dayOfWeek: z.string().min(1, t('availability.validation.dayRequired')),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t('availability.validation.timeFormat')),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t('availability.validation.timeFormat')),
   isAvailable: z.boolean().default(true)
 }).refine((data) => {
   const start = data.startTime.split(':').map(Number);
@@ -32,25 +33,26 @@ const timeSlotSchema = z.object({
   const endMinutes = end[0] * 60 + end[1];
   return endMinutes > startMinutes;
 }, {
-  message: "La hora de fin debe ser posterior a la hora de inicio",
+  message: t('availability.validation.endAfterStart'),
   path: ["endTime"]
 });
 
-type TimeSlotForm = z.infer<typeof timeSlotSchema>;
-
-const DAYS_OF_WEEK = [
-  { value: "0", label: "Domingo" },
-  { value: "1", label: "Lunes" },
-  { value: "2", label: "Martes" },
-  { value: "3", label: "Miércoles" },
-  { value: "4", label: "Jueves" },
-  { value: "5", label: "Viernes" },
-  { value: "6", label: "Sábado" }
-];
+type TimeSlotForm = z.infer<ReturnType<typeof createTimeSlotSchema>>;
 
 export default function AvailabilityManagement() {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+
+  const DAYS_OF_WEEK = [
+    { value: "0", label: t('availability.days.sunday') },
+    { value: "1", label: t('availability.days.monday') },
+    { value: "2", label: t('availability.days.tuesday') },
+    { value: "3", label: t('availability.days.wednesday') },
+    { value: "4", label: t('availability.days.thursday') },
+    { value: "5", label: t('availability.days.friday') },
+    { value: "6", label: t('availability.days.saturday') }
+  ];
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<ProviderAvailability | null>(null);
   const [deletingSlotId, setDeletingSlotId] = useState<string | null>(null);
@@ -70,8 +72,8 @@ export default function AvailabilityManagement() {
       
       if (is401or403) {
         toast({
-          title: "Autenticación requerida",
-          description: "Por favor inicia sesión para gestionar tu disponibilidad.",
+          title: t('availability.toast.authRequired.title'),
+          description: t('availability.toast.authRequired.description'),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -90,7 +92,7 @@ export default function AvailabilityManagement() {
   });
 
   const form = useForm<TimeSlotForm>({
-    resolver: zodResolver(timeSlotSchema),
+    resolver: zodResolver(createTimeSlotSchema(t)),
     defaultValues: {
       dayOfWeek: "",
       startTime: "09:00",
@@ -140,8 +142,8 @@ export default function AvailabilityManagement() {
     },
     onSuccess: () => {
       toast({
-        title: editingSlot ? "¡Horario actualizado!" : "¡Horario agregado!",
-        description: editingSlot ? "Tu horario se actualizó exitosamente." : "Tu nuevo horario ya está disponible.",
+        title: editingSlot ? t('availability.toast.updated.title') : t('availability.toast.added.title'),
+        description: editingSlot ? t('availability.toast.updated.description') : t('availability.toast.added.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId, "availability"] });
       setIsDialogOpen(false);
@@ -150,9 +152,9 @@ export default function AvailabilityManagement() {
     },
     onError: (error: Error) => {
       // Extract error message from the response (format: "status: message")
-      const errorMessage = error.message.replace(/^\d+:\s*/, '') || "No se pudo guardar el horario.";
+      const errorMessage = error.message.replace(/^\d+:\s*/, '') || t('availability.toast.saveError.description');
       toast({
-        title: "Error al guardar",
+        title: t('availability.toast.saveError.title'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -168,17 +170,17 @@ export default function AvailabilityManagement() {
     },
     onSuccess: () => {
       toast({
-        title: "¡Horario eliminado!",
-        description: "El horario se eliminó exitosamente.",
+        title: t('availability.toast.deleted.title'),
+        description: t('availability.toast.deleted.description'),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/providers", providerId, "availability"] });
       setDeletingSlotId(null);
     },
     onError: (error: Error) => {
       // Extract error message from the response (format: "status: message")
-      const errorMessage = error.message.replace(/^\d+:\s*/, '') || "No se pudo eliminar el horario.";
+      const errorMessage = error.message.replace(/^\d+:\s*/, '') || t('availability.toast.deleteError.description');
       toast({
-        title: "Error al eliminar",
+        title: t('availability.toast.deleteError.title'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -199,9 +201,9 @@ export default function AvailabilityManagement() {
     },
     onError: (error: Error) => {
       // Extract error message from the response (format: "status: message")
-      const errorMessage = error.message.replace(/^\d+:\s*/, '') || "No se pudo actualizar la disponibilidad.";
+      const errorMessage = error.message.replace(/^\d+:\s*/, '') || t('availability.toast.updateError.description');
       toast({
-        title: "Error al actualizar",
+        title: t('availability.toast.updateError.title'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -260,16 +262,16 @@ export default function AvailabilityManagement() {
           <CardContent className="pt-6 text-center py-12">
             <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Perfil de Proveedor Requerido
+              {t('availability.providerRequired.title')}
             </h3>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Para gestionar tu disponibilidad, primero necesitas crear un perfil de proveedor de servicios.
+              {t('availability.providerRequired.description')}
             </p>
             <Button 
               onClick={() => window.location.href = "/provider-setup"}
               data-testid="button-create-provider"
             >
-              Crear Perfil de Proveedor
+              {t('availability.providerRequired.button')}
             </Button>
           </CardContent>
         </Card>
@@ -284,10 +286,10 @@ export default function AvailabilityManagement() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2" data-testid="title-availability">
               <Calendar className="h-8 w-8 text-primary" />
-              Gestionar Disponibilidad
+              {t('availability.header.title')}
             </h1>
             <p className="mt-2 text-gray-600" data-testid="subtitle-availability">
-              Configura tus horarios semanales para que los clientes puedan agendar servicios
+              {t('availability.header.subtitle')}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -300,14 +302,14 @@ export default function AvailabilityManagement() {
             <DialogTrigger asChild>
               <Button className="gap-2" data-testid="button-add-slot">
                 <Plus className="h-4 w-4" />
-                Agregar Horario
+                {t('availability.header.addButton')}
               </Button>
             </DialogTrigger>
             <DialogContent data-testid="dialog-add-slot">
               <DialogHeader>
-                <DialogTitle>{editingSlot ? "Editar Horario" : "Agregar Nuevo Horario"}</DialogTitle>
+                <DialogTitle>{editingSlot ? t('availability.form.dialogTitle.edit') : t('availability.form.dialogTitle.add')}</DialogTitle>
                 <DialogDescription>
-                  {editingSlot ? "Actualiza el horario seleccionado" : "Configura un nuevo horario de disponibilidad"}
+                  {editingSlot ? t('availability.form.dialogDescription.edit') : t('availability.form.dialogDescription.add')}
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
@@ -317,11 +319,11 @@ export default function AvailabilityManagement() {
                     name="dayOfWeek"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Día de la semana</FormLabel>
+                        <FormLabel>{t('availability.form.dayLabel')}</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-day">
-                              <SelectValue placeholder="Selecciona un día" />
+                              <SelectValue placeholder={t('availability.form.dayPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -342,7 +344,7 @@ export default function AvailabilityManagement() {
                       name="startTime"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Hora de inicio</FormLabel>
+                          <FormLabel>{t('availability.form.startTimeLabel')}</FormLabel>
                           <FormControl>
                             <input
                               type="time"
@@ -360,7 +362,7 @@ export default function AvailabilityManagement() {
                       name="endTime"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Hora de fin</FormLabel>
+                          <FormLabel>{t('availability.form.endTimeLabel')}</FormLabel>
                           <FormControl>
                             <input
                               type="time"
@@ -380,9 +382,9 @@ export default function AvailabilityManagement() {
                     render={({ field }) => (
                       <FormItem className="flex items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel>Disponible</FormLabel>
+                          <FormLabel>{t('availability.form.availableLabel')}</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Activa este horario para recibir reservas
+                            {t('availability.form.availableHelp')}
                           </div>
                         </div>
                         <FormControl>
@@ -406,14 +408,14 @@ export default function AvailabilityManagement() {
                       }}
                       data-testid="button-cancel"
                     >
-                      Cancelar
+                      {t('availability.form.cancelButton')}
                     </Button>
                     <Button
                       type="submit"
                       disabled={saveSlotMutation.isPending}
                       data-testid="button-save-slot"
                     >
-                      {saveSlotMutation.isPending ? "Guardando..." : editingSlot ? "Actualizar" : "Guardar"}
+                      {saveSlotMutation.isPending ? t('availability.form.saving') : editingSlot ? t('availability.form.updateButton') : t('availability.form.saveButton')}
                     </Button>
                   </div>
                 </form>
@@ -433,13 +435,13 @@ export default function AvailabilityManagement() {
         <Card data-testid="empty-state">
           <CardContent className="pt-6 text-center py-12">
             <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay horarios configurados</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('availability.empty.title')}</h3>
             <p className="text-gray-500 mb-4">
-              Agrega tus horarios de disponibilidad para que los clientes puedan agendar servicios
+              {t('availability.empty.description')}
             </p>
             <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-first-slot">
               <Plus className="h-4 w-4 mr-2" />
-              Agregar Primer Horario
+              {t('availability.empty.button')}
             </Button>
           </CardContent>
         </Card>
@@ -450,12 +452,17 @@ export default function AvailabilityManagement() {
               <CardHeader>
                 <CardTitle className="text-lg">{day.label}</CardTitle>
                 <CardDescription>
-                  {day.slots.length === 0 ? "Sin horarios" : `${day.slots.length} horario${day.slots.length > 1 ? 's' : ''}`}
+                  {day.slots.length === 0 
+                    ? t('availability.card.noSchedules') 
+                    : day.slots.length === 1 
+                      ? t('availability.card.scheduleCount').replace('{{count}}', day.slots.length.toString())
+                      : t('availability.card.scheduleCount_plural').replace('{{count}}', day.slots.length.toString())
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {day.slots.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">No disponible</p>
+                  <p className="text-sm text-gray-500 text-center py-4">{t('availability.card.notAvailable')}</p>
                 ) : (
                   day.slots.map(slot => (
                     <div
@@ -475,7 +482,7 @@ export default function AvailabilityManagement() {
                           className="mt-1"
                           data-testid={`badge-${slot.id}`}
                         >
-                          {slot.isAvailable ?? false ? "Disponible" : "No disponible"}
+                          {slot.isAvailable ?? false ? t('availability.card.available') : t('availability.card.unavailable')}
                         </Badge>
                       </div>
                       <div className="flex gap-1">
@@ -516,19 +523,19 @@ export default function AvailabilityManagement() {
       <AlertDialog open={!!deletingSlotId} onOpenChange={(open) => !open && setDeletingSlotId(null)}>
         <AlertDialogContent data-testid="dialog-confirm-delete">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogTitle>{t('availability.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El horario se eliminará permanentemente.
+              {t('availability.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">{t('availability.delete.cancelButton')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
               data-testid="button-confirm-delete"
             >
-              {deleteSlotMutation.isPending ? "Eliminando..." : "Eliminar"}
+              {deleteSlotMutation.isPending ? t('availability.delete.deleting') : t('availability.delete.confirmButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
