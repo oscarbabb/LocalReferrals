@@ -6,6 +6,10 @@
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+- **Header Navigation Refactoring** (October 15, 2025): Complete redesign with two-tier layout to eliminate overlap issues. Top utility bar (desktop-only) contains language toggle, invite button, and auth controls. Main navigation displays primary links inline (Services, Como Funciona, Providers, Testimonials) with "More" dropdown for secondary items (Bookings, Messages, Contact Admin, Admin Dashboard). Mobile uses hamburger menu. Fully tested and architect-approved.
+
 # System Architecture
 
 ## Frontend Architecture
