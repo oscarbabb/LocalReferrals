@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Quote, CheckCircle, Heart, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Testimonial {
   id: string;
@@ -38,7 +39,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+function TestimonialCard({ testimonial, t }: { testimonial: Testimonial; t: (key: string) => string }) {
   return (
     <Card className="h-full hover:shadow-lg transition-shadow duration-300" data-testid={`card-testimonial-${testimonial.id}`}>
       <CardContent className="p-6">
@@ -62,7 +63,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
                 {testimonial.verified && (
                   <Badge variant="secondary" className="text-green-600 bg-green-50">
                     <CheckCircle className="w-3 h-3 mr-1" />
-                    Verificado
+                    {t('testimonials.verified')}
                   </Badge>
                 )}
               </div>
@@ -88,7 +89,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">
-              Proveedor: <span className="font-medium text-gray-900">{testimonial.providerName}</span>
+              {t('testimonials.provider')} <span className="font-medium text-gray-900">{testimonial.providerName}</span>
             </span>
             <span className="text-gray-400" data-testid="text-testimonial-date">
               {testimonial.date}
@@ -101,6 +102,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 }
 
 export default function Testimonials() {
+  const { t } = useLanguage();
   const averageRating = testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length;
   const totalTestimonials = testimonials.length;
 
@@ -112,18 +114,18 @@ export default function Testimonials() {
           <div className="text-center">
             <Link href="/" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al Inicio
+              {t('testimonials.backToHome')}
             </Link>
             
             <div className="flex justify-center items-center mb-6">
               <Heart className="w-8 h-8 mr-3" />
               <h1 className="text-4xl font-bold">
-                Testimonios de Vecinos
+                {t('testimonials.title')}
               </h1>
             </div>
             
             <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
-              Descubre las experiencias reales de nuestros vecinos con los servicios locales de confianza
+              {t('testimonials.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
@@ -132,21 +134,21 @@ export default function Testimonials() {
                 <div className="flex justify-center mb-1">
                   <StarRating rating={Math.round(averageRating)} />
                 </div>
-                <div className="text-sm text-orange-200">Calificación Promedio</div>
+                <div className="text-sm text-orange-200">{t('testimonials.averageRating')}</div>
               </div>
               
               <div className="hidden sm:block w-px h-12 bg-orange-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">{totalTestimonials}</div>
-                <div className="text-sm text-orange-200">Testimonios Reales</div>
+                <div className="text-sm text-orange-200">{t('testimonials.realTestimonials')}</div>
               </div>
               
               <div className="hidden sm:block w-px h-12 bg-orange-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">100%</div>
-                <div className="text-sm text-orange-200">Satisfacción</div>
+                <div className="text-sm text-orange-200">{t('testimonials.satisfaction')}</div>
               </div>
             </div>
           </div>
@@ -157,7 +159,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} t={t} />
           ))}
         </div>
 
@@ -166,21 +168,20 @@ export default function Testimonials() {
           <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                ¿Quieres ser parte de nuestra comunidad?
+                {t('testimonials.joinCommunity.title')}
               </h3>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Únete a cientos de vecinos que ya disfrutan de servicios de confianza. 
-                Encuentra el servicio que necesitas o comparte tu talento con la comunidad.
+                {t('testimonials.joinCommunity.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/services">
                   <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8" data-testid="button-find-services">
-                    Buscar Servicios
+                    {t('testimonials.findServices')}
                   </Button>
                 </Link>
                 <Link href="/providers">
                   <Button variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8" data-testid="button-become-provider">
-                    Ser Proveedor
+                    {t('testimonials.becomeProvider')}
                   </Button>
                 </Link>
               </div>

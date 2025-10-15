@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Star, MapPin, Phone, Mail, MessageCircle, Calendar, Shield, Plus, ChefHat, Edit, FileText, Download, Globe } from "lucide-react";
 import { parseSafeDate } from "@/lib/date-utils";
 import { Provider, User, Review, MenuItem, MenuItemVariation } from "@shared/schema";
+import { useLanguage } from "@/hooks/use-language";
 
 // Extended types for API responses
 interface ReviewWithReviewer extends Review {
@@ -32,6 +33,7 @@ interface MenuItemWithVariations extends MenuItem {
 }
 
 export default function ProviderDetail() {
+  const { t } = useLanguage();
   const [, params] = useRoute("/providers/:id");
   const [, setLocation] = useLocation();
   const providerId = params?.id;
@@ -94,8 +96,8 @@ export default function ProviderDetail() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Proveedor no encontrado</h1>
-            <p className="text-gray-600">El proveedor que buscas no existe o ha sido eliminado.</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('providerDetail.notFound.title')}</h1>
+            <p className="text-gray-600">{t('providerDetail.notFound.description')}</p>
           </div>
         </div>
       </div>
@@ -113,7 +115,7 @@ export default function ProviderDetail() {
                 {provider.user?.avatar && (
                   <AvatarImage 
                     src={provider.user.avatar} 
-                    alt={provider.user?.fullName || "Proveedor"}
+                    alt={provider.user?.fullName || t('providerDetail.provider')}
                     data-testid="img-provider-avatar"
                   />
                 )}
@@ -126,14 +128,14 @@ export default function ProviderDetail() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-provider-name">
-                      {provider.user?.fullName || 'Proveedor'}
+                      {provider.user?.fullName || t('providerDetail.provider')}
                     </h1>
                     <h2 className="text-xl text-gray-700 mb-3" data-testid="text-provider-title">{provider.title}</h2>
                   </div>
                   {provider.isVerified && (
                     <Badge className="bg-green-100 text-green-800 mb-4 md:mb-0" data-testid="badge-verified">
                       <Shield className="w-4 h-4 mr-1" />
-                      Verificado
+                      {t('providerDetail.verified')}
                     </Badge>
                   )}
                 </div>
@@ -143,7 +145,7 @@ export default function ProviderDetail() {
                     <div className="flex items-center">
                       <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 mr-1" />
                       <span className="text-lg font-semibold">{averageRating.toFixed(1)}</span>
-                      <span className="text-gray-500 ml-2">({reviews.length} reseñas)</span>
+                      <span className="text-gray-500 ml-2">({reviews.length} {t('providerDetail.reviews')})</span>
                     </div>
                   </div>
                 )}
@@ -152,12 +154,12 @@ export default function ProviderDetail() {
                   <div className="flex items-center space-x-4 text-gray-600 mb-4 md:mb-0">
                     <div className="flex items-center" data-testid="text-provider-location">
                       <MapPin className="w-4 h-4 mr-1" />
-                      <span>{provider.user?.building || 'Edificio Local'}</span>
+                      <span>{provider.user?.building || t('providerDetail.localBuilding')}</span>
                     </div>
                     {provider.serviceRadiusKm && (
                       <div className="flex items-center" data-testid="text-service-radius">
                         <Globe className="w-4 h-4 mr-1" />
-                        <span>Radio: {provider.serviceRadiusKm} km</span>
+                        <span>{t('providerDetail.radius')} {provider.serviceRadiusKm} km</span>
                       </div>
                     )}
                   </div>
@@ -167,7 +169,7 @@ export default function ProviderDetail() {
                       <div className="text-3xl font-bold text-gray-900">
                         MXN ${provider.hourlyRate}
                       </div>
-                      <div className="text-gray-500">por hora</div>
+                      <div className="text-gray-500">{t('providerDetail.perHour')}</div>
                     </div>
                   )}
                 </div>
@@ -190,7 +192,7 @@ export default function ProviderDetail() {
                 data-testid="button-send-message"
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
-                Enviar Mensaje
+                {t('providerDetail.sendMessage')}
               </Button>
             </div>
           </CardContent>
@@ -202,13 +204,13 @@ export default function ProviderDetail() {
             {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle>Acerca del Servicio</CardTitle>
+                <CardTitle>{t('providerDetail.aboutService')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 leading-relaxed" data-testid="text-provider-description">{provider.description}</p>
                 {provider.experience && (
                   <div className="mt-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Experiencia</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t('providerDetail.experience')}</h4>
                     <p className="text-gray-700" data-testid="text-provider-experience">{provider.experience}</p>
                   </div>
                 )}
@@ -221,7 +223,7 @@ export default function ProviderDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <FileText className="w-5 h-5 mr-2" />
-                    Menú Completo
+                    {t('providerDetail.fullMenu')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -231,8 +233,8 @@ export default function ProviderDetail() {
                         <div className="flex items-center space-x-3">
                           <FileText className="w-8 h-8 text-red-600" />
                           <div>
-                            <p className="font-medium text-gray-900">Menú en PDF</p>
-                            <p className="text-sm text-gray-500">Haz clic para ver o descargar</p>
+                            <p className="font-medium text-gray-900">{t('providerDetail.menuPdf')}</p>
+                            <p className="text-sm text-gray-500">{t('providerDetail.clickToView')}</p>
                           </div>
                         </div>
                         <Button
@@ -241,7 +243,7 @@ export default function ProviderDetail() {
                           data-testid="button-view-pdf-menu"
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Ver PDF
+                          {t('providerDetail.viewPdf')}
                         </Button>
                       </div>
                     </div>
@@ -249,7 +251,7 @@ export default function ProviderDetail() {
                     <div className="space-y-3">
                       <img 
                         src={`/objects/${provider.menuDocumentUrl}`} 
-                        alt="Menú Completo" 
+                        alt={t('providerDetail.fullMenu')} 
                         className="w-full h-auto rounded-lg border shadow-sm"
                         data-testid="img-full-menu"
                       />
@@ -260,7 +262,7 @@ export default function ProviderDetail() {
                         data-testid="button-view-image-menu"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Ver en tamaño completo
+                        {t('providerDetail.viewFullSize')}
                       </Button>
                     </div>
                   )}
@@ -275,7 +277,7 @@ export default function ProviderDetail() {
                   <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center">
                       <ChefHat className="w-5 h-5 mr-2" />
-                      Menú de Servicios ({menuItems.length})
+                      {t('providerDetail.servicesMenu')} ({menuItems.length})
                     </CardTitle>
                     {isOwnProfile && (
                       <Button 
@@ -284,7 +286,7 @@ export default function ProviderDetail() {
                         data-testid="button-manage-own-menu"
                       >
                         <Edit className="w-4 h-4 mr-2" />
-                        Gestionar Menú
+                        {t('providerDetail.manageMenu')}
                       </Button>
                     )}
                   </div>
@@ -321,11 +323,11 @@ export default function ProviderDetail() {
                                 )}
                                 {item.duration && (
                                   <p className="text-xs text-gray-500">
-                                    Duración: {item.duration} minutos
+                                    {t('providerDetail.duration')} {item.duration} {t('providerDetail.minutes')}
                                   </p>
                                 )}
                                 {!item.isAvailable && (
-                                  <Badge variant="secondary" className="mt-2">No disponible</Badge>
+                                  <Badge variant="secondary" className="mt-2">{t('providerDetail.notAvailable')}</Badge>
                                 )}
                               </div>
                               <div className="text-right ml-4">
@@ -349,17 +351,17 @@ export default function ProviderDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <ChefHat className="w-5 h-5 mr-2" />
-                    Menú de Servicios
+                    {t('providerDetail.servicesMenu')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-12">
                     <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No tienes servicios en tu menú
+                      {t('providerDetail.noServices')}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                      Agrega servicios a tu menú para que los clientes puedan reservarlos y conocer tus precios.
+                      {t('providerDetail.noServicesDesc')}
                     </p>
                     <Button 
                       onClick={() => setLocation('/menu-management')}
@@ -367,7 +369,7 @@ export default function ProviderDetail() {
                       data-testid="button-manage-own-menu"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Agregar Primer Servicio
+                      {t('providerDetail.addFirstService')}
                     </Button>
                   </div>
                 </CardContent>
@@ -378,7 +380,7 @@ export default function ProviderDetail() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Reseñas ({reviews.length})</CardTitle>
+                  <CardTitle>{t('providerDetail.reviewsTitle')} ({reviews.length})</CardTitle>
                   {user && (
                     <Button
                       onClick={() => setShowReviewForm(true)}
@@ -386,7 +388,7 @@ export default function ProviderDetail() {
                       data-testid="button-add-review"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Agregar Reseña
+                      {t('providerDetail.addReview')}
                     </Button>
                   )}
                 </div>
@@ -416,10 +418,10 @@ export default function ProviderDetail() {
                   <div className="text-center py-12">
                     <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No hay reseñas aún
+                      {t('providerDetail.noReviews')}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                      Se el primero en reseñar este proveedor y ayuda a otros usuarios.
+                      {t('providerDetail.noReviewsDesc')}
                     </p>
                     {user && (
                       <Button
@@ -427,7 +429,7 @@ export default function ProviderDetail() {
                         className="bg-orange-500 hover:bg-orange-600 text-white"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Escribir Primera Reseña
+                        {t('providerDetail.writeFirstReview')}
                       </Button>
                     )}
                   </div>
@@ -441,18 +443,18 @@ export default function ProviderDetail() {
             {/* Contact Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Información de Contacto</CardTitle>
+                <CardTitle>{t('providerDetail.contactInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="font-medium" data-testid="text-contact-building">
-                      {provider.user?.building || 'Edificio Local'}
+                      {provider.user?.building || t('providerDetail.localBuilding')}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {provider.user?.apartment && `Apartamento ${provider.user.apartment}, `}
-                      {provider.user?.section || 'Comunidad Referencias Locales'}
+                      {provider.user?.apartment && `${t('providerDetail.apartment')} ${provider.user.apartment}, `}
+                      {provider.user?.section || t('providerDetail.localCommunity')}
                     </p>
                   </div>
                 </div>
@@ -464,7 +466,7 @@ export default function ProviderDetail() {
                 )}
                 <div className="flex items-center space-x-3">
                   <Mail className="w-5 h-5 text-gray-400" />
-                  <p>Contacto disponible</p>
+                  <p>{t('providerDetail.contactAvailable')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -472,29 +474,29 @@ export default function ProviderDetail() {
             {/* Quick Stats */}
             <Card>
               <CardHeader>
-                <CardTitle>Estadísticas</CardTitle>
+                <CardTitle>{t('providerDetail.stats')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Miembro desde</span>
+                  <span className="text-gray-600">{t('providerDetail.memberSince')}</span>
                   <span className="font-medium">
                     {parseSafeDate(provider.createdAt).toLocaleDateString('es-ES')}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Servicios completados</span>
+                  <span className="text-gray-600">{t('providerDetail.servicesCompleted')}</span>
                   <span className="font-medium" data-testid="text-stat-completed">{provider.reviewCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Calificación promedio</span>
+                  <span className="text-gray-600">{t('providerDetail.averageRating')}</span>
                   <span className="font-medium" data-testid="text-stat-rating">
-                    {averageRating > 0 ? `${averageRating.toFixed(1)}/5` : "Sin calificar"}
+                    {averageRating > 0 ? `${averageRating.toFixed(1)}/5` : t('providerDetail.notRated')}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Estado</span>
+                  <span className="text-gray-600">{t('providerDetail.status')}</span>
                   <span className="font-medium">
-                    {provider.isActive ? "Activo" : "Inactivo"}
+                    {provider.isActive ? t('providerDetail.active') : t('providerDetail.inactive')}
                   </span>
                 </div>
               </CardContent>
@@ -504,7 +506,7 @@ export default function ProviderDetail() {
             <div className="space-y-4">
               <PayForServiceButton
                 providerId={provider.id}
-                providerName={provider.user?.fullName || 'Proveedor'}
+                providerName={provider.user?.fullName || t('providerDetail.provider')}
                 serviceName={provider.title}
                 hourlyRate={provider.hourlyRate}
                 description={provider.description}
@@ -520,7 +522,7 @@ export default function ProviderDetail() {
         onOpenChange={setShowMessagingModal}
         currentUserId={user?.id}
         recipientUserId={provider.userId}
-        recipientName={provider.user?.fullName || 'Proveedor'}
+        recipientName={provider.user?.fullName || t('providerDetail.provider')}
       />
     </div>
   );

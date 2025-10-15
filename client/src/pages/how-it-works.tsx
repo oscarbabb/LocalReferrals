@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Step {
   id: number;
@@ -40,109 +41,7 @@ interface Feature {
   benefits: string[];
 }
 
-const steps: Step[] = [
-  {
-    id: 1,
-    title: "Explora Servicios",
-    description: "Descubre servicios verificados en tu comunidad",
-    icon: <Search className="w-8 h-8" />,
-    details: [
-      "Navega por categorías de servicios organizadas",
-      "Usa filtros para encontrar exactamente lo que necesitas",
-      "Ve perfiles detallados de cada proveedor",
-      "Revisa calificaciones y reseñas de otros vecinos"
-    ],
-    color: "from-blue-500 to-blue-600"
-  },
-  {
-    id: 2,
-    title: "Conecta con Proveedores",
-    description: "Contacta directamente con profesionales de tu edificio",
-    icon: <Users className="w-8 h-8" />,
-    details: [
-      "Ve información verificada de cada proveedor",
-      "Revisa sus especialidades y experiencia",
-      "Consulta disponibilidad en tiempo real",
-      "Lee testimonios de vecinos que ya usaron sus servicios"
-    ],
-    color: "from-green-500 to-green-600"
-  },
-  {
-    id: 3,
-    title: "Agenda tu Servicio",
-    description: "Reserva citas de manera fácil y rápida",
-    icon: <Calendar className="w-8 h-8" />,
-    details: [
-      "Selecciona fecha y hora que te convenga",
-      "Confirma detalles del servicio",
-      "Recibe confirmación instantánea",
-      "Gestiona tus citas desde un solo lugar"
-    ],
-    color: "from-orange-500 to-orange-600"
-  },
-  {
-    id: 4,
-    title: "Disfruta y Califica",
-    description: "Recibe el servicio y comparte tu experiencia",
-    icon: <Star className="w-8 h-8" />,
-    details: [
-      "Disfruta de un servicio de calidad",
-      "Deja tu reseña detallada con fotos",
-      "Califica diferentes aspectos del servicio",
-      "Ayuda a otros vecinos con tu experiencia"
-    ],
-    color: "from-purple-500 to-purple-600"
-  }
-];
-
-const features: Feature[] = [
-  {
-    icon: <Shield className="w-6 h-6" />,
-    title: "Seguridad Verificada",
-    description: "Todos los proveedores son verificados y validados por la comunidad",
-    benefits: [
-      "Identidad confirmada",
-      "Referencias de vecinos", 
-      "Historial de servicios",
-      "Sistema de calificaciones"
-    ]
-  },
-  {
-    icon: <MapPin className="w-6 h-6" />,
-    title: "Servicios Locales",
-    description: "Encuentra proveedores en tu mismo edificio o vecindario",
-    benefits: [
-      "Disponibilidad inmediata",
-      "Conocimiento local",
-      "Confianza comunitaria",
-      "Precios justos"
-    ]
-  },
-  {
-    icon: <Clock className="w-6 h-6" />,
-    title: "Reservas Instantáneas",
-    description: "Agenda servicios en tiempo real con confirmación inmediata",
-    benefits: [
-      "Calendario integrado",
-      "Disponibilidad en vivo",
-      "Confirmación automática",
-      "Recordatorios incluidos"
-    ]
-  },
-  {
-    icon: <Award className="w-6 h-6" />,
-    title: "Calidad Garantizada",
-    description: "Sistema avanzado de reseñas con fotos y calificaciones detalladas",
-    benefits: [
-      "Reseñas con evidencia",
-      "Múltiples criterios",
-      "Comentarios verificados",
-      "Transparencia total"
-    ]
-  }
-];
-
-function StepCard({ step, isActive, onClick }: { step: Step; isActive: boolean; onClick: () => void }) {
+function StepCard({ step, isActive, onClick, t }: { step: Step; isActive: boolean; onClick: () => void; t: (key: string) => string }) {
   return (
     <Card 
       className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
@@ -159,7 +58,7 @@ function StepCard({ step, isActive, onClick }: { step: Step; isActive: boolean; 
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="outline" className="text-xs">
-                Paso {step.id}
+                {t('howItWorks.stepLabel')} {step.id}
               </Badge>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">{step.title}</h3>
@@ -181,7 +80,7 @@ function StepCard({ step, isActive, onClick }: { step: Step; isActive: boolean; 
         
         {!isActive && (
           <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700 p-0">
-            Ver detalles <ArrowRight className="w-4 h-4 ml-1" />
+            {t('howItWorks.viewDetails')} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         )}
       </CardContent>
@@ -216,7 +115,110 @@ function FeatureCard({ feature }: { feature: Feature }) {
 }
 
 export default function HowItWorks() {
+  const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(1);
+
+  const steps: Step[] = [
+    {
+      id: 1,
+      title: t('howItWorks.step1.title'),
+      description: t('howItWorks.step1.description'),
+      icon: <Search className="w-8 h-8" />,
+      details: [
+        t('howItWorks.step1.detail1'),
+        t('howItWorks.step1.detail2'),
+        t('howItWorks.step1.detail3'),
+        t('howItWorks.step1.detail4')
+      ],
+      color: "from-blue-500 to-blue-600"
+    },
+    {
+      id: 2,
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.description'),
+      icon: <Users className="w-8 h-8" />,
+      details: [
+        t('howItWorks.step2.detail1'),
+        t('howItWorks.step2.detail2'),
+        t('howItWorks.step2.detail3'),
+        t('howItWorks.step2.detail4')
+      ],
+      color: "from-green-500 to-green-600"
+    },
+    {
+      id: 3,
+      title: t('howItWorks.step3.title'),
+      description: t('howItWorks.step3.description'),
+      icon: <Calendar className="w-8 h-8" />,
+      details: [
+        t('howItWorks.step3.detail1'),
+        t('howItWorks.step3.detail2'),
+        t('howItWorks.step3.detail3'),
+        t('howItWorks.step3.detail4')
+      ],
+      color: "from-orange-500 to-orange-600"
+    },
+    {
+      id: 4,
+      title: t('howItWorks.step4.title'),
+      description: t('howItWorks.step4.description'),
+      icon: <Star className="w-8 h-8" />,
+      details: [
+        t('howItWorks.step4.detail1'),
+        t('howItWorks.step4.detail2'),
+        t('howItWorks.step4.detail3'),
+        t('howItWorks.step4.detail4')
+      ],
+      color: "from-purple-500 to-purple-600"
+    }
+  ];
+
+  const features: Feature[] = [
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: t('howItWorks.feature1.title'),
+      description: t('howItWorks.feature1.description'),
+      benefits: [
+        t('howItWorks.feature1.benefit1'),
+        t('howItWorks.feature1.benefit2'),
+        t('howItWorks.feature1.benefit3'),
+        t('howItWorks.feature1.benefit4')
+      ]
+    },
+    {
+      icon: <MapPin className="w-6 h-6" />,
+      title: t('howItWorks.feature2.title'),
+      description: t('howItWorks.feature2.description'),
+      benefits: [
+        t('howItWorks.feature2.benefit1'),
+        t('howItWorks.feature2.benefit2'),
+        t('howItWorks.feature2.benefit3'),
+        t('howItWorks.feature2.benefit4')
+      ]
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: t('howItWorks.feature3.title'),
+      description: t('howItWorks.feature3.description'),
+      benefits: [
+        t('howItWorks.feature3.benefit1'),
+        t('howItWorks.feature3.benefit2'),
+        t('howItWorks.feature3.benefit3'),
+        t('howItWorks.feature3.benefit4')
+      ]
+    },
+    {
+      icon: <Award className="w-6 h-6" />,
+      title: t('howItWorks.feature4.title'),
+      description: t('howItWorks.feature4.description'),
+      benefits: [
+        t('howItWorks.feature4.benefit1'),
+        t('howItWorks.feature4.benefit2'),
+        t('howItWorks.feature4.benefit3'),
+        t('howItWorks.feature4.benefit4')
+      ]
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -226,39 +228,38 @@ export default function HowItWorks() {
           <div className="text-center">
             <Link href="/" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al Inicio
+              {t('howItWorks.backToHome')}
             </Link>
             
             <div className="flex justify-center items-center mb-6">
               <PlayCircle className="w-8 h-8 mr-3" />
               <h1 className="text-4xl font-bold">
-                Cómo Funciona Referencias Locales
+                {t('howItWorks.mainTitle')}
               </h1>
             </div>
             
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Descubre lo fácil que es conectar con servicios de confianza en tu comunidad. 
-              Desde encontrar el proveedor perfecto hasta recibir un servicio excepcional.
+              {t('howItWorks.mainDescription')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">4</div>
-                <div className="text-sm text-blue-200">Pasos Simples</div>
+                <div className="text-sm text-blue-200">{t('howItWorks.simpleSteps')}</div>
               </div>
               
               <div className="hidden sm:block w-px h-12 bg-blue-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">100%</div>
-                <div className="text-sm text-blue-200">Verificado</div>
+                <div className="text-sm text-blue-200">{t('howItWorks.verified')}</div>
               </div>
               
               <div className="hidden sm:block w-px h-12 bg-blue-300"></div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">24/7</div>
-                <div className="text-sm text-blue-200">Disponible</div>
+                <div className="text-sm text-blue-200">{t('howItWorks.available')}</div>
               </div>
             </div>
           </div>
@@ -269,10 +270,10 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Proceso Paso a Paso
+            {t('howItWorks.processTitle')}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Haz clic en cada paso para ver los detalles y descubrir lo fácil que es usar nuestra plataforma
+            {t('howItWorks.processDescription')}
           </p>
         </div>
 
@@ -283,6 +284,7 @@ export default function HowItWorks() {
               step={step}
               isActive={activeStep === step.id}
               onClick={() => setActiveStep(step.id)}
+              t={t}
             />
           ))}
         </div>
@@ -290,7 +292,7 @@ export default function HowItWorks() {
         {/* Process Flow Visualization */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
           <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
-            Flujo del Proceso
+            {t('howItWorks.processFlowTitle')}
           </h3>
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
             {steps.map((step, index) => (
@@ -317,10 +319,10 @@ export default function HowItWorks() {
               <HeartHandshake className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              ¿Por Qué Elegir Referencias Locales?
+              {t('howItWorks.whyChooseTitle')}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Nuestra plataforma está diseñada para brindarte la mejor experiencia al conectar con servicios de confianza
+              {t('howItWorks.whyChooseDescription')}
             </p>
           </div>
 
@@ -338,7 +340,7 @@ export default function HowItWorks() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Beneficios para Toda la Comunidad
+                {t('howItWorks.communityBenefitsTitle')}
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
@@ -346,10 +348,9 @@ export default function HowItWorks() {
                     <Home className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Para Residentes</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('howItWorks.forResidents.title')}</h3>
                     <p className="text-gray-600">
-                      Accede a servicios de calidad sin salir de tu edificio. Encuentra proveedores verificados 
-                      y recomendados por tus propios vecinos.
+                      {t('howItWorks.forResidents.description')}
                     </p>
                   </div>
                 </div>
@@ -359,10 +360,9 @@ export default function HowItWorks() {
                     <UserCheck className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Para Proveedores</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('howItWorks.forProviders.title')}</h3>
                     <p className="text-gray-600">
-                      Conecta con clientes en tu propio edificio o vecindario. Construye tu reputación 
-                      y haz crecer tu negocio dentro de la comunidad.
+                      {t('howItWorks.forProviders.description')}
                     </p>
                   </div>
                 </div>
@@ -372,10 +372,9 @@ export default function HowItWorks() {
                     <MessageCircle className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Para la Comunidad</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('howItWorks.forCommunity.title')}</h3>
                     <p className="text-gray-600">
-                      Fortalece los lazos vecinales y crea una red de confianza. Comparte experiencias 
-                      y ayuda a otros a tomar mejores decisiones.
+                      {t('howItWorks.forCommunity.description')}
                     </p>
                   </div>
                 </div>
@@ -386,9 +385,9 @@ export default function HowItWorks() {
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
                   <Smartphone className="w-8 h-8 text-orange-600 mx-auto mb-3" />
-                  <h4 className="font-semibold text-gray-900 mb-2">Fácil de Usar</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t('howItWorks.easyToUse.title')}</h4>
                   <p className="text-sm text-gray-600">
-                    Interfaz intuitiva diseñada para todos los usuarios
+                    {t('howItWorks.easyToUse.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -396,9 +395,9 @@ export default function HowItWorks() {
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
                   <CreditCard className="w-8 h-8 text-green-600 mx-auto mb-3" />
-                  <h4 className="font-semibold text-gray-900 mb-2">Sin Comisiones</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t('howItWorks.noFees.title')}</h4>
                   <p className="text-sm text-gray-600">
-                    Contacta directamente sin costos adicionales
+                    {t('howItWorks.noFees.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -406,9 +405,9 @@ export default function HowItWorks() {
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
                   <Shield className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-                  <h4 className="font-semibold text-gray-900 mb-2">100% Seguro</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t('howItWorks.secure.title')}</h4>
                   <p className="text-sm text-gray-600">
-                    Proveedores verificados por la comunidad
+                    {t('howItWorks.secure.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -416,9 +415,9 @@ export default function HowItWorks() {
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
                   <Clock className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-                  <h4 className="font-semibold text-gray-900 mb-2">Disponibilidad</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t('howItWorks.availability.title')}</h4>
                   <p className="text-sm text-gray-600">
-                    Servicios disponibles cuando los necesites
+                    {t('howItWorks.availability.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -431,20 +430,20 @@ export default function HowItWorks() {
       <div className="bg-gradient-to-r from-indigo-600 to-purple-700 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            ¿Listo para Comenzar?
+            {t('howItWorks.readyToStart.title')}
           </h2>
           <p className="text-xl text-indigo-100 mb-8">
-            Únete a la comunidad de Referencias Locales y descubre una nueva forma de conectar con servicios de confianza
+            {t('howItWorks.readyToStart.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/services">
               <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-explore-services">
-                Explorar Servicios
+                {t('howItWorks.exploreServices')}
               </Button>
             </Link>
             <Link href="/providers">
               <Button size="lg" variant="outline" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
-                Ser Proveedor
+                {t('howItWorks.becomeProvider')}
               </Button>
             </Link>
           </div>

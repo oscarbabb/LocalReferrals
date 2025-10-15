@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { ServiceCategory } from "@shared/schema";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function Providers() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("rating");
@@ -84,10 +86,10 @@ export default function Providers() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Proveedores de Servicios
+            {t('providers.page.title')}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Encuentra profesionales recomendados por tu comunidad
+            {t('providers.page.subtitle')}
           </p>
 
           {/* Search and Filter Bar */}
@@ -97,7 +99,7 @@ export default function Providers() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="Buscar proveedores..."
+                  placeholder={t('providers.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -106,10 +108,10 @@ export default function Providers() {
               
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Categoría" />
+                  <SelectValue placeholder={t('providers.filter.categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas las categorías</SelectItem>
+                  <SelectItem value="all">{t('providers.filter.allCategories')}</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -120,21 +122,21 @@ export default function Providers() {
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Ordenar por" />
+                  <SelectValue placeholder={t('providers.sort.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rating">Mejor calificación</SelectItem>
-                  <SelectItem value="reviews">Más reseñas</SelectItem>
-                  <SelectItem value="price-low">Precio: menor a mayor</SelectItem>
-                  <SelectItem value="price-high">Precio: mayor a menor</SelectItem>
-                  <SelectItem value="name">Nombre A-Z</SelectItem>
+                  <SelectItem value="rating">{t('providers.sort.byRating')}</SelectItem>
+                  <SelectItem value="reviews">{t('providers.sort.byReviews')}</SelectItem>
+                  <SelectItem value="price-low">{t('providers.sort.priceLowHigh')}</SelectItem>
+                  <SelectItem value="price-high">{t('providers.sort.priceHighLow')}</SelectItem>
+                  <SelectItem value="name">{t('providers.sort.byName')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <div className="flex items-center space-x-2">
                 <Filter className="w-5 h-5 text-gray-400" />
                 <Badge variant="secondary">
-                  {filteredAndSortedProviders.length} resultados
+                  {filteredAndSortedProviders.length} {t('providers.results.available')}
                 </Badge>
               </div>
             </div>
@@ -144,7 +146,7 @@ export default function Providers() {
         {filteredAndSortedProviders.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-xl text-gray-600">
-              No se encontraron proveedores que coincidan con tu búsqueda.
+              {t('providers.noResults')}
             </p>
           </div>
         ) : (
