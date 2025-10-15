@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **Database Connection Error Fix** (October 15, 2025): Fixed critical crash caused by Neon serverless database connection terminations. Added error handling to PostgreSQL connection pool to gracefully handle idle connection closures without crashing the application. App now recovers automatically from database connection errors.
+
 - **Complete Bilingual Translation Implementation** (October 15, 2025): Comprehensive platform-wide translation to Spanish/English across 26 pages and 6 shared components (600+ translation keys). Systematic domain-based rollout covering public pages, user management, provider tools, payment flows, and components. All Zod validation schemas converted to translation-aware functions. Fixed Email label translation bug in auth page. E2E tested and architect-approved - no hardcoded strings remain, all UI elements translate correctly.
 
 - **Header Navigation Refactoring** (October 15, 2025): Complete redesign with two-tier layout to eliminate overlap issues. Top utility bar (desktop-only) contains language toggle, invite button, and auth controls. Main navigation displays primary links inline (Services, Como Funciona, Providers, Testimonials) with "More" dropdown for secondary items (Bookings, Messages, Contact Admin, Admin Dashboard). Mobile uses hamburger menu. Fully tested and architect-approved.
