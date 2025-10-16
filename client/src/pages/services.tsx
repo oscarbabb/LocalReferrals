@@ -3,16 +3,19 @@ import { useLocation } from "wouter";
 import ServiceCard from "@/components/service-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Plus } from "lucide-react";
 import { useState } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel, categoryMatchesSearch } from "@/lib/serviceTranslations";
+import { RequestCategoryDialog } from "@/components/request-category-dialog";
 
 export default function Services() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const { t, language } = useLanguage();
 
   const { data: categories = [], isLoading } = useQuery<ServiceCategory[]>({
@@ -59,9 +62,26 @@ export default function Services() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
             {t('services.pageTitle')}
           </h1>
-          <p className="text-xl text-gray-600 mb-8 animate-fade-in">
+          <p className="text-xl text-gray-600 mb-4 animate-fade-in">
             {t('services.pageDescription')}
           </p>
+
+          {/* Category Counter and Request Button */}
+          <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
+            <div className="text-sm font-medium text-gray-600 px-4 py-2 bg-gray-100 rounded-full" data-testid="text-category-count">
+              {categories.length} {t('services.categoriesAvailable')}
+            </div>
+            <Button
+              onClick={() => setRequestDialogOpen(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2 hover:bg-primary hover:text-white transition-colors"
+              data-testid="button-request-category"
+            >
+              <Plus className="w-4 h-4" />
+              {t('services.requestCategory')}
+            </Button>
+          </div>
 
           {/* Search and Filter */}
           <div className="max-w-2xl mx-auto mb-8 space-y-4 animate-slide-up">
@@ -111,6 +131,15 @@ export default function Services() {
             ))}
           </div>
         )}
+
+      <RequestCategoryDialog
+        open={requestDialogOpen}
+        onOpenChange={setRequestDialogOpen}
+        categories={categories.map(cat => ({
+          id: cat.id,
+          name: getCategoryLabel(cat.id, language, cat.name)
+        }))}
+      />
       </div>
   );
 }

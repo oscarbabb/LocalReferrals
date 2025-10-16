@@ -109,7 +109,7 @@ export const es = {
   'services.filterPlaceholder': 'Filtrar por categoría',
   'services.allCategories': 'Todas las categorías',
   'services.noResults': 'No se encontraron servicios que coincidan con tu búsqueda.',
-  'services.categoriesAvailable': '{count} categorías disponibles',
+  'services.categoriesAvailable': 'categorías disponibles',
   'services.requestCategory': 'Solicitar Nueva Categoría',
   'services.requestCategoryTitle': 'Solicitar una Nueva Categoría o Subcategoría',
   'services.requestCategoryDescription': '¿No encuentras lo que buscas? Cuéntanos qué servicio necesitas y revisaremos tu solicitud.',

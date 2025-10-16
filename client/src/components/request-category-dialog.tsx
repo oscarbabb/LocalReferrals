@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { useLanguage } from "@/lib/languageContext";
+import { useLanguage } from "@/hooks/use-language";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -70,10 +70,7 @@ export function RequestCategoryDialog({
 
   const createRequestMutation = useMutation({
     mutationFn: async (data: RequestCategoryFormData) => {
-      return await apiRequest("/api/category-requests", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/category-requests", data);
     },
     onSuccess: () => {
       toast({
