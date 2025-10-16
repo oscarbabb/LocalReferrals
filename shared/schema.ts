@@ -284,6 +284,21 @@ export const adminMessages = pgTable("admin_messages", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const categoryRequests = pgTable("category_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  requestType: varchar("request_type").notNull(), // category, subcategory
+  categoryName: text("category_name").notNull(),
+  subcategoryName: text("subcategory_name"),
+  parentCategoryId: varchar("parent_category_id").references(() => serviceCategories.id), // For subcategory requests
+  description: text("description").notNull(),
+  status: varchar("status").default("pending").notNull(), // pending, approved, rejected
+  adminResponse: text("admin_response"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -382,6 +397,13 @@ export const insertAdminMessageSchema = createInsertSchema(adminMessages).omit({
   updatedAt: true,
 });
 
+export const insertCategoryRequestSchema = createInsertSchema(categoryRequests).omit({
+  id: true,
+  status: true,
+  reviewedAt: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
@@ -418,6 +440,8 @@ export type ProviderCategory = typeof providerCategories.$inferSelect;
 export type InsertProviderCategory = z.infer<typeof insertProviderCategorySchema>;
 export type AdminMessage = typeof adminMessages.$inferSelect;
 export type InsertAdminMessage = z.infer<typeof insertAdminMessageSchema>;
+export type CategoryRequest = typeof categoryRequests.$inferSelect;
+export type InsertCategoryRequest = z.infer<typeof insertCategoryRequestSchema>;
 
 // Conversation type for message inbox
 export interface Conversation {
