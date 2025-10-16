@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **Category/Subcategory Request System** (October 16, 2025): Implemented user-driven category request feature enabling users to suggest new service categories and subcategories. Added database schema (category_requests table), API endpoints (POST/GET/PATCH with auth protection), RequestCategoryDialog component with form validation, and UI integration on services page with category counter and request button. Full bilingual support (English/Spanish) with 20+ translation keys. E2E tested and architect-approved - users can now request new categories/subcategories which admins can review and approve.
+
 - **Database Connection Error Fix** (October 15, 2025): Fixed critical crash caused by Neon serverless database connection terminations. Added error handling to PostgreSQL connection pool to gracefully handle idle connection closures without crashing the application. App now recovers automatically from database connection errors.
 
 - **Complete Bilingual Translation Implementation** (October 15, 2025): Comprehensive platform-wide translation to Spanish/English across 26 pages and 6 shared components (600+ translation keys). Systematic domain-based rollout covering public pages, user management, provider tools, payment flows, and components. All Zod validation schemas converted to translation-aware functions. Fixed Email label translation bug in auth page. E2E tested and architect-approved - no hardcoded strings remain, all UI elements translate correctly.
@@ -50,6 +52,7 @@ Preferred communication style: Simple, everyday language.
 - **One-Click Booking**: Calendar interface with time slot selection.
 - **Messaging System**: Comprehensive inbox page for conversations between providers and consumers.
 - **Admin Communication & Dashboard System**: Contact Admin page for users to submit lost & found, questions, complaints, suggestions, and general inquiries with category and priority selection. Admin Dashboard (`/admin-dashboard`) for admins to view all messages with filters (category/status/priority), respond to users, and manage message status independently. Role-based access with `isAdmin` database field and middleware protection. Secure authorization checks prevent cross-tenant access.
+- **Category Request System**: User-driven feature allowing authenticated users to request new service categories or subcategories. Includes modal dialog with form validation (request type, name, parent category for subcategories, description), API endpoints with authentication protection, and admin review workflow. Services page displays category counter and request button.
 - **Geographical Service Radius**: Optional preference (1-100 km) for both providers (service delivery range) and consumers (service reception range), validated on frontend and backend.
 - **Provider Tools**: Availability Management (weekly schedules), Menu Management (items, document uploads), Multi-Category Registration.
 - **Legal Documentation**: Comprehensive Terms & Conditions and Privacy Policy pages with ARCO rights and cookie policy, fully bilingual.
