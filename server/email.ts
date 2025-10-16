@@ -63,7 +63,7 @@ export async function sendProfileConfirmationEmail(userEmail: string, userName: 
     </div>
   `;
   
-  const text = `¡Hola ${userName}! Gracias por crear tu perfil en Referencias Locales. Ya puedes comenzar a buscar servicios locales en tu comunidad.`;
+  const text = `¡Hola ${userName}! Gracias por crear tu perfil en Referencias Locales. Ya puedes comenzar a buscar servicios locales en tu comunidad. Si tienes alguna pregunta, contáctanos en ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: userEmail,
@@ -100,7 +100,7 @@ export async function sendBookingConfirmationEmail(
     </div>
   `;
   
-  const text = `¡Hola ${userName}! Tu reserva ha sido confirmada. Proveedor: ${providerName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}`;
+  const text = `¡Hola ${userName}! Tu reserva ha sido confirmada. Proveedor: ${providerName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: userEmail,
@@ -137,7 +137,7 @@ export async function sendBookingNotificationEmail(
     </div>
   `;
   
-  const text = `¡Hola ${providerName}! Has recibido una nueva reserva. Cliente: ${userName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}`;
+  const text = `¡Hola ${providerName}! Has recibido una nueva reserva. Cliente: ${userName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: providerEmail,
