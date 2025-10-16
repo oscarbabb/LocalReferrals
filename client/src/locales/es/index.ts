@@ -393,6 +393,21 @@ export const es = {
   'common.delete': 'Eliminar',
   'common.close': 'Cerrar',
   
+  // Disclaimer
+  'disclaimer.title': 'Aviso Importante para Nuestra Comunidad',
+  'disclaimer.intro': 'En Referencias Locales somos una plataforma de colaboración social que conecta a personas y negocios locales con el objetivo de fortalecer la economía de nuestra comunidad y generar más oportunidades para todos.',
+  'disclaimer.importantNote': '💡 Es importante que sepas:',
+  'disclaimer.responsibility': 'Las transacciones, acuerdos y servicios que pactes directamente con los proveedores anunciantes son responsabilidad exclusiva de las partes involucradas. Nosotros facilitamos el espacio de encuentro, pero no intervenimos en los acuerdos ni nos hacemos responsables por los resultados de los servicios contratados.',
+  'disclaimer.recommendationsTitle': 'Te recomendamos:',
+  'disclaimer.recommendation1': 'Realizar las calificaciones de cada proveedor',
+  'disclaimer.recommendation2': 'Si lo consideras necesario, y antes de contratar, lleva a cabo la solicitud de licencias de funcionamiento, de sanidad, entre otras que puede emitir la autoridad para validar la legitimidad del negocio o servicio.',
+  'disclaimer.recommendation3': 'Establecer expectativas claras directamente con el proveedor.',
+  'disclaimer.recommendation4': 'Compartir tu experiencia para ayudar a crecer esta red de colaboración.',
+  'disclaimer.closing': 'Juntos podemos construir una comunidad más unida, activa y próspera.',
+  'disclaimer.thanks': 'Agradecemos tu confianza y participación.',
+  'disclaimer.acceptButton': 'Entiendo y Acepto',
+  'disclaimer.mustAccept': 'Debes aceptar el aviso para continuar',
+
   // Invite
   'invite.button': 'Invitar Amigos',
   'invite.title': 'Invita a tus Vecinos',

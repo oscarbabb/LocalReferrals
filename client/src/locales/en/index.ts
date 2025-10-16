@@ -393,6 +393,21 @@ export const en = {
   'common.delete': 'Delete',
   'common.close': 'Close',
   
+  // Disclaimer
+  'disclaimer.title': 'Important Notice for Our Community',
+  'disclaimer.intro': 'At Local References, we are a social collaboration platform that connects people and local businesses with the goal of strengthening our community\'s economy and generating more opportunities for everyone.',
+  'disclaimer.importantNote': '💡 It\'s important that you know:',
+  'disclaimer.responsibility': 'Transactions, agreements, and services that you arrange directly with the advertised providers are the exclusive responsibility of the parties involved. We facilitate the meeting space, but we do not intervene in agreements nor are we responsible for the results of contracted services.',
+  'disclaimer.recommendationsTitle': 'We recommend:',
+  'disclaimer.recommendation1': 'Rate each provider',
+  'disclaimer.recommendation2': 'If you deem it necessary, and before hiring, request operating licenses, health permits, and others that the authority can issue to validate the legitimacy of the business or service.',
+  'disclaimer.recommendation3': 'Establish clear expectations directly with the provider.',
+  'disclaimer.recommendation4': 'Share your experience to help grow this collaboration network.',
+  'disclaimer.closing': 'Together we can build a more united, active, and prosperous community.',
+  'disclaimer.thanks': 'We appreciate your trust and participation.',
+  'disclaimer.acceptButton': 'I Understand and Accept',
+  'disclaimer.mustAccept': 'You must accept the notice to continue',
+
   // Invite
   'invite.button': 'Invite Friends',
   'invite.title': 'Invite Your Neighbors',
