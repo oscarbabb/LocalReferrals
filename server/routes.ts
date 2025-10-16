@@ -1244,6 +1244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         address: z.string().min(10, "La dirección debe ser más específica").optional(),
         profilePicture: z.string().optional(),
         serviceRadiusKm: z.number().int().min(1).max(100).nullable().optional(), // Service reception radius (1-100 km)
+        disclaimerAccepted: z.boolean().optional(),
       }).strict(); // .strict() rejects extra keys
       
       const validatedData = profileUpdateSchema.parse(req.body);
@@ -1254,8 +1255,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // If accepting disclaimer, add timestamp
+      const updateData: any = { ...validatedData };
+      if (validatedData.disclaimerAccepted && !existingUser.disclaimerAccepted) {
+        updateData.disclaimerAcceptedAt = new Date();
+      }
+      
       // Update user data with only validated fields
-      const updatedUser = await storage.updateUser(id, validatedData);
+      const updatedUser = await storage.updateUser(id, updateData);
       if (!updatedUser) {
         return res.status(500).json({ message: "Failed to update user" });
       }
