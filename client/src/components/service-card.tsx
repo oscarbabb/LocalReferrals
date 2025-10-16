@@ -69,7 +69,7 @@ const getHoverColorForCategory = (categoryId: string): string => {
 };
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 400 });
   const cardRef = useRef<HTMLDivElement>(null);
