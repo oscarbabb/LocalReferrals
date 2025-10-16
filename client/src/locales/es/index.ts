@@ -328,6 +328,8 @@ export const es = {
   'providers.page.subtitle': 'Encuentra profesionales recomendados por tu comunidad',
   'providers.filter.categoryPlaceholder': 'Categoría',
   'providers.filter.allCategories': 'Todas las categorías',
+  'providers.filter.radiusLabel': 'Radio de Servicio',
+  'providers.filter.anyDistance': 'Cualquier distancia',
   'providers.sort.placeholder': 'Ordenar por',
   'providers.sort.byRating': 'Mejor calificación',
   'providers.sort.byReviews': 'Más reseñas',

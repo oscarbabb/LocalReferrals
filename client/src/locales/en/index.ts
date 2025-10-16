@@ -228,6 +228,8 @@ export const en = {
   'providers.page.subtitle': 'Find professionals recommended by your community',
   'providers.filter.categoryPlaceholder': 'Category',
   'providers.filter.allCategories': 'All categories',
+  'providers.filter.radiusLabel': 'Service Radius',
+  'providers.filter.anyDistance': 'Any distance',
   'providers.sort.placeholder': 'Sort by',
   'providers.sort.byRating': 'Best rating',
   'providers.sort.byReviews': 'Most reviews',
