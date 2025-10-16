@@ -97,7 +97,7 @@ export default function Header() {
                 </Link>
                 <Link href="/auth">
                   <Button size="sm" className="text-xs bg-blue-600 text-white hover:bg-blue-700" data-testid="button-register">
-                    {t('auth.register')}
+                    {t('auth.register.tab')}
                   </Button>
                 </Link>
               </>
