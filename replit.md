@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **Subcategory Counter Addition** (October 16, 2025): Added subcategory counter display on services page alongside category counter. Shows "431 subcategories available" (or Spanish equivalent). Queries `/api/subcategories` endpoint, includes bilingual translation support, and matches existing UI styling. E2E tested and architect-approved - users can now see both category (55) and subcategory (431) counts at a glance.
+
 - **Category/Subcategory Request System** (October 16, 2025): Implemented user-driven category request feature enabling users to suggest new service categories and subcategories. Added database schema (category_requests table), API endpoints (POST/GET/PATCH with auth protection), RequestCategoryDialog component with form validation, and UI integration on services page with category counter and request button. Full bilingual support (English/Spanish) with 20+ translation keys. E2E tested and architect-approved - users can now request new categories/subcategories which admins can review and approve.
 
 - **Database Connection Error Fix** (October 15, 2025): Fixed critical crash caused by Neon serverless database connection terminations. Added error handling to PostgreSQL connection pool to gracefully handle idle connection closures without crashing the application. App now recovers automatically from database connection errors.

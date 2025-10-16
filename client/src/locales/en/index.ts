@@ -110,6 +110,7 @@ export const en = {
   'services.allCategories': 'All categories',
   'services.noResults': 'No services found matching your search.',
   'services.categoriesAvailable': 'categories available',
+  'services.subcategoriesAvailable': 'subcategories available',
   'services.requestCategory': 'Request New Category',
   'services.requestCategoryTitle': 'Request a New Category or Subcategory',
   'services.requestCategoryDescription': 'Don\'t see what you need? Tell us what service you\'re looking for and we\'ll review your request.',

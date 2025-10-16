@@ -22,6 +22,10 @@ export default function Services() {
     queryKey: ["/api/categories"],
   });
 
+  const { data: subcategories = [] } = useQuery<any[]>({
+    queryKey: ["/api/subcategories"],
+  });
+
   const { data: providers = [] } = useQuery<any[]>({
     queryKey: ["/api/providers"],
   });
@@ -66,10 +70,13 @@ export default function Services() {
             {t('services.pageDescription')}
           </p>
 
-          {/* Category Counter and Request Button */}
+          {/* Category & Subcategory Counters and Request Button */}
           <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
             <div className="text-sm font-medium text-gray-600 px-4 py-2 bg-gray-100 rounded-full" data-testid="text-category-count">
               {categories.length} {t('services.categoriesAvailable')}
+            </div>
+            <div className="text-sm font-medium text-gray-600 px-4 py-2 bg-gray-100 rounded-full" data-testid="text-subcategory-count">
+              {subcategories.length} {t('services.subcategoriesAvailable')}
             </div>
             <Button
               onClick={() => setRequestDialogOpen(true)}
