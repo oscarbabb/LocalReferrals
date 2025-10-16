@@ -43,7 +43,8 @@ export async function sendEmail(params: CustomEmailParams): Promise<boolean> {
 }
 
 // Email templates for Referencias Locales
-const FROM_EMAIL = "noreply@test.com"; // You may need to verify this domain in MailerSend
+const FROM_EMAIL = "hello@referenciaslocales.com.mx";
+const SUPPORT_EMAIL = "support@referenciaslocales.com.mx";
 
 export async function sendProfileConfirmationEmail(userEmail: string, userName: string): Promise<boolean> {
   const subject = "¡Bienvenido a Referencias Locales!";
@@ -57,7 +58,7 @@ export async function sendProfileConfirmationEmail(userEmail: string, userName: 
         <li>Conectar con proveedores verificados</li>
         <li>Solicitar servicios de confianza</li>
       </ul>
-      <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+      <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
       <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
@@ -94,6 +95,7 @@ export async function sendBookingConfirmationEmail(
         <p><strong>Hora:</strong> ${bookingTime}</p>
       </div>
       <p>El proveedor se pondrá en contacto contigo pronto.</p>
+      <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
       <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
@@ -130,6 +132,7 @@ export async function sendBookingNotificationEmail(
         <p><strong>Hora:</strong> ${bookingTime}</p>
       </div>
       <p>Por favor, ponte en contacto con el cliente para coordinar los detalles.</p>
+      <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
       <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
