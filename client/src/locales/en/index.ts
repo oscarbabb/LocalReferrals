@@ -258,7 +258,7 @@ export const en = {
   'howItWorks.stepLabel': 'Step',
   'howItWorks.viewDetails': 'View details',
   'howItWorks.step1.title': 'Explore Services',
-  'howItWorks.step1.description': 'Discover verified services in your community',
+  'howItWorks.step1.description': 'Discover recommended services in your community',
   'howItWorks.step1.detail1': 'Browse organized service categories',
   'howItWorks.step1.detail2': 'Use filters to find exactly what you need',
   'howItWorks.step1.detail3': 'View detailed profiles of each provider',

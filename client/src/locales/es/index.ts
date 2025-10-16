@@ -243,7 +243,7 @@ export const es = {
   'howItWorks.stepLabel': 'Paso',
   'howItWorks.viewDetails': 'Ver detalles',
   'howItWorks.step1.title': 'Explora Servicios',
-  'howItWorks.step1.description': 'Descubre servicios verificados en tu comunidad',
+  'howItWorks.step1.description': 'Descubre servicios recomendados en tu comunidad',
   'howItWorks.step1.detail1': 'Navega por categorías de servicios organizadas',
   'howItWorks.step1.detail2': 'Usa filtros para encontrar exactamente lo que necesitas',
   'howItWorks.step1.detail3': 'Ve perfiles detallados de cada proveedor',
