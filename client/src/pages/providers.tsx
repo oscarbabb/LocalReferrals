@@ -4,7 +4,8 @@ import ProviderCard from "@/components/provider-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Search, Filter, MapPin } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
@@ -15,6 +16,7 @@ export default function Providers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("rating");
+  const [radiusKm, setRadiusKm] = useState<number>(100); // Default 100km (no filter)
 
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
@@ -38,7 +40,12 @@ export default function Providers() {
         provider.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
-      return matchesSearch && matchesCategory;
+      
+      // Filter by radius: show providers whose service radius is >= selected radius
+      // (they can deliver services at least that far)
+      const matchesRadius = radiusKm === 100 || (provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm);
+      
+      return matchesSearch && matchesCategory && matchesRadius;
     });
 
     // Sort providers
@@ -58,7 +65,7 @@ export default function Providers() {
           return 0;
       }
     });
-  }, [providers, searchTerm, selectedCategory, sortBy]);
+  }, [providers, searchTerm, selectedCategory, sortBy, radiusKm]);
 
   if (isLoading) {
     return (
@@ -95,7 +102,7 @@ export default function Providers() {
 
           {/* Search and Filter Bar */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
@@ -104,11 +111,12 @@ export default function Providers() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  data-testid="input-search-providers"
                 />
               </div>
               
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-category">
                   <SelectValue placeholder={t('providers.filter.categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -122,7 +130,7 @@ export default function Providers() {
               </Select>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-sort">
                   <SelectValue placeholder={t('providers.sort.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -136,9 +144,37 @@ export default function Providers() {
 
               <div className="flex items-center space-x-2">
                 <Filter className="w-5 h-5 text-gray-400" />
-                <Badge variant="secondary">
+                <Badge variant="secondary" data-testid="badge-results-count">
                   {filteredAndSortedProviders.length} {t('providers.results.available')}
                 </Badge>
+              </div>
+            </div>
+
+            {/* Radius Filter */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-gray-600" />
+                  <label className="text-sm font-medium text-gray-700">
+                    {t('providers.filter.radiusLabel')}
+                  </label>
+                </div>
+                <Badge variant="outline" data-testid="badge-radius-value">
+                  {radiusKm === 100 ? t('providers.filter.anyDistance') : `${radiusKm} km`}
+                </Badge>
+              </div>
+              <Slider
+                value={[radiusKm]}
+                onValueChange={(value) => setRadiusKm(value[0])}
+                min={1}
+                max={100}
+                step={1}
+                className="w-full"
+                data-testid="slider-radius"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>1 km</span>
+                <span>100 km ({t('providers.filter.anyDistance')})</span>
               </div>
             </div>
           </div>
