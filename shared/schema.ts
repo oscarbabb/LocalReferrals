@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   isAdmin: boolean("is_admin").default(false),
   avatar: text("avatar"),
   serviceRadiusKm: integer("service_radius_km"), // Service reception radius in km for consumers
+  disclaimerAccepted: boolean("disclaimer_accepted").default(false),
+  disclaimerAcceptedAt: timestamp("disclaimer_accepted_at"),
   // Detailed Mexican Address Fields
   condominioMaestro: text("condominio_maestro"),
   condominio: text("condominio"),
