@@ -47,7 +47,11 @@ export default function ContactAdmin() {
       message: string;
       priority?: string;
     }) => {
-      return await apiRequest("POST", `/api/admin-messages`, data);
+      console.log("🔵 Creating admin message with data:", data);
+      const response = await apiRequest("POST", `/api/admin-messages`, data);
+      const result = await response.json();
+      console.log("✅ Admin message created:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin-messages/user", user?.id] });
@@ -61,10 +65,11 @@ export default function ContactAdmin() {
       setMessage("");
       setPriority("medium");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("❌ Error creating admin message:", error);
       toast({
         title: t("admin.toast.error"),
-        description: t("admin.toast.errorDesc"),
+        description: error.message || t("admin.toast.errorDesc"),
         variant: "destructive",
       });
     },
@@ -72,8 +77,14 @@ export default function ContactAdmin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!category || !subject || !message) return;
+    console.log("📝 Form submitted with:", { category, subject, message, priority });
+    
+    if (!category || !subject || !message) {
+      console.warn("⚠️ Form validation failed - missing required fields");
+      return;
+    }
 
+    console.log("🚀 Triggering mutation...");
     createMessageMutation.mutate({
       category,
       subject,

@@ -1920,16 +1920,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Messages
   app.post("/api/admin-messages", isAuthenticated, async (req: any, res) => {
     try {
+      console.log("📬 POST /api/admin-messages - Request received");
+      console.log("👤 User ID:", req.user.claims.sub);
+      console.log("📦 Request body:", req.body);
+      
       const userId = req.user.claims.sub;
       const validatedData = insertAdminMessageSchema.parse({
         ...req.body,
         userId
       });
+      
+      console.log("✅ Data validated:", validatedData);
+      
       const message = await storage.createAdminMessage(validatedData);
+      
+      console.log("✅ Message created in database:", message.id);
       res.status(201).json(message);
     } catch (error: any) {
-      console.error("Failed to create admin message:", error);
+      console.error("❌ Failed to create admin message:", error);
       if (error.name === 'ZodError') {
+        console.error("❌ Zod validation error:", error.issues);
         res.status(400).json({ message: "Invalid message data", details: error.issues });
       } else {
         res.status(500).json({ message: "Failed to create admin message" });
