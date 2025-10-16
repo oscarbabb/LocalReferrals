@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 - **Complete Bilingual Translation Implementation** (October 15, 2025): Comprehensive platform-wide translation to Spanish/English across 26 pages and 6 shared components (600+ translation keys). Systematic domain-based rollout covering public pages, user management, provider tools, payment flows, and components. All Zod validation schemas converted to translation-aware functions. Fixed Email label translation bug in auth page. E2E tested and architect-approved - no hardcoded strings remain, all UI elements translate correctly.
 
+- **Subcategory Header Translation Fix** (October 16, 2025): Added translation key for "Subcategories" header in service card dropdown. Previously hardcoded as "Subcategorías", now properly translates between Spanish ("Subcategorías") and English ("Subcategories"). Translation keys added to both locale files and service-card component updated to use translation function.
+
 - **Header Navigation Refactoring** (October 15, 2025): Complete redesign with two-tier layout to eliminate overlap issues. Top utility bar (desktop-only) contains language toggle, invite button, and auth controls. Main navigation displays primary links inline (Services, Como Funciona, Providers, Testimonials) with "More" dropdown for secondary items (Bookings, Messages, Contact Admin, Admin Dashboard). Mobile uses hamburger menu. Fully tested and architect-approved.
 
 # System Architecture
