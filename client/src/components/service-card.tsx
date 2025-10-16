@@ -197,7 +197,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
       >
         <div className="p-4 flex-shrink-0 border-b border-gray-100">
           <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <span>Subcategorías:</span>
+            <span>{t('components.serviceCard.subcategories')}:</span>
             <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
               {subcategories.length}
             </Badge>

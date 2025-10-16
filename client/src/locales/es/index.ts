@@ -846,6 +846,9 @@ export const es = {
   'components.providerCard.serviceRadius': 'Radio de servicio',
   'components.providerCard.viewProfile': 'Ver Perfil',
 
+  // Service Card
+  'components.serviceCard.subcategories': 'Subcategorías',
+
   // Advanced Review Form
   'components.advancedReview.successTitle': '¡Reseña Enviada!',
   'components.advancedReview.successDesc': 'Tu reseña ha sido enviada exitosamente.',

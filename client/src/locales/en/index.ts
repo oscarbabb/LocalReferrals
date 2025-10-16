@@ -846,6 +846,9 @@ export const en = {
   'components.providerCard.serviceRadius': 'Service radius',
   'components.providerCard.viewProfile': 'View Profile',
 
+  // Service Card
+  'components.serviceCard.subcategories': 'Subcategories',
+
   // Advanced Review Form
   'components.advancedReview.successTitle': 'Review Submitted!',
   'components.advancedReview.successDesc': 'Your review has been successfully submitted.',
