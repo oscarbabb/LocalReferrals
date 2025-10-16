@@ -22,6 +22,7 @@ import {
   insertAppointmentSchema,
   insertMessageSchema,
   insertAdminMessageSchema,
+  insertCategoryRequestSchema,
   insertPaymentMethodSchema,
   insertMenuItemSchema,
   insertMenuItemVariationSchema
@@ -1972,6 +1973,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to update admin message:", error);
       res.status(500).json({ message: "Failed to update admin message" });
+    }
+  });
+
+  // Category Requests
+  app.post("/api/category-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const validatedData = insertCategoryRequestSchema.parse({
+        ...req.body,
+        userId: req.user.claims.sub,
+      });
+      const request = await storage.createCategoryRequest(validatedData);
+      res.json(request);
+    } catch (error) {
+      console.error("Failed to create category request:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Validation error", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create category request" });
+      }
+    }
+  });
+
+  app.get("/api/category-requests/user/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user can only access their own requests
+      if (req.user.claims.sub !== req.params.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const requests = await storage.getCategoryRequestsByUser(req.params.userId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Failed to fetch category requests:", error);
+      res.status(500).json({ message: "Failed to fetch category requests" });
+    }
+  });
+
+  app.get("/api/category-requests", isAdmin, async (req: any, res) => {
+    try {
+      const requests = await storage.getCategoryRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Failed to fetch all category requests:", error);
+      res.status(500).json({ message: "Failed to fetch category requests" });
+    }
+  });
+
+  app.patch("/api/category-requests/:id", isAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const updateData = {
+        ...req.body,
+        reviewedBy: adminId,
+        reviewedAt: new Date(),
+      };
+      const updatedRequest = await storage.updateCategoryRequest(req.params.id, updateData);
+      if (!updatedRequest) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Failed to update category request:", error);
+      res.status(500).json({ message: "Failed to update category request" });
     }
   });
 

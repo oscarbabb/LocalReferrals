@@ -36,6 +36,8 @@ import {
   type Conversation,
   type AdminMessage,
   type InsertAdminMessage,
+  type CategoryRequest,
+  type InsertCategoryRequest,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -46,6 +48,7 @@ import {
   appointments,
   messages,
   adminMessages,
+  categoryRequests,
   verificationDocuments,
   backgroundChecks,
   verificationReviews,
@@ -335,6 +338,47 @@ export class DatabaseStorage implements IStorage {
   async updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined> {
     const [updatedMessage] = await db.update(adminMessages).set({...message, updatedAt: new Date()}).where(eq(adminMessages.id, id)).returning();
     return updatedMessage || undefined;
+  }
+
+  // Category Requests
+  async getCategoryRequests(): Promise<CategoryRequest[]> {
+    const results = await db
+      .select({
+        request: categoryRequests,
+        user: {
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          fullName: users.fullName,
+        }
+      })
+      .from(categoryRequests)
+      .leftJoin(users, eq(categoryRequests.userId, users.id))
+      .orderBy(categoryRequests.createdAt);
+    
+    return results.map(r => ({
+      ...r.request,
+      user: r.user
+    })) as any;
+  }
+
+  async getCategoryRequestsByUser(userId: string): Promise<CategoryRequest[]> {
+    return await db.select().from(categoryRequests).where(eq(categoryRequests.userId, userId)).orderBy(categoryRequests.createdAt);
+  }
+
+  async getCategoryRequest(id: string): Promise<CategoryRequest | undefined> {
+    const [request] = await db.select().from(categoryRequests).where(eq(categoryRequests.id, id));
+    return request || undefined;
+  }
+
+  async createCategoryRequest(request: InsertCategoryRequest): Promise<CategoryRequest> {
+    const [newRequest] = await db.insert(categoryRequests).values(request).returning();
+    return newRequest;
+  }
+
+  async updateCategoryRequest(id: string, request: Partial<CategoryRequest>): Promise<CategoryRequest | undefined> {
+    const [updatedRequest] = await db.update(categoryRequests).set(request).where(eq(categoryRequests.id, id)).returning();
+    return updatedRequest || undefined;
   }
 
   // Verification Documents

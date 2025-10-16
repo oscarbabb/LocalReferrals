@@ -36,6 +36,8 @@ import {
   type Conversation,
   type AdminMessage,
   type InsertAdminMessage,
+  type CategoryRequest,
+  type InsertCategoryRequest,
   users,
   serviceCategories,
   serviceSubcategories,
@@ -46,6 +48,7 @@ import {
   appointments,
   messages,
   adminMessages,
+  categoryRequests,
   verificationDocuments,
   backgroundChecks,
   verificationReviews,
@@ -124,6 +127,13 @@ export interface IStorage {
   getAdminMessage(id: string): Promise<AdminMessage | undefined>;
   createAdminMessage(message: InsertAdminMessage): Promise<AdminMessage>;
   updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined>;
+
+  // Category Requests
+  getCategoryRequests(): Promise<CategoryRequest[]>;
+  getCategoryRequestsByUser(userId: string): Promise<CategoryRequest[]>;
+  getCategoryRequest(id: string): Promise<CategoryRequest | undefined>;
+  createCategoryRequest(request: InsertCategoryRequest): Promise<CategoryRequest>;
+  updateCategoryRequest(id: string, request: Partial<CategoryRequest>): Promise<CategoryRequest | undefined>;
 
   // Verification Documents
   getVerificationDocuments(providerId: string): Promise<VerificationDocument[]>;
@@ -782,6 +792,36 @@ export class MemStorage implements IStorage {
   }
 
   async updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined> {
+    return undefined;
+  }
+
+  // Category Requests - stubbed for MemStorage (not used in production)
+  async getCategoryRequests(): Promise<CategoryRequest[]> {
+    return [];
+  }
+
+  async getCategoryRequestsByUser(userId: string): Promise<CategoryRequest[]> {
+    return [];
+  }
+
+  async getCategoryRequest(id: string): Promise<CategoryRequest | undefined> {
+    return undefined;
+  }
+
+  async createCategoryRequest(request: InsertCategoryRequest): Promise<CategoryRequest> {
+    const id = randomUUID();
+    return {
+      ...request,
+      id,
+      status: 'pending',
+      adminResponse: null,
+      reviewedBy: null,
+      reviewedAt: null,
+      createdAt: new Date()
+    } as CategoryRequest;
+  }
+
+  async updateCategoryRequest(id: string, request: Partial<CategoryRequest>): Promise<CategoryRequest | undefined> {
     return undefined;
   }
 
