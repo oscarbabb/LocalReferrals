@@ -6,23 +6,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Search, Filter, MapPin } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel } from "@/lib/serviceTranslations";
+import { useAuth } from "@/hooks/useAuth";
+import DisclaimerDialog from "@/components/disclaimer-dialog";
 
 export default function Providers() {
   const { t, language } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("rating");
   const [radiusKm, setRadiusKm] = useState<number>(100); // Default 100km (no filter)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
+  // Show disclaimer if user is authenticated and hasn't accepted it
+  useEffect(() => {
+    if (isAuthenticated && user && !(user as any).disclaimerAccepted) {
+      setDisclaimerOpen(true);
+    }
+  }, [isAuthenticated, user]);
 
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
   });
 
-  const { data: providers = [], isLoading } = useQuery({
+  const { data: providers = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/providers"],
   });
 
@@ -197,6 +208,15 @@ export default function Providers() {
             ))}
           </div>
         )}
+
+        {/* Disclaimer Dialog */}
+        {(isAuthenticated && user && (
+          <DisclaimerDialog
+            open={disclaimerOpen}
+            onAccept={() => setDisclaimerOpen(false)}
+            userId={(user as any).id}
+          />
+        )) as React.ReactNode}
       </div>
   );
 }

@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
 import type { ServiceCategory } from "@shared/schema";
 import { getCategoryLabel } from "@/lib/serviceTranslations";
+import { useAuth } from "@/hooks/useAuth";
+import DisclaimerDialog from "@/components/disclaimer-dialog";
 
 interface OnboardingTourProps {
   isOpen: boolean;
@@ -54,9 +56,11 @@ const getTourSteps = (t: (key: string) => string) => [
 
 export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
   const { t, language } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const tourSteps = getTourSteps(t);
   const [currentStep, setCurrentStep] = useState(0);
   const [showcaseCategories, setShowcaseCategories] = useState<ServiceCategory[]>([]);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
@@ -82,6 +86,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      // Tour completed - check if user needs to see disclaimer
+      if (isAuthenticated && user && !(user as any).disclaimerAccepted) {
+        setDisclaimerOpen(true);
+      }
       onClose();
     }
   };
@@ -102,6 +110,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
   const IconComponent = currentTourStep.icon;
 
   return (
+    <>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -531,5 +540,15 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
         </motion.div>
       </motion.div>
     </AnimatePresence>
+
+    {/* Disclaimer Dialog - shown after tour completes if needed */}
+    {isAuthenticated && user && (
+      <DisclaimerDialog
+        open={disclaimerOpen}
+        onAccept={() => setDisclaimerOpen(false)}
+        userId={(user as any).id}
+      />
+    )}
+    </>
   );
 }

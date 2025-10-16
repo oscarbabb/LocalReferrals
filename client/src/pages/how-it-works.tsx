@@ -22,8 +22,10 @@ import {
   HeartHandshake
 } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/useAuth";
+import DisclaimerDialog from "@/components/disclaimer-dialog";
 
 interface Step {
   id: number;
@@ -114,9 +116,18 @@ function FeatureCard({ feature }: { feature: Feature }) {
   );
 }
 
-export default function HowItWorks() {
+export default function HowItWorks(): JSX.Element {
   const { t } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [activeStep, setActiveStep] = useState(1);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
+  // Show disclaimer if user is authenticated and hasn't accepted it
+  useEffect(() => {
+    if (isAuthenticated && user && !(user as any).disclaimerAccepted) {
+      setDisclaimerOpen(true);
+    }
+  }, [isAuthenticated, user]);
 
   const steps: Step[] = [
     {
@@ -327,7 +338,7 @@ export default function HowItWorks() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
+            {features.map((feature, index): React.ReactNode => (
               <FeatureCard key={index} feature={feature} />
             ))}
           </div>
@@ -449,6 +460,15 @@ export default function HowItWorks() {
           </div>
         </div>
       </div>
+
+      {/* Disclaimer Dialog */}
+      {isAuthenticated && user && (
+        <DisclaimerDialog
+          open={disclaimerOpen}
+          onAccept={() => setDisclaimerOpen(false)}
+          userId={(user as any).id}
+        />
+      )}
     </div>
   );
 }

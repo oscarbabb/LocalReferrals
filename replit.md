@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **Disclaimer Dialog Integration** (October 16, 2025): Implemented comprehensive disclaimer system to inform users about platform responsibilities and safety recommendations. DisclaimerDialog component automatically displays to authenticated users who haven't accepted the disclaimer on key pages (how-it-works, providers) and after completing the onboarding tour. Features bilingual support (Spanish/English) with 15+ translation keys covering user responsibilities, platform limitations, and safety recommendations. Database tracking via disclaimerAccepted and disclaimerAcceptedAt fields with PATCH /api/users/:id endpoint support. Dialog is non-dismissible until accepted, ensuring all users acknowledge important platform policies. E2E tested - users see disclaimer once, acceptance persists across sessions.
+
 - **Provider Radius Filter** (October 16, 2025): Added slider-based radius filter (1-100 km) to providers page enabling users to filter providers by their service delivery range. Uses existing serviceRadiusKm field to show providers whose delivery range meets or exceeds selected radius. Fully bilingual with "Service Radius"/"Radio de Servicio" label and "Any distance"/"Cualquier distancia" for 100km setting. E2E tested and architect-approved - users can now narrow provider search by geographical service coverage.
 
 - **Subcategory Counter Addition** (October 16, 2025): Added subcategory counter display on services page alongside category counter. Shows "431 subcategories available" (or Spanish equivalent). Queries `/api/subcategories` endpoint, includes bilingual translation support, and matches existing UI styling. E2E tested and architect-approved - users can now see both category (55) and subcategory (431) counts at a glance.
@@ -60,6 +62,7 @@ Preferred communication style: Simple, everyday language.
 - **Geographical Service Radius**: Optional preference (1-100 km) for both providers (service delivery range) and consumers (service reception range), validated on frontend and backend.
 - **Provider Tools**: Availability Management (weekly schedules), Menu Management (items, document uploads), Multi-Category Registration.
 - **Legal Documentation**: Comprehensive Terms & Conditions and Privacy Policy pages with ARCO rights and cookie policy, fully bilingual.
+- **Disclaimer System**: Non-dismissible disclaimer dialog shown to authenticated users on first visit to key pages (how-it-works, providers) and after onboarding tour completion. Informs users about platform limitations, user responsibilities, and safety recommendations. Acceptance tracked in database (disclaimerAccepted, disclaimerAcceptedAt fields) and persists across sessions. Fully bilingual with detailed content including recommendations for verifying credentials, checking references, and establishing clear agreements.
 - **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences; locale-aware date formatting.
 - **Invite/Share Feature**: Prominently styled button allowing users to share the platform via WhatsApp, Email, or link copy.
 
