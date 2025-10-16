@@ -400,7 +400,7 @@ export const es = {
   'invite.whatsapp': 'Compartir por WhatsApp',
   'invite.email': 'Compartir por Email',
   'invite.messageTitle': '¡Únete a Referencias Locales!',
-  'invite.messageBody': '¡Hola! Te invito a unirte a Referencias Locales, una plataforma donde puedes encontrar servicios confiables de vecinos verificados en nuestra comunidad. Desde limpieza hasta tutorías, encuentra profesionales recomendados. ¡Únete ahora!',
+  'invite.messageBody': '¡HOLA!, Te comparto esta red social de CONTACTO SOCIAL ENTRE PROVEEDORES LOCALES Y USUARIOS QUE YO ENCONTRÉ MUY PRÁCTICA Y FÁCIL DE USAR. Referencias Locales SE COMPLEMENTA CON LAS RECOMENDACIONES QUE LAS PERSONAS BUSCAN EN LOS CHATS DE VECINOS, PERO MÁS COMPLETO, CON MÁS INFORMACIÓN PARA TOMAR BUENAS DECISIONES. SALUDOS Y ESPERO QUE SEA DE TU GUSTO.... Aquí va:',
   'invite.emailSubject': 'Te invito a Referencias Locales',
   'invite.copied': 'Enlace copiado al portapapeles',
   'invite.copyLink': 'Copiar Enlace',
