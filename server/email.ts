@@ -1,13 +1,11 @@
-// MailerSend integration for Referencias Locales
-import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
+// SendGrid integration for Referencias Locales
+import sgMail from "@sendgrid/mail";
 
-if (!process.env.MAILERSEND_API_KEY) {
-  throw new Error("MAILERSEND_API_KEY environment variable must be set");
+if (!process.env.SENDGRID_API_KEY) {
+  throw new Error("SENDGRID_API_KEY environment variable must be set");
 }
 
-const mailerSend = new MailerSend({
-  apiKey: process.env.MAILERSEND_API_KEY,
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 interface CustomEmailParams {
   to: string;
@@ -19,25 +17,25 @@ interface CustomEmailParams {
 
 export async function sendEmail(params: CustomEmailParams): Promise<boolean> {
   try {
-    const sentFrom = new Sender(params.from, "Referencias Locales");
-    const recipients = [new Recipient(params.to)];
-    
-    const emailParams = new EmailParams()
-      .setFrom(sentFrom)
-      .setTo(recipients)
-      .setSubject(params.subject);
+    const msg = {
+      to: params.to,
+      from: {
+        email: params.from,
+        name: "Referencias Locales"
+      },
+      subject: params.subject,
+      text: params.text || "",
+      html: params.html || params.text || ""
+    };
 
-    if (params.html) {
-      emailParams.setHtml(params.html);
-    }
-    if (params.text) {
-      emailParams.setText(params.text);
-    }
-
-    await mailerSend.email.send(emailParams);
+    await sgMail.send(msg);
+    console.log(`✅ Email sent successfully to ${params.to}`);
     return true;
-  } catch (error) {
-    console.error('MailerSend email error:', error);
+  } catch (error: any) {
+    console.error('SendGrid email error:', error);
+    if (error.response) {
+      console.error('SendGrid error details:', error.response.body);
+    }
     return false;
   }
 }
