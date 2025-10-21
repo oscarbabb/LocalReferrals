@@ -10,6 +10,7 @@ import {
 import { useLanguage } from "@/hooks/use-language";
 import { Link } from "wouter";
 import { Search, HelpCircle, MessageCircle } from "lucide-react";
+import Footer from "@/components/footer";
 
 export default function FAQ() {
   const { t } = useLanguage();
@@ -129,21 +130,10 @@ export default function FAQ() {
           </div>
         </div>
 
-        {/* Additional Links */}
-        <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm">
-          <Link href="/terms">
-            <Button variant="link" className="text-gray-600 hover:text-primary" data-testid="link-terms">
-              {t('footer.terms')}
-            </Button>
-          </Link>
-          <span className="text-gray-300">•</span>
-          <Link href="/privacy">
-            <Button variant="link" className="text-gray-600 hover:text-primary" data-testid="link-privacy">
-              {t('footer.privacy')}
-            </Button>
-          </Link>
-        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

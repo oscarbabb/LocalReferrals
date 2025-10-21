@@ -2,6 +2,7 @@ import { useLanguage } from "@/hooks/use-language";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Footer from "@/components/footer";
 
 export default function Terms() {
   const { t, language } = useLanguage();
@@ -253,6 +254,9 @@ export default function Terms() {
           )}
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
