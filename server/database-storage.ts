@@ -59,7 +59,7 @@ import {
   providerCategories
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 import type { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
@@ -238,12 +238,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getConversation(userId1: string, userId2: string): Promise<Message[]> {
-    return await db.select().from(messages).where(
-      and(
-        eq(messages.senderId, userId1),
-        eq(messages.receiverId, userId2)
+    const result = await db.select().from(messages).where(
+      or(
+        and(
+          eq(messages.senderId, userId1),
+          eq(messages.receiverId, userId2)
+        ),
+        and(
+          eq(messages.senderId, userId2),
+          eq(messages.receiverId, userId1)
+        )
       )
-    );
+    ).orderBy(messages.createdAt);
+    
+    return result;
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
