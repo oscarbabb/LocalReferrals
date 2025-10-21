@@ -268,11 +268,12 @@ export default function Home() {
                 {t('home.ctaStartNow')}
               </Button>
             </Link>
-            <Link href="#como-funciona">
+            <Link href="/how-it-works">
               <Button 
                 variant="outline" 
                 size="lg"
                 className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary shadow-lg px-8 py-4 text-lg w-full sm:w-auto"
+                data-testid="button-learn-more"
               >
                 {t('home.ctaLearnMore')}
               </Button>
