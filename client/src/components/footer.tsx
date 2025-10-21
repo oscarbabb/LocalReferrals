@@ -97,13 +97,15 @@ export default function Footer() {
                           </span>
                         </a>
                       ) : (
-                        <Link href={link.href}>
-                          <a className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-200 group">
-                            {Icon && <Icon className="w-4 h-4 opacity-70 group-hover:opacity-100" />}
-                            <span className="group-hover:translate-x-1 transition-transform duration-200">
-                              {link.label}
-                            </span>
-                          </a>
+                        <Link 
+                          href={link.href}
+                          className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-200 group"
+                          data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {Icon && <Icon className="w-4 h-4 opacity-70 group-hover:opacity-100" />}
+                          <span className="group-hover:translate-x-1 transition-transform duration-200">
+                            {link.label}
+                          </span>
                         </Link>
                       )}
                     </li>
