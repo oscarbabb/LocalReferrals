@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle, HelpCircle, Shield, MoreHorizontal, Calendar } from "lucide-react";
+import { Menu, User, LogIn, LogOut, Sparkles, MessageCircle, HelpCircle, Shield, MoreHorizontal, Calendar, BookOpen } from "lucide-react";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { LanguageToggle } from "@/components/language-toggle";
 import InviteButton from "@/components/invite-button";
@@ -50,6 +50,7 @@ export default function Header() {
   const secondaryNavItems = [
     { href: "/bookings", label: t('nav.bookings'), icon: Calendar },
     { href: "/messages", label: t('nav.messages'), icon: MessageCircle },
+    { href: "/faq", label: t('nav.faq'), icon: BookOpen },
     { href: "/contact-admin", label: t('nav.contactAdmin'), icon: HelpCircle },
   ];
   

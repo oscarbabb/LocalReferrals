@@ -2,6 +2,7 @@ import { bookings } from './bookings';
 import { messages } from './messages';
 import { profile } from './profile';
 import { admin } from './admin';
+import { faq } from './faq';
 
 export const es = {
   // Navigation (existing)
@@ -17,6 +18,7 @@ export const es = {
   'nav.messages': 'Mensajes',
   'nav.contactAdmin': 'Contactar Admin',
   'nav.adminDashboard': 'Panel de Admin',
+  'nav.faq': 'Preguntas Frecuentes',
   'nav.more': 'Más',
   'nav.tour': 'Ver Tour de la Plataforma',
   'nav.logoutToastTitle': 'Sesión cerrada',
@@ -998,4 +1000,5 @@ export const es = {
   ...messages,
   ...profile,
   ...admin,
+  ...faq,
 };

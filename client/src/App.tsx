@@ -30,6 +30,7 @@ import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import ContactAdmin from "@/pages/contact-admin";
 import AdminDashboard from "@/pages/admin-dashboard";
+import FAQ from "@/pages/faq";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
 import { useOnboarding, OnboardingProvider } from "@/hooks/use-onboarding";
@@ -66,6 +67,7 @@ function Router() {
         <Route path="/auth" component={Auth} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
+        <Route path="/faq" component={FAQ} />
         <Route component={NotFound} />
       </Switch>
       

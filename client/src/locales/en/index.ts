@@ -2,6 +2,7 @@ import { bookings } from './bookings';
 import { messages } from './messages';
 import { profile } from './profile';
 import { admin } from './admin';
+import { faq } from './faq';
 
 export const en = {
   // Navigation (existing)
@@ -17,6 +18,7 @@ export const en = {
   'nav.messages': 'Messages',
   'nav.contactAdmin': 'Contact Admin',
   'nav.adminDashboard': 'Admin Dashboard',
+  'nav.faq': 'FAQ',
   'nav.more': 'More',
   'nav.tour': 'Take Platform Tour',
   'nav.logoutToastTitle': 'Logged out',
@@ -998,4 +1000,5 @@ export const en = {
   ...messages,
   ...profile,
   ...admin,
+  ...faq,
 };
