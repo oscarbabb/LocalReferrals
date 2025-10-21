@@ -1,4 +1,4 @@
-import { categoryTranslations, subcategoryTranslations } from '@/locales/data/serviceTaxonomy';
+import { categoryTranslations, categoryDescriptionTranslations, subcategoryTranslations } from '@/locales/data/serviceTaxonomy';
 
 /**
  * Get the translated label for a category
@@ -13,6 +13,29 @@ export function getCategoryLabel(
   fallback?: string
 ): string {
   const translation = categoryTranslations[id];
+  
+  if (!translation) {
+    // If no translation found, return fallback or empty string
+    return fallback || '';
+  }
+  
+  // Return the requested language, with Spanish as fallback if English is missing
+  return translation[language] || translation.es || fallback || '';
+}
+
+/**
+ * Get the translated description for a category
+ * @param id - The category ID
+ * @param language - The language ('en' or 'es')
+ * @param fallback - Optional fallback string if translation not found
+ * @returns The translated category description
+ */
+export function getCategoryDescription(
+  id: string, 
+  language: 'en' | 'es', 
+  fallback?: string
+): string {
+  const translation = categoryDescriptionTranslations[id];
   
   if (!translation) {
     // If no translation found, return fallback or empty string

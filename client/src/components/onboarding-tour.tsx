@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
 import type { ServiceCategory } from "@shared/schema";
-import { getCategoryLabel } from "@/lib/serviceTranslations";
+import { getCategoryLabel, getCategoryDescription } from "@/lib/serviceTranslations";
 import { useAuth } from "@/hooks/useAuth";
 import DisclaimerDialog from "@/components/disclaimer-dialog";
 
@@ -257,7 +257,7 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                     {getCategoryLabel(category.id, language, category.name)}
                                   </h4>
                                   <p className="text-xs text-gray-600 line-clamp-2">
-                                    {category.description}
+                                    {getCategoryDescription(category.id, language, category.description || undefined)}
                                   </p>
                                 </CardContent>
                               </Card>

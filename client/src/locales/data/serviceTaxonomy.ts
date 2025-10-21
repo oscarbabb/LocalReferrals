@@ -232,6 +232,230 @@ export const categoryTranslations: TaxonomyTranslations = {
   }
 };
 
+// Category description translations - All 55 categories
+export const categoryDescriptionTranslations: TaxonomyTranslations = {
+  "5223d70e-6f88-4c5c-92b4-a30e909b6808": {
+    es: "Servicios profesionales de administración de condominios",
+    en: "Professional condominium administration services"
+  },
+  "cf46eb23-e0c5-4c81-9849-95923fd687ba": {
+    es: "Servicios de viajes, tours y experiencias turísticas",
+    en: "Travel services, tours and tourist experiences"
+  },
+  "61c026f7-4c63-4e16-b086-4b3f88a136f8": {
+    es: "Servicios de tratamiento y purificación de agua",
+    en: "Water treatment and purification services"
+  },
+  "3f553e39-15ac-4203-a891-d657285619b6": {
+    es: "Servicios profesionales de climatización y refrigeración",
+    en: "Professional air conditioning and refrigeration services"
+  },
+  "495da282-60d1-4cab-8195-6c0227f95e6b": {
+    es: "Mantenimiento y reparación de albercas",
+    en: "Pool maintenance and repair"
+  },
+  "a172237d-4446-421e-acf8-94f3ad8c2f1e": {
+    es: "Trámites y gestión de servicios del hogar",
+    en: "Service registration and home management procedures"
+  },
+  "89ba9434-cb52-4d94-bc62-4532b445b26f": {
+    es: "Servicios de lavado y detallado automotriz",
+    en: "Automotive washing and detailing services"
+  },
+  "53dbffd4-cd06-4869-9887-8c66c8e2ae6a": {
+    es: "Servicios inmobiliarios y administración de propiedades",
+    en: "Real estate and property management services"
+  },
+  "548aac7f-9c0b-4342-bb90-b92992788188": {
+    es: "Búsqueda de empleo en servicios locales",
+    en: "Local services job search"
+  },
+  "448da561-e568-4e83-9466-d1ab6fc009dc": {
+    es: "Servicios profesionales de carpintería y fabricación de muebles",
+    en: "Professional carpentry and furniture manufacturing"
+  },
+  "e95719bd-69d6-4d52-ad4e-86888da74905": {
+    es: "Objetos perdidos y encontrados en la comunidad",
+    en: "Lost and found items in the community"
+  },
+  "c04a9249-dcf7-4959-9446-75b92d4f17b3": {
+    es: "Servicios de catering, chef a domicilio y eventos",
+    en: "Catering, personal chef and event services"
+  },
+  "ab13a458-4e9b-41ec-85ea-5cbdb0cdd2f9": {
+    es: "Servicios de importación y exportación",
+    en: "Import and export services"
+  },
+  "f2bbfbb9-dc6e-4eec-ac2b-9f64de9a0476": {
+    es: "Servicios profesionales de construcción y remodelación",
+    en: "Professional construction and remodeling services"
+  },
+  "0686abd8-6d3b-4e96-a971-679a40182eaf": {
+    es: "Servicios profesionales de control y prevención de plagas",
+    en: "Professional pest control and prevention services"
+  },
+  "c678456b-6680-44ac-9652-a91f51a020dd": {
+    es: "Organizaciones sin fines de lucro y voluntariado",
+    en: "Non-profit organizations and volunteering"
+  },
+  "a2dccf02-2ca0-4542-8b7d-ed4fb232f521": {
+    es: "Servicios de drones y topografía",
+    en: "Drone and surveying services"
+  },
+  "88a001f0-24e0-4fe9-b6ea-2d77a5bd3487": {
+    es: "Clases particulares y apoyo educativo",
+    en: "Private tutoring and educational support"
+  },
+  "f1b54eb6-806b-40c7-aee7-a0619dc3da3e": {
+    es: "Servicios profesionales de electricidad e instalaciones eléctricas",
+    en: "Professional electrical services and installations"
+  },
+  "79943511-571c-4a9c-ae75-33bf61739a3e": {
+    es: "Reparación y mantenimiento de electrodomésticos",
+    en: "Home appliance repair and maintenance"
+  },
+  "0e17bb9a-757a-441a-863a-92bacabd70fb": {
+    es: "Soluciones de energía renovable y sustentabilidad",
+    en: "Renewable energy and sustainability solutions"
+  },
+  "af7b4f64-59f9-4132-8829-4da37c53b759": {
+    es: "Organización integral de eventos",
+    en: "Comprehensive event planning"
+  },
+  "86ed945b-d474-4019-8bb4-4066ddf0b35b": {
+    es: "Servicios de belleza y acondicionamiento físico",
+    en: "Beauty and fitness services"
+  },
+  "10dbcbe5-f005-4120-a94f-be17ce69dc8b": {
+    es: "Servicios profesionales de fotografía y video",
+    en: "Professional photography and video services"
+  },
+  "a21e027a-c813-4079-bfa6-be32218f608e": {
+    es: "Recolección y reciclaje de residuos",
+    en: "Waste collection and recycling"
+  },
+  "c951670f-f0a5-4efa-beb5-c3c3f998dd87": {
+    es: "Servicios profesionales de herrería y vidriería",
+    en: "Professional ironwork and glass services"
+  },
+  "6dd23cfe-8454-47d6-ba17-2252cd597c90": {
+    es: "Clases de idiomas y preparación para certificaciones",
+    en: "Language classes and certification preparation"
+  },
+  "a555e22b-9fc8-4c88-a7a0-96ccd4f18e0d": {
+    es: "Servicios de impresión y señalética",
+    en: "Printing and signage services"
+  },
+  "0dcac66d-94f1-4492-8766-2248a2623b4d": {
+    es: "Asesoría migratoria y gestión de visas",
+    en: "Immigration consulting and visa management"
+  },
+  "758c0e99-b64a-4ff1-b5e5-2fd2fdcf9be5": {
+    es: "Servicios profesionales de jardinería y diseño de paisajes",
+    en: "Professional gardening and landscape design"
+  },
+  "d32f73a9-f850-4d99-a96d-6cc3a0afa96d": {
+    es: "Servicios de lavandería y tintorería",
+    en: "Laundry and dry cleaning services"
+  },
+  "6776d67d-0f81-4ad4-8f9f-6cd4f579d559": {
+    es: "Servicios profesionales de limpieza para hogares y oficinas",
+    en: "Professional cleaning services for homes and offices"
+  },
+  "5c2c6a6b-2b3b-429f-9cc4-d5cc3511f172": {
+    es: "Compra, venta e intercambio de artículos",
+    en: "Buying, selling and exchanging items"
+  },
+  "0a882025-7e03-495d-8542-4e3872b4e2ea": {
+    es: "Servicios veterinarios y cuidado de mascotas",
+    en: "Veterinary and pet care services"
+  },
+  "0aace69f-d60c-470f-b885-f4bdf7d3d9d6": {
+    es: "Servicios de mensajería y mandados",
+    en: "Courier and errand services"
+  },
+  "7637fb3b-0e03-4671-b9ae-d4362e769fce": {
+    es: "Servicios de mudanzas y transporte de muebles",
+    en: "Moving and furniture transport services"
+  },
+  "db0a5312-16d3-4b3a-8a28-3ebec4329be3": {
+    es: "Organizaciones de asistencia social",
+    en: "Social assistance organizations"
+  },
+  "952884ff-caed-44e1-a03a-2c5d55f55db1": {
+    es: "Servicios profesionales de pintura e impermeabilización",
+    en: "Professional painting and waterproofing services"
+  },
+  "68c6d03b-667e-4b87-b217-335cf6fd9291": {
+    es: "Servicios profesionales de plomería e instalaciones",
+    en: "Professional plumbing and installations"
+  },
+  "e4fe42a2-683a-4802-9785-b3753817af6c": {
+    es: "Servicios de psicología y bienestar emocional",
+    en: "Psychology and emotional wellness services"
+  },
+  "01dddc60-5c8e-4241-ae56-a4ef41e72503": {
+    es: "Renta de espacios y equipos",
+    en: "Space and equipment rental"
+  },
+  "d7253195-0436-45c9-9f6b-7cecb37f24b2": {
+    es: "Gestión de propiedades vacacionales",
+    en: "Vacation property management"
+  },
+  "c9b1133a-7021-4c6d-8c45-659396d13079": {
+    es: "Reparación de dispositivos electrónicos",
+    en: "Electronic device repair"
+  },
+  "0fb65ea3-ac5f-4bc7-bae3-482b2b9df377": {
+    es: "Servicios de comida a domicilio",
+    en: "Food delivery services"
+  },
+  "e2c7b267-d1fe-4a75-ba7d-5620a6bd017f": {
+    es: "Organización de rifas y sorteos",
+    en: "Raffle and sweepstakes organization"
+  },
+  "b9d82c24-47f0-4496-9452-4465361f8aa9": {
+    es: "Servicios médicos y de enfermería",
+    en: "Medical and nursing services"
+  },
+  "80b17f57-c87d-4fb3-87ea-21dc3e4f5ccc": {
+    es: "Sistemas de seguridad y vigilancia",
+    en: "Security and surveillance systems"
+  },
+  "4545d452-49c5-49fe-9ec5-485a27c40204": {
+    es: "Servicios funerarios y de previsión",
+    en: "Funeral and pre-planning services"
+  },
+  "43c0cb46-953c-4880-8e5b-0801663287c8": {
+    es: "Asesoría legal y servicios notariales",
+    en: "Legal consulting and notary services"
+  },
+  "6e12f367-712b-4d12-91e1-c1b030782e72": {
+    es: "Servicios para embarcaciones y yates",
+    en: "Boat and yacht services"
+  },
+  "f07195e4-8098-4d2d-a5bd-07873f35cb37": {
+    es: "Servicios especializados para negocios",
+    en: "Specialized business services"
+  },
+  "ba533071-043e-416a-8868-3a50de73f932": {
+    es: "Instalación y configuración de redes y domótica",
+    en: "Network installation and home automation"
+  },
+  "36fb8e90-0f81-41ce-8d34-122f31c9e706": {
+    es: "Servicios de internet y telecomunicaciones",
+    en: "Internet and telecommunications services"
+  },
+  "c6509633-a2b6-4e47-be9e-9d874d572bf6": {
+    es: "Servicios de traducción e interpretación",
+    en: "Translation and interpretation services"
+  },
+  "7a723f65-a775-4fce-a1fa-447e698e1848": {
+    es: "Servicios de transporte y choferes",
+    en: "Transportation and driver services"
+  }
+};
+
 // Subcategory translations - All 431 subcategories
 export const subcategoryTranslations: TaxonomyTranslations = {
   // Rentas (Rentals)

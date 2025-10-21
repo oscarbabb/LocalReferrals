@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
-import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
+import { getCategoryLabel, getCategoryDescription, getSubcategoryLabel } from "@/lib/serviceTranslations";
 
 interface ServiceCardProps {
   category: ServiceCategory;
@@ -247,7 +247,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
             {getCategoryLabel(category.id, language, category.name)}
           </h3>
           <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
-            {category.description}
+            {getCategoryDescription(category.id, language, category.description || undefined)}
           </p>
           
           {/* Provider count badge and expand button */}
