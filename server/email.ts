@@ -145,3 +145,47 @@ export async function sendBookingNotificationEmail(
     html
   });
 }
+
+export async function sendPasswordResetEmail(
+  userEmail: string,
+  userName: string,
+  resetToken: string,
+  appUrl: string
+): Promise<boolean> {
+  const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
+  const subject = "Restablecer Contraseña - Referencias Locales";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #f97316;">Restablece tu Contraseña</h2>
+      <p>¡Hola ${userName}!</p>
+      <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Referencias Locales.</p>
+      <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetLink}" style="background-color: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+          Restablecer Contraseña
+        </a>
+      </div>
+      <p style="color: #666; font-size: 14px;">
+        Este enlace expirará en 1 hora por seguridad.
+      </p>
+      <p style="color: #666; font-size: 14px;">
+        Si no solicitaste este restablecimiento, puedes ignorar este correo de forma segura.
+      </p>
+      <p style="color: #999; font-size: 12px; margin-top: 30px;">
+        Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+        ${resetLink}
+      </p>
+      <p style="color: #666;">El equipo de Referencias Locales</p>
+    </div>
+  `;
+  
+  const text = `¡Hola ${userName}! Recibimos una solicitud para restablecer tu contraseña. Visita este enlace para crear una nueva contraseña: ${resetLink}. Este enlace expirará en 1 hora. Si no solicitaste este restablecimiento, puedes ignorar este correo.`;
+
+  return await sendEmail({
+    to: userEmail,
+    from: FROM_EMAIL,
+    subject,
+    text,
+    html
+  });
+}
