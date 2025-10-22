@@ -36,6 +36,7 @@ export default function Auth() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
+        credentials: "include",
       });
       
       if (!response.ok) {
@@ -46,6 +47,9 @@ export default function Auth() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate auth queries to refresh user state
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
       toast({
         title: t('auth.toast.registerSuccess.title'),
         description: t('auth.toast.registerSuccess.description'),
