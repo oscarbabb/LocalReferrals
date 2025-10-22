@@ -117,7 +117,7 @@ export async function sendProfileConfirmationEmail(userEmail: string, userName: 
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.REPLIT_DEV_DOMAIN || 'https://referenciaslocales.com.mx'}" 
+          <a href="${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/servicios` : 'https://www.referenciaslocales.com.mx/servicios'}" 
              style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
                     color: white; 
                     padding: 14px 35px; 

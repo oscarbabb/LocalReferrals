@@ -272,7 +272,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary shadow-lg px-8 py-4 text-lg w-full sm:w-auto"
+                className="border-2 border-white text-white bg-white/20 hover:bg-white hover:text-primary shadow-lg px-8 py-4 text-lg w-full sm:w-auto backdrop-blur-sm"
                 data-testid="button-learn-more"
               >
                 {t('home.ctaLearnMore')}
