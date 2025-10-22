@@ -48,10 +48,14 @@ const SUPPORT_EMAIL = "hello@referenciaslocales.com.mx";
 const BRAND_BLUE = "#1463D0";
 const BRAND_ORANGE = "#f97316";
 
-// Get logo URL based on environment
+// Get logo URL based on environment - ensure absolute HTTPS URL for email clients
 const getLogoUrl = () => {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN || 'https://referenciaslocales.com.mx';
-  return `${baseUrl}/logo.png`;
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    // Development: construct full HTTPS URL from Replit domain
+    return `https://${process.env.REPLIT_DEV_DOMAIN}/logo.png`;
+  }
+  // Production: use production domain
+  return 'https://www.referenciaslocales.com.mx/logo.png';
 };
 
 // Reusable email header template
@@ -100,20 +104,50 @@ export async function sendProfileConfirmationEmail(userEmail: string, userName: 
         
         <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 10px; margin: 25px 0;">
           <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 15px;">Ya puedes comenzar a:</h3>
-          <div style="margin: 15px 0;">
-            <div style="display: flex; align-items: start; margin-bottom: 12px;">
-              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">🔍</span>
-              <p style="margin: 0; color: #555; line-height: 1.5;">Buscar servicios locales en tu comunidad</p>
-            </div>
-            <div style="display: flex; align-items: start; margin-bottom: 12px;">
-              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">✅</span>
-              <p style="margin: 0; color: #555; line-height: 1.5;">Conectar con proveedores verificados</p>
-            </div>
-            <div style="display: flex; align-items: start; margin-bottom: 12px;">
-              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">💼</span>
-              <p style="margin: 0; color: #555; line-height: 1.5;">Solicitar servicios de confianza</p>
-            </div>
-          </div>
+          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin: 15px 0;">
+            <tr>
+              <td style="padding: 0 0 12px 0;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-right: 10px; vertical-align: top;">
+                      <span style="color: ${BRAND_ORANGE}; font-size: 20px;">🔍</span>
+                    </td>
+                    <td style="vertical-align: top;">
+                      <p style="margin: 0; color: #555; line-height: 1.5;">Buscar servicios locales en tu comunidad</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 0;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-right: 10px; vertical-align: top;">
+                      <span style="color: ${BRAND_ORANGE}; font-size: 20px;">✅</span>
+                    </td>
+                    <td style="vertical-align: top;">
+                      <p style="margin: 0; color: #555; line-height: 1.5;">Conectar con proveedores verificados</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-right: 10px; vertical-align: top;">
+                      <span style="color: ${BRAND_ORANGE}; font-size: 20px;">💼</span>
+                    </td>
+                    <td style="vertical-align: top;">
+                      <p style="margin: 0; color: #555; line-height: 1.5;">Solicitar servicios de confianza</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
@@ -162,7 +196,7 @@ export async function sendBookingConfirmationEmail(
       
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; text-align: center; line-height: 70px;">
             <span style="font-size: 28px;">✅</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Reserva Confirmada!</h2>
@@ -232,7 +266,7 @@ export async function sendBookingNotificationEmail(
       
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; text-align: center; line-height: 70px;">
             <span style="font-size: 28px;">🔔</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Nueva Reserva!</h2>
@@ -301,7 +335,7 @@ export async function sendPasswordResetEmail(
       
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; text-align: center; line-height: 70px;">
             <span style="font-size: 28px;">🔐</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">Restablecer Contraseña</h2>
