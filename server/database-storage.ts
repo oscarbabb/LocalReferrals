@@ -166,6 +166,15 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(reviews).where(eq(reviews.providerId, providerId));
   }
 
+  async getReviewsByUser(userId: string): Promise<Review[]> {
+    return await db.select().from(reviews).where(
+      and(
+        eq(reviews.reviewedUserId, userId),
+        eq(reviews.reviewType, 'customer_review')
+      )
+    );
+  }
+
   async createReview(review: InsertReview): Promise<Review> {
     const [newReview] = await db.insert(reviews).values(review).returning();
     return newReview;

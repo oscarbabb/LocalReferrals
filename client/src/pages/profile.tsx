@@ -22,8 +22,9 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseSafeDate } from "@/lib/date-utils";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import AppleMapsAddressInput from "@/components/apple-maps-address-input";
+import EnhancedReviewCard from "@/components/enhanced-review-card";
 import type { UploadResult } from "@uppy/core";
-import type { MenuItem } from "@shared/schema";
+import type { MenuItem, Review } from "@shared/schema";
 
 // Profile form schema - accepts translation function
 const profileSchema = (t: any) => z.object({
@@ -71,6 +72,12 @@ export default function Profile() {
   const { data: menuItems = [] } = useQuery<MenuItem[]>({
     queryKey: ["/api/providers", provider?.id, "menu-items"],
     enabled: !!provider?.id,
+  });
+
+  // Get customer reviews (reviews written by providers about this user)
+  const { data: customerReviews = [] } = useQuery<Review[]>({
+    queryKey: ["/api/users", user?.id, "reviews"],
+    enabled: !!user?.id,
   });
 
   // Profile form
@@ -565,6 +572,38 @@ export default function Profile() {
                         <Badge className="bg-green-100 text-green-800">✓</Badge>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Customer Reviews Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="w-5 h-5 text-yellow-400" />
+                      {t('profile.reviews.customerTitle')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {customerReviews.length > 0 ? (
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-600 mb-4">
+                          {t('profile.reviews.customerDescription')}
+                        </p>
+                        {customerReviews.map((review: any) => (
+                          <EnhancedReviewCard key={review.id} review={review} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Star className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h4 className="font-medium text-gray-900 mb-2">
+                          {t('profile.reviews.noCustomerReviews')}
+                        </h4>
+                        <p className="text-gray-600">
+                          {t('profile.reviews.noCustomerReviewsDesc')}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

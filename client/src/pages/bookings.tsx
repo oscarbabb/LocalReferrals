@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import MessagingModal from "@/components/messaging-modal";
+import CustomerRatingDialog from "@/components/customer-rating-dialog";
 import { 
   Calendar, 
   Clock, 
@@ -70,6 +71,8 @@ export default function Bookings() {
   const [activeTab, setActiveTab] = useState("requests");
   const [showMessagingModal, setShowMessagingModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<{ id: string; name: string } | null>(null);
+  const [showCustomerRatingDialog, setShowCustomerRatingDialog] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<{id: string, name: string, providerId: string} | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t, dateLocale } = useLanguage();
@@ -258,7 +261,26 @@ export default function Bookings() {
                 {t('bookings.buttons.message')}
               </Button>
               {request.status === "completed" && (
-                <Button variant="outline" size="sm" data-testid={`button-rate-${request.id}`}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  data-testid={`button-rate-${request.id}`}
+                  onClick={() => {
+                    if (request.provider?.userId === currentUser?.id) {
+                      setSelectedCustomer({
+                        id: request.requesterId,
+                        name: request.requester?.fullName || request.requester?.username || 'Customer',
+                        providerId: request.providerId
+                      });
+                      setShowCustomerRatingDialog(true);
+                    } else {
+                      toast({
+                        title: t('bookings.toast.ratingInfo'),
+                        description: t('bookings.toast.customerRatingOnly'),
+                      });
+                    }
+                  }}
+                >
                   <Star className="w-4 h-4 mr-2" />
                   {t('bookings.buttons.rate')}
                 </Button>
@@ -570,6 +592,20 @@ export default function Bookings() {
             currentUserId={user?.id || ""}
             recipientUserId={selectedProvider.id}
             recipientName={selectedProvider.name}
+          />
+        )}
+
+        {/* Customer Rating Dialog */}
+        {showCustomerRatingDialog && selectedCustomer && (
+          <CustomerRatingDialog
+            isOpen={showCustomerRatingDialog}
+            onClose={() => {
+              setShowCustomerRatingDialog(false);
+              setSelectedCustomer(null);
+            }}
+            customerId={selectedCustomer.id}
+            customerName={selectedCustomer.name}
+            providerId={selectedCustomer.providerId}
           />
         )}
       </div>

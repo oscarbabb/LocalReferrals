@@ -48,6 +48,17 @@ export const bookings = {
   'bookings.toast.updateFailed': 'No se pudo actualizar el estado.',
   'bookings.toast.messageUnavailable': 'No disponible',
   'bookings.toast.cannotMessage': 'No se puede enviar mensaje en este momento.',
+  'bookings.toast.ratingSuccess': 'Calificación enviada',
+  'bookings.toast.ratingSuccessDesc': 'Tu calificación del cliente ha sido enviada exitosamente.',
+  'bookings.toast.ratingFailed': 'No se pudo enviar la calificación.',
+  
+  // Customer Rating
+  'bookings.rateCustomer.title': 'Calificar a {customerName}',
+  'bookings.rateCustomer.overall': 'Calificación General',
+  'bookings.rateCustomer.communication': 'Comunicación',
+  'bookings.rateCustomer.punctuality': 'Puntualidad',
+  'bookings.rateCustomer.comment': 'Comentarios Adicionales',
+  'bookings.rateCustomer.commentPlaceholder': 'Comparte tu experiencia trabajando con este cliente...',
   
   // Auth required
   'bookings.auth.required': 'Acceso Requerido',
