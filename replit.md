@@ -33,7 +33,8 @@ Preferred communication style: Simple, everyday language.
 - **Provider Verification**: System for tracking verification status.
 
 ## Key Features Architecture
-- **Service Discovery**: Categorized listings with search and filters.
+- **Service Discovery**: Categorized listings with search and filters, including intelligent autocomplete search for categories/subcategories.
+- **Smart Search System**: Type-ahead autocomplete comboboxes on both Services and Providers pages using Shadcn Command component, allowing users to type first letters of any category or subcategory (e.g., "plom" for "Plomería") to instantly filter results across all 55 categories and 431 subcategories with bilingual support.
 - **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
 - **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
 - **Mutual Rating System**: Bidirectional rating capability where providers can rate customers and customers can rate providers after completed bookings. Customer ratings (provider→customer reviews) are displayed on user profiles with the same detailed criteria as provider reviews.

@@ -3,22 +3,26 @@ import { useLocation } from "wouter";
 import ProviderCard from "@/components/provider-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Search, Filter, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, MapPin, Check, ChevronsUpDown } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
 import { useAuth } from "@/hooks/useAuth";
 import DisclaimerDialog from "@/components/disclaimer-dialog";
+import { cn } from "@/lib/utils";
 
 export default function Providers() {
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState<{ type: 'category' | 'subcategory', id: string } | null>(null);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
   const [sortBy, setSortBy] = useState<string>("rating");
   const [radiusKm, setRadiusKm] = useState<number>(100); // Default 100km (no filter)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
@@ -30,10 +34,9 @@ export default function Providers() {
     const subcategoryParam = params.get('subcategory');
     
     if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-    if (subcategoryParam) {
-      setSelectedSubcategory(subcategoryParam);
+      setSelectedFilter({ type: 'category', id: categoryParam });
+    } else if (subcategoryParam) {
+      setSelectedFilter({ type: 'subcategory', id: subcategoryParam });
     }
   }, []);
 
@@ -49,8 +52,7 @@ export default function Providers() {
   });
 
   const { data: subcategories = [] } = useQuery<any[]>({
-    queryKey: selectedCategory ? [`/api/categories/${selectedCategory}/subcategories`] : ["/api/subcategories"],
-    enabled: !!selectedCategory,
+    queryKey: ["/api/subcategories"],
   });
 
   const { data: providers = [], isLoading } = useQuery<any[]>({
@@ -64,20 +66,67 @@ export default function Providers() {
     }, {} as Record<string, string>);
   }, [categories, language]);
 
+  // Build searchable options list
+  const searchableOptions = useMemo(() => {
+    const options: Array<{ type: 'category' | 'subcategory', id: string, categoryId?: string, label: string, searchText: string }> = [];
+    
+    // Add all categories
+    categories.forEach(cat => {
+      const label = getCategoryLabel(cat.id, language, cat.name);
+      options.push({
+        type: 'category',
+        id: cat.id,
+        label,
+        searchText: `${label} ${cat.description || ''}`.toLowerCase(),
+      });
+    });
+
+    // Add all subcategories
+    subcategories.forEach(sub => {
+      const label = getSubcategoryLabel(sub.id, language, sub.name);
+      const category = categories.find(c => c.id === sub.categoryId);
+      const categoryLabel = category ? getCategoryLabel(category.id, language, category.name) : '';
+      options.push({
+        type: 'subcategory',
+        id: sub.id,
+        categoryId: sub.categoryId,
+        label,
+        searchText: `${label} ${categoryLabel}`.toLowerCase(),
+      });
+    });
+
+    return options;
+  }, [categories, subcategories, language]);
+
+  // Get the selected label for display
+  const selectedLabel = useMemo(() => {
+    if (!selectedFilter) return null;
+    const option = searchableOptions.find(opt => opt.type === selectedFilter.type && opt.id === selectedFilter.id);
+    return option?.label || null;
+  }, [selectedFilter, searchableOptions]);
+
   const filteredAndSortedProviders = useMemo(() => {
     let filtered = providers.filter((provider: any) => {
       const matchesSearch = 
         provider.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
-      const matchesSubcategory = !selectedSubcategory || selectedSubcategory === "all" || provider.subcategoryId === selectedSubcategory;
+      
+      // Filter by selected category or subcategory
+      let matchesFilter = true;
+      if (selectedFilter) {
+        if (selectedFilter.type === 'category') {
+          matchesFilter = provider.categoryId === selectedFilter.id;
+        } else if (selectedFilter.type === 'subcategory') {
+          matchesFilter = provider.subcategoryId === selectedFilter.id;
+        }
+      }
       
       // Filter by radius: show providers whose service radius is >= selected radius
       // (they can deliver services at least that far)
       const matchesRadius = radiusKm === 100 || (provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm);
       
-      return matchesSearch && matchesCategory && matchesSubcategory && matchesRadius;
+      return matchesSearch && matchesFilter && matchesRadius;
     });
 
     // Sort providers
@@ -97,7 +146,7 @@ export default function Providers() {
           return 0;
       }
     });
-  }, [providers, searchTerm, selectedCategory, selectedSubcategory, sortBy, radiusKm]);
+  }, [providers, searchTerm, selectedFilter, sortBy, radiusKm]);
 
   if (isLoading) {
     return (
@@ -147,38 +196,113 @@ export default function Providers() {
                 />
               </div>
               
-              <Select value={selectedCategory} onValueChange={(value) => {
-                setSelectedCategory(value);
-                setSelectedSubcategory(""); // Reset subcategory when category changes
-              }}>
-                <SelectTrigger data-testid="select-category">
-                  <SelectValue placeholder={t('providers.filter.categoryPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('providers.filter.allCategories')}</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {getCategoryLabel(category.id, language, category.name)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Autocomplete Combobox for Categories and Subcategories */}
+              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={comboboxOpen}
+                    className="w-full justify-between"
+                    data-testid="button-category-combobox"
+                  >
+                    {selectedLabel || t('providers.filter.categoryPlaceholder')}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full max-w-md p-0" align="center" sideOffset={8}>
+                  <Command className="rounded-lg border shadow-md">
+                    <CommandInput 
+                      placeholder={t('services.searchCategoryPlaceholder')} 
+                      data-testid="input-category-search"
+                    />
+                    <CommandList>
+                      <CommandEmpty>{t('services.noResultsFound')}</CommandEmpty>
+                      
+                      {/* All Categories option */}
+                      <CommandGroup heading={t('services.allCategories')}>
+                        <CommandItem
+                          value="all-categories"
+                          onSelect={() => {
+                            setSelectedFilter(null);
+                            setComboboxOpen(false);
+                          }}
+                          data-testid="option-all-categories"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              !selectedFilter ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {t('services.allCategories')}
+                        </CommandItem>
+                      </CommandGroup>
 
-              {selectedCategory && selectedCategory !== "all" && subcategories.length > 0 && (
-                <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-                  <SelectTrigger data-testid="select-subcategory">
-                    <SelectValue placeholder={t('providers.filter.subcategoryPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('providers.filter.allSubcategories')}</SelectItem>
-                    {subcategories.map((subcategory) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+                      {/* Categories */}
+                      <CommandGroup heading={t('services.categories')}>
+                        {searchableOptions
+                          .filter(opt => opt.type === 'category')
+                          .map((option) => (
+                            <CommandItem
+                              key={option.id}
+                              value={option.searchText}
+                              onSelect={() => {
+                                setSelectedFilter({ type: 'category', id: option.id });
+                                setComboboxOpen(false);
+                              }}
+                              data-testid={`option-category-${option.id}`}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedFilter?.type === 'category' && selectedFilter?.id === option.id
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {option.label}
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+
+                      {/* Subcategories */}
+                      <CommandGroup heading={t('services.subcategories')}>
+                        {searchableOptions
+                          .filter(opt => opt.type === 'subcategory')
+                          .map((option) => {
+                            const category = categories.find(c => c.id === option.categoryId);
+                            const categoryLabel = category ? getCategoryLabel(category.id, language, category.name) : '';
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.searchText}
+                                onSelect={() => {
+                                  setSelectedFilter({ type: 'subcategory', id: option.id });
+                                  setComboboxOpen(false);
+                                }}
+                                data-testid={`option-subcategory-${option.id}`}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedFilter?.type === 'subcategory' && selectedFilter?.id === option.id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span>{option.label}</span>
+                                  <span className="text-xs text-muted-foreground">{categoryLabel}</span>
+                                </div>
+                              </CommandItem>
+                            );
+                          })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger data-testid="select-sort">
