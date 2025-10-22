@@ -23,6 +23,13 @@ export default function Home() {
 
   const featuredProviders = (providers as any[]).slice(0, 3);
 
+  // Calculate real provider count per category
+  const getProviderCountForCategory = (categoryId: string): number => {
+    return (providers as any[]).filter(provider => 
+      provider.categoryId === categoryId
+    ).length;
+  };
+
   const testimonials: any[] = [];
 
   return (
@@ -96,7 +103,7 @@ export default function Home() {
               <div key={category.id} className="stagger-item">
                 <ServiceCard 
                   category={category} 
-                  providerCount={Math.floor(Math.random() * 15) + 8} 
+                  providerCount={getProviderCountForCategory(category.id)} 
                 />
               </div>
             ))}
