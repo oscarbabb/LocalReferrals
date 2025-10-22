@@ -264,6 +264,8 @@ export const en = {
   'providers.page.subtitle': 'Find professionals recommended by your community',
   'providers.filter.categoryPlaceholder': 'Category',
   'providers.filter.allCategories': 'All categories',
+  'providers.filter.subcategoryPlaceholder': 'Subcategory',
+  'providers.filter.allSubcategories': 'All subcategories',
   'providers.filter.radiusLabel': 'Service Radius',
   'providers.filter.anyDistance': 'Any distance',
   'providers.sort.placeholder': 'Sort by',

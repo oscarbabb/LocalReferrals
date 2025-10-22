@@ -9,7 +9,7 @@ import { Search, Filter, MapPin } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import type { ServiceCategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
-import { getCategoryLabel } from "@/lib/serviceTranslations";
+import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
 import { useAuth } from "@/hooks/useAuth";
 import DisclaimerDialog from "@/components/disclaimer-dialog";
 
@@ -18,9 +18,24 @@ export default function Providers() {
   const { user, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("rating");
   const [radiusKm, setRadiusKm] = useState<number>(100); // Default 100km (no filter)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
+  // Read URL query parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get('category');
+    const subcategoryParam = params.get('subcategory');
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+  }, []);
 
   // Show disclaimer if user is authenticated and hasn't accepted it
   useEffect(() => {
@@ -31,6 +46,11 @@ export default function Providers() {
 
   const { data: categories = [] } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: subcategories = [] } = useQuery<any[]>({
+    queryKey: selectedCategory ? [`/api/categories/${selectedCategory}/subcategories`] : ["/api/subcategories"],
+    enabled: !!selectedCategory,
   });
 
   const { data: providers = [], isLoading } = useQuery<any[]>({
@@ -51,12 +71,13 @@ export default function Providers() {
         provider.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         provider.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
+      const matchesSubcategory = !selectedSubcategory || selectedSubcategory === "all" || provider.subcategoryId === selectedSubcategory;
       
       // Filter by radius: show providers whose service radius is >= selected radius
       // (they can deliver services at least that far)
       const matchesRadius = radiusKm === 100 || (provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm);
       
-      return matchesSearch && matchesCategory && matchesRadius;
+      return matchesSearch && matchesCategory && matchesSubcategory && matchesRadius;
     });
 
     // Sort providers
@@ -76,7 +97,7 @@ export default function Providers() {
           return 0;
       }
     });
-  }, [providers, searchTerm, selectedCategory, sortBy, radiusKm]);
+  }, [providers, searchTerm, selectedCategory, selectedSubcategory, sortBy, radiusKm]);
 
   if (isLoading) {
     return (
@@ -113,8 +134,8 @@ export default function Providers() {
 
           {/* Search and Filter Bar */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <div className="relative md:col-span-2 lg:col-span-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
@@ -126,7 +147,10 @@ export default function Providers() {
                 />
               </div>
               
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedCategory} onValueChange={(value) => {
+                setSelectedCategory(value);
+                setSelectedSubcategory(""); // Reset subcategory when category changes
+              }}>
                 <SelectTrigger data-testid="select-category">
                   <SelectValue placeholder={t('providers.filter.categoryPlaceholder')} />
                 </SelectTrigger>
@@ -139,6 +163,22 @@ export default function Providers() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {selectedCategory && selectedCategory !== "all" && subcategories.length > 0 && (
+                <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+                  <SelectTrigger data-testid="select-subcategory">
+                    <SelectValue placeholder={t('providers.filter.subcategoryPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('providers.filter.allSubcategories')}</SelectItem>
+                    {subcategories.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger data-testid="select-sort">
