@@ -44,24 +44,92 @@ export async function sendEmail(params: CustomEmailParams): Promise<boolean> {
 const FROM_EMAIL = "hello@referenciaslocales.com.mx";
 const SUPPORT_EMAIL = "hello@referenciaslocales.com.mx";
 
+// Brand colors
+const BRAND_BLUE = "#1463D0";
+const BRAND_ORANGE = "#f97316";
+
+// Reusable email header template
+const getEmailHeader = () => `
+  <div style="background: linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_ORANGE} 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+    <div style="background: white; width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="${BRAND_BLUE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 22V12H15V22" stroke="${BRAND_BLUE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Referencias Locales</h1>
+    <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0; font-size: 14px;">Tu comunidad de servicios locales de confianza</p>
+  </div>
+`;
+
+// Email footer template
+const getEmailFooter = () => `
+  <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #f0f0f0; text-align: center;">
+    <p style="color: #999; font-size: 13px; margin: 0 0 10px;">
+      ¿Necesitas ayuda? Contáctanos en 
+      <a href="mailto:${SUPPORT_EMAIL}" style="color: ${BRAND_ORANGE}; text-decoration: none; font-weight: 500;">${SUPPORT_EMAIL}</a>
+    </p>
+    <div style="margin: 20px 0;">
+      <div style="display: inline-block; margin: 0 5px; background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 40px; height: 3px; border-radius: 2px;"></div>
+    </div>
+    <p style="color: #666; font-size: 14px; margin: 15px 0 5px; font-weight: 500;">El equipo de Referencias Locales</p>
+    <p style="color: #999; font-size: 12px; margin: 5px 0;">
+      Conectando comunidades con servicios de calidad
+    </p>
+  </div>
+`;
+
 export async function sendProfileConfirmationEmail(userEmail: string, userName: string): Promise<boolean> {
-  const subject = "¡Bienvenido a Referencias Locales!";
+  const subject = "¡Bienvenido a Referencias Locales! 🏘️";
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #f97316;">¡Hola ${userName}!</h2>
-      <p>Gracias por crear tu perfil en Referencias Locales.</p>
-      <p>Ya puedes comenzar a:</p>
-      <ul>
-        <li>Buscar servicios locales en tu comunidad</li>
-        <li>Conectar con proveedores verificados</li>
-        <li>Solicitar servicios de confianza</li>
-      </ul>
-      <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
-      <p style="color: #666;">El equipo de Referencias Locales</p>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <h2 style="color: #333; font-size: 24px; margin: 0 0 20px; font-weight: 600;">¡Hola ${userName}! 👋</h2>
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
+          Gracias por unirte a <strong style="color: ${BRAND_BLUE};">Referencias Locales</strong>, tu nueva plataforma de servicios locales de confianza.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 10px; margin: 25px 0;">
+          <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 15px;">Ya puedes comenzar a:</h3>
+          <div style="margin: 15px 0;">
+            <div style="display: flex; align-items: start; margin-bottom: 12px;">
+              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">🔍</span>
+              <p style="margin: 0; color: #555; line-height: 1.5;">Buscar servicios locales en tu comunidad</p>
+            </div>
+            <div style="display: flex; align-items: start; margin-bottom: 12px;">
+              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">✅</span>
+              <p style="margin: 0; color: #555; line-height: 1.5;">Conectar con proveedores verificados</p>
+            </div>
+            <div style="display: flex; align-items: start; margin-bottom: 12px;">
+              <span style="color: ${BRAND_ORANGE}; font-size: 20px; margin-right: 10px;">💼</span>
+              <p style="margin: 0; color: #555; line-height: 1.5;">Solicitar servicios de confianza</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.REPLIT_DEV_DOMAIN || 'https://referenciaslocales.com.mx'}" 
+             style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
+                    color: white; 
+                    padding: 14px 35px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    display: inline-block; 
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(244, 114, 46, 0.3);">
+            Explorar Servicios
+          </a>
+        </div>
+        
+        ${getEmailFooter()}
+      </div>
     </div>
   `;
   
-  const text = `¡Hola ${userName}! Gracias por crear tu perfil en Referencias Locales. Ya puedes comenzar a buscar servicios locales en tu comunidad. Si tienes alguna pregunta, contáctanos en ${SUPPORT_EMAIL}`;
+  const text = `¡Hola ${userName}! Gracias por unirte a Referencias Locales. Ya puedes comenzar a buscar servicios locales en tu comunidad, conectar con proveedores verificados y solicitar servicios de confianza. Si tienes alguna pregunta, contáctanos en ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: userEmail,
@@ -80,25 +148,58 @@ export async function sendBookingConfirmationEmail(
   bookingDate: string,
   bookingTime: string
 ): Promise<boolean> {
-  const subject = "Confirmación de Reserva - Referencias Locales";
+  const subject = "✅ Reserva Confirmada - Referencias Locales";
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #f97316;">Reserva Confirmada</h2>
-      <p>¡Hola ${userName}!</p>
-      <p>Tu reserva ha sido confirmada con los siguientes detalles:</p>
-      <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Proveedor:</strong> ${providerName}</p>
-        <p><strong>Servicio:</strong> ${serviceName}</p>
-        <p><strong>Fecha:</strong> ${bookingDate}</p>
-        <p><strong>Hora:</strong> ${bookingTime}</p>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 35px;">✅</span>
+          </div>
+          <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Reserva Confirmada!</h2>
+        </div>
+        
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px; text-align: center;">
+          ¡Hola <strong>${userName}</strong>! Tu reserva ha sido confirmada exitosamente.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 20px; text-align: center;">Detalles de tu Reserva</h3>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Proveedor</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${providerName}</p>
+            </div>
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Servicio</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${serviceName}</p>
+            </div>
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">📅 Fecha</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${bookingDate}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">🕒 Hora</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${bookingTime}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>📞 Próximos pasos:</strong><br>
+            El proveedor se pondrá en contacto contigo pronto para coordinar los detalles finales del servicio.
+          </p>
+        </div>
+        
+        ${getEmailFooter()}
       </div>
-      <p>El proveedor se pondrá en contacto contigo pronto.</p>
-      <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
-      <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
   
-  const text = `¡Hola ${userName}! Tu reserva ha sido confirmada. Proveedor: ${providerName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
+  const text = `¡Hola ${userName}! Tu reserva ha sido confirmada. Proveedor: ${providerName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. El proveedor se pondrá en contacto contigo pronto. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: userEmail,
@@ -117,25 +218,58 @@ export async function sendBookingNotificationEmail(
   bookingDate: string,
   bookingTime: string
 ): Promise<boolean> {
-  const subject = "Nueva Reserva Recibida - Referencias Locales";
+  const subject = "🔔 Nueva Reserva Recibida - Referencias Locales";
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #f97316;">Nueva Reserva</h2>
-      <p>¡Hola ${providerName}!</p>
-      <p>Has recibido una nueva reserva:</p>
-      <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Cliente:</strong> ${userName}</p>
-        <p><strong>Servicio:</strong> ${serviceName}</p>
-        <p><strong>Fecha:</strong> ${bookingDate}</p>
-        <p><strong>Hora:</strong> ${bookingTime}</p>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 35px;">🔔</span>
+          </div>
+          <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Nueva Reserva!</h2>
+        </div>
+        
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px; text-align: center;">
+          ¡Hola <strong>${providerName}</strong>! Has recibido una nueva solicitud de servicio.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid ${BRAND_BLUE};">
+          <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 20px; text-align: center;">Detalles de la Reserva</h3>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Cliente</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${userName}</p>
+            </div>
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Servicio Solicitado</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${serviceName}</p>
+            </div>
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">📅 Fecha</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${bookingDate}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">🕒 Hora</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${bookingTime}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid ${BRAND_BLUE};">
+          <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+            <strong>👉 Acción requerida:</strong><br>
+            Por favor, ponte en contacto con el cliente lo antes posible para coordinar los detalles del servicio y confirmar la disponibilidad.
+          </p>
+        </div>
+        
+        ${getEmailFooter()}
       </div>
-      <p>Por favor, ponte en contacto con el cliente para coordinar los detalles.</p>
-      <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:${SUPPORT_EMAIL}" style="color: #f97316;">${SUPPORT_EMAIL}</a></p>
-      <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
   
-  const text = `¡Hola ${providerName}! Has recibido una nueva reserva. Cliente: ${userName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
+  const text = `¡Hola ${providerName}! Has recibido una nueva reserva. Cliente: ${userName}, Servicio: ${serviceName}, Fecha: ${bookingDate}, Hora: ${bookingTime}. Por favor, ponte en contacto con el cliente para coordinar los detalles. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: providerEmail,
@@ -153,33 +287,67 @@ export async function sendPasswordResetEmail(
   appUrl: string
 ): Promise<boolean> {
   const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
-  const subject = "Restablecer Contraseña - Referencias Locales";
+  const subject = "🔐 Restablecer Contraseña - Referencias Locales";
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #f97316;">Restablece tu Contraseña</h2>
-      <p>¡Hola ${userName}!</p>
-      <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Referencias Locales.</p>
-      <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${resetLink}" style="background-color: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-          Restablecer Contraseña
-        </a>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 35px;">🔐</span>
+          </div>
+          <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">Restablecer Contraseña</h2>
+        </div>
+        
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
+          ¡Hola <strong>${userName}</strong>!
+        </p>
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
+          Recibimos una solicitud para restablecer la contraseña de tu cuenta en Referencias Locales.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
+                    color: white; 
+                    padding: 16px 40px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    display: inline-block; 
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(244, 114, 46, 0.3);">
+            Restablecer Contraseña
+          </a>
+        </div>
+        
+        <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <p style="margin: 0 0 10px; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>⏱️ Importante:</strong><br>
+            Este enlace expirará en <strong>1 hora</strong> por seguridad.
+          </p>
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>🔒 No solicitaste esto?</strong><br>
+            Si no solicitaste este restablecimiento, puedes ignorar este correo de forma segura. Tu contraseña no cambiará.
+          </p>
+        </div>
+        
+        <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin: 25px 0;">
+          <p style="margin: 0 0 8px; color: #666; font-size: 12px;">
+            Si el botón no funciona, copia y pega este enlace en tu navegador:
+          </p>
+          <p style="margin: 0; color: ${BRAND_BLUE}; font-size: 12px; word-break: break-all;">
+            ${resetLink}
+          </p>
+        </div>
+        
+        ${getEmailFooter()}
       </div>
-      <p style="color: #666; font-size: 14px;">
-        Este enlace expirará en 1 hora por seguridad.
-      </p>
-      <p style="color: #666; font-size: 14px;">
-        Si no solicitaste este restablecimiento, puedes ignorar este correo de forma segura.
-      </p>
-      <p style="color: #999; font-size: 12px; margin-top: 30px;">
-        Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
-        ${resetLink}
-      </p>
-      <p style="color: #666;">El equipo de Referencias Locales</p>
     </div>
   `;
   
-  const text = `¡Hola ${userName}! Recibimos una solicitud para restablecer tu contraseña. Visita este enlace para crear una nueva contraseña: ${resetLink}. Este enlace expirará en 1 hora. Si no solicitaste este restablecimiento, puedes ignorar este correo.`;
+  const text = `¡Hola ${userName}! Recibimos una solicitud para restablecer tu contraseña. Visita este enlace para crear una nueva contraseña: ${resetLink}. Este enlace expirará en 1 hora. Si no solicitaste este restablecimiento, puedes ignorar este correo. ¿Necesitas ayuda? Escríbenos a ${SUPPORT_EMAIL}`;
 
   return await sendEmail({
     to: userEmail,
