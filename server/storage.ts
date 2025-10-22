@@ -272,7 +272,7 @@ export class MemStorage implements IStorage {
       {
         username: "maria.garcia",
         email: "maria@example.com",
-        password: "password123",
+        password: bcrypt.hashSync("password123", 10),
         fullName: "María García",
         address: "Condominio Las Flores, Torre Norte",
         section: "Norte", 
@@ -295,7 +295,7 @@ export class MemStorage implements IStorage {
       {
         username: "carlos.mendoza",
         email: "carlos@example.com",
-        password: "password123",
+        password: bcrypt.hashSync("password123", 10),
         fullName: "Carlos Mendoza",
         address: "Condominio Las Flores, Torre Sur", 
         section: "Sur",
@@ -318,7 +318,7 @@ export class MemStorage implements IStorage {
       {
         username: "ana.ruiz", 
         email: "ana@example.com",
-        password: "password123",
+        password: bcrypt.hashSync("password123", 10),
         fullName: "Ana Ruiz",
         address: "Condominio Las Flores, Torre Este",
         section: "Este",
