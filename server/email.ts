@@ -57,9 +57,13 @@ const getLogoUrl = () => {
 // Reusable email header template
 const getEmailHeader = () => `
   <div style="background: linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_ORANGE} 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
-    <div style="background: white; width: 140px; height: 140px; margin: 0 auto 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 20px;">
-      <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 100%; height: 100%; max-width: 100px; max-height: 100px; object-fit: contain; display: block;" />
-    </div>
+    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
+      <tr>
+        <td style="background: white; width: 160px; height: 160px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center; vertical-align: middle; padding: 25px;">
+          <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 110px; height: 110px; object-fit: contain; display: block; margin: 0 auto;" />
+        </td>
+      </tr>
+    </table>
     <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Referencias Locales</h1>
     <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0; font-size: 14px;">Tu comunidad de servicios locales de confianza</p>
   </div>
@@ -159,7 +163,7 @@ export async function sendBookingConfirmationEmail(
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
           <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <span style="font-size: 35px;">✅</span>
+            <span style="font-size: 28px;">✅</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Reserva Confirmada!</h2>
         </div>
@@ -229,7 +233,7 @@ export async function sendBookingNotificationEmail(
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
           <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <span style="font-size: 35px;">🔔</span>
+            <span style="font-size: 28px;">🔔</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Nueva Reserva!</h2>
         </div>
@@ -298,7 +302,7 @@ export async function sendPasswordResetEmail(
       <div style="padding: 40px 30px;">
         <div style="text-align: center; margin-bottom: 25px;">
           <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <span style="font-size: 35px;">🔐</span>
+            <span style="font-size: 28px;">🔐</span>
           </div>
           <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">Restablecer Contraseña</h2>
         </div>
