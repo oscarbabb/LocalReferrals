@@ -32,6 +32,8 @@ export const users = pgTable("users", {
   municipio: text("municipio"),
   estado: text("estado"),
   addressNotes: text("address_notes"),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
