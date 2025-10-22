@@ -291,7 +291,7 @@ export default function ProviderDetail() {
                     )}
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="max-h-[70vh] md:max-h-none overflow-y-auto">
                   <div className="grid gap-6">
                     {Object.entries(
                       menuItems.reduce((grouped, item) => {
