@@ -92,6 +92,8 @@ export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   providerId: varchar("provider_id").references(() => providers.id).notNull(),
   reviewerId: varchar("reviewer_id").references(() => users.id).notNull(),
+  reviewType: varchar("review_type").default("provider_review").notNull(), // "provider_review" or "customer_review"
+  reviewedUserId: varchar("reviewed_user_id").references(() => users.id), // Used when provider reviews customer
   rating: integer("rating").notNull(),
   comment: text("comment"),
   photos: text("photos").array().default(sql`ARRAY[]::text[]`), // Array of photo URLs
