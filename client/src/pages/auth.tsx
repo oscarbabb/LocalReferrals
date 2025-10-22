@@ -529,7 +529,7 @@ export default function Auth() {
                     <Checkbox id="terms" required />
                     <Label htmlFor="terms" className="text-sm">
                       {t('auth.register.termsPrefix')}{" "}
-                      <a href="#" className="text-primary hover:underline">
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         {t('auth.register.termsLink')}
                       </a>
                     </Label>
