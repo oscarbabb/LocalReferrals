@@ -79,6 +79,16 @@ export default function ContactAdmin() {
     e.preventDefault();
     console.log("📝 Form submitted with:", { category, subject, message, priority });
     
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        title: "Inicia sesión requerido",
+        description: "Debes iniciar sesión para enviar un mensaje al administrador.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!category || !subject || !message) {
       console.warn("⚠️ Form validation failed - missing required fields");
       return;
@@ -141,7 +151,26 @@ export default function ContactAdmin() {
           </p>
         </div>
 
-        {!showForm && (
+        {!user ? (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <AlertCircle className="w-12 h-12 text-accent mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  {t("admin.loginRequired")}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {t("admin.loginRequiredDesc")}
+                </p>
+                <Link href="/auth">
+                  <Button className="bg-accent hover:bg-accent/90" data-testid="button-login">
+                    {t("admin.loginButton")}
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : !showForm ? (
           <Button 
             onClick={() => setShowForm(true)} 
             className="mb-6 bg-accent hover:bg-accent/90"
@@ -150,7 +179,7 @@ export default function ContactAdmin() {
             <MessageCircle className="w-4 h-4 mr-2" />
             {t("admin.contactButton")}
           </Button>
-        )}
+        ) : null}
 
         {showForm && (
           <Card className="mb-6" data-testid="card-message-form">

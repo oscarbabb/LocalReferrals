@@ -4,6 +4,9 @@ export const admin = {
   'admin.contactButton': 'Contactar Admin',
   'admin.myMessages': 'Mis Mensajes',
   'admin.backToMessages': 'Volver a Mensajes',
+  'admin.loginRequired': 'Inicia Sesión Requerida',
+  'admin.loginRequiredDesc': 'Debes iniciar sesión para enviar un mensaje al administrador.',
+  'admin.loginButton': 'Iniciar Sesión',
   
   'admin.form.category': 'Categoría',
   'admin.form.categoryPlaceholder': 'Selecciona una categoría',

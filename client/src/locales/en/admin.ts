@@ -4,6 +4,9 @@ export const admin = {
   'admin.contactButton': 'Contact Admin',
   'admin.myMessages': 'My Messages',
   'admin.backToMessages': 'Back to Messages',
+  'admin.loginRequired': 'Login Required',
+  'admin.loginRequiredDesc': 'You must log in to send a message to the administrator.',
+  'admin.loginButton': 'Log In',
   
   'admin.form.category': 'Category',
   'admin.form.categoryPlaceholder': 'Select a category',
