@@ -1280,7 +1280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let providerSetupToken = null;
       if (validatedData.isProvider) {
         providerSetupToken = randomBytes(32).toString('hex');
-        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
+        const expiresAt = Date.now() + (120 * 60 * 1000); // 2 hours from now
         providerSetupTokens.set(providerSetupToken, { 
           userId: user.id, 
           expiresAt 
@@ -1398,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let providerSetupToken = null;
       if (validatedData.isProvider && !existingUser.isProvider) {
         providerSetupToken = randomBytes(32).toString('hex');
-        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
+        const expiresAt = Date.now() + (120 * 60 * 1000); // 2 hours from now
         providerSetupTokens.set(providerSetupToken, { 
           userId: id, 
           expiresAt 
