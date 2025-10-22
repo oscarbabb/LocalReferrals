@@ -42,7 +42,7 @@ export async function sendEmail(params: CustomEmailParams): Promise<boolean> {
 
 // Email templates for Referencias Locales
 const FROM_EMAIL = "hello@referenciaslocales.com.mx";
-const SUPPORT_EMAIL = "support@referenciaslocales.com.mx";
+const SUPPORT_EMAIL = "hello@referenciaslocales.com.mx";
 
 export async function sendProfileConfirmationEmail(userEmail: string, userName: string): Promise<boolean> {
   const subject = "¡Bienvenido a Referencias Locales!";
