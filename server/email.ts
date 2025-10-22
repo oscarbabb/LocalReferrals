@@ -48,14 +48,17 @@ const SUPPORT_EMAIL = "hello@referenciaslocales.com.mx";
 const BRAND_BLUE = "#1463D0";
 const BRAND_ORANGE = "#f97316";
 
+// Get logo URL based on environment
+const getLogoUrl = () => {
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN || 'https://referenciaslocales.com.mx';
+  return `${baseUrl}/logo.png`;
+};
+
 // Reusable email header template
 const getEmailHeader = () => `
   <div style="background: linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_ORANGE} 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
-    <div style="background: white; width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="${BRAND_BLUE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M9 22V12H15V22" stroke="${BRAND_BLUE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <div style="background: white; width: 90px; height: 90px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 10px;">
+      <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 70px; height: 70px; object-fit: contain;" />
     </div>
     <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Referencias Locales</h1>
     <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0; font-size: 14px;">Tu comunidad de servicios locales de confianza</p>
