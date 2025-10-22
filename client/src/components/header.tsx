@@ -276,8 +276,8 @@ export default function Header() {
                       </Button>
                     </Link>
                     <Link href="/auth" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full bg-gradient-to-r from-primary to-blue-600 text-white" data-testid="button-register-mobile">
-                        {t('auth.register')}
+                      <Button className="w-full bg-gradient-to-r from-primary to-blue-600 text-white hover:from-blue-600 hover:to-primary shadow-md" data-testid="button-register-mobile">
+                        {t('auth.register.tab')}
                       </Button>
                     </Link>
                   </>
