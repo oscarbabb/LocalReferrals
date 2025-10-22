@@ -1,24 +1,60 @@
 // Twilio WhatsApp integration for Referencias Locales
 import twilio from "twilio";
 
-if (!process.env.TWILIO_ACCOUNT_SID) {
-  throw new Error("TWILIO_ACCOUNT_SID environment variable must be set");
+// Lazy initialization of Twilio client
+let twilioClient: ReturnType<typeof twilio> | null = null;
+let twilioConfigured = false;
+let configurationError: string | null = null;
+
+function initializeTwilioClient(): boolean {
+  // Return cached result if already checked
+  if (twilioClient !== null) {
+    return true;
+  }
+  
+  if (configurationError !== null) {
+    return false;
+  }
+
+  // Check if credentials are available
+  if (!process.env.TWILIO_ACCOUNT_SID) {
+    configurationError = "TWILIO_ACCOUNT_SID not configured - WhatsApp messaging disabled";
+    console.warn("⚠️  " + configurationError);
+    return false;
+  }
+
+  if (!process.env.TWILIO_AUTH_TOKEN) {
+    configurationError = "TWILIO_AUTH_TOKEN not configured - WhatsApp messaging disabled";
+    console.warn("⚠️  " + configurationError);
+    return false;
+  }
+
+  if (!process.env.TWILIO_WHATSAPP_NUMBER) {
+    configurationError = "TWILIO_WHATSAPP_NUMBER not configured - WhatsApp messaging disabled";
+    console.warn("⚠️  " + configurationError);
+    return false;
+  }
+
+  try {
+    // Initialize Twilio client
+    twilioClient = twilio(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+    twilioConfigured = true;
+    console.log("✅ Twilio WhatsApp client initialized successfully");
+    return true;
+  } catch (error: any) {
+    configurationError = `Failed to initialize Twilio: ${error.message}`;
+    console.error("❌ " + configurationError);
+    return false;
+  }
 }
 
-if (!process.env.TWILIO_AUTH_TOKEN) {
-  throw new Error("TWILIO_AUTH_TOKEN environment variable must be set");
+function getWhatsAppFrom(): string {
+  const number = process.env.TWILIO_WHATSAPP_NUMBER || "";
+  return number.startsWith('whatsapp:') ? number : `whatsapp:${number}`;
 }
-
-if (!process.env.TWILIO_WHATSAPP_NUMBER) {
-  throw new Error("TWILIO_WHATSAPP_NUMBER environment variable must be set");
-}
-
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const WHATSAPP_FROM = `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`;
 
 interface WhatsAppMessageParams {
   to: string; // Phone number in E.164 format (e.g., +525512345678)
@@ -26,14 +62,20 @@ interface WhatsAppMessageParams {
 }
 
 export async function sendWhatsAppMessage(params: WhatsAppMessageParams): Promise<boolean> {
+  // Check if Twilio is configured
+  if (!initializeTwilioClient()) {
+    console.log(`⚠️  WhatsApp message not sent to ${params.to} - Twilio not configured`);
+    return false;
+  }
+
   try {
     // Ensure phone number has whatsapp: prefix for Twilio
     const toNumber = params.to.startsWith('whatsapp:') 
       ? params.to 
       : `whatsapp:${params.to}`;
 
-    const message = await twilioClient.messages.create({
-      from: WHATSAPP_FROM,
+    const message = await twilioClient!.messages.create({
+      from: getWhatsAppFrom(),
       to: toNumber,
       body: params.body
     });
