@@ -1,10 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { createPortal } from "react-dom";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel, getCategoryDescription, getSubcategoryLabel } from "@/lib/serviceTranslations";
@@ -70,80 +69,9 @@ const getHoverColorForCategory = (categoryId: string): string => {
 
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const { language, t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 400 });
-  const cardRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
-
-  // Calculate dropdown position when expanded
-  useEffect(() => {
-    if (isExpanded && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const dropdownMaxHeight = 400; // Maximum dropdown height
-      const spaceBelow = viewportHeight - rect.bottom - 20; // 20px padding from bottom
-      const spaceAbove = rect.top - 20; // 20px padding from top
-      
-      // Check if dropdown should open upward or downward
-      const shouldOpenUpward = spaceBelow < dropdownMaxHeight && spaceAbove > spaceBelow;
-      
-      if (shouldOpenUpward) {
-        // Open upward
-        const availableHeight = Math.min(dropdownMaxHeight, spaceAbove);
-        setDropdownPosition({
-          top: rect.top - availableHeight - 4,
-          left: rect.left,
-          width: rect.width,
-          maxHeight: availableHeight
-        });
-      } else {
-        // Open downward (default)
-        const availableHeight = Math.min(dropdownMaxHeight, spaceBelow);
-        setDropdownPosition({
-          top: rect.bottom + 4,
-          left: rect.left,
-          width: rect.width,
-          maxHeight: availableHeight
-        });
-      }
-    }
-  }, [isExpanded]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      const isInCard = cardRef.current && cardRef.current.contains(target);
-      const isInDropdown = dropdownRef.current && dropdownRef.current.contains(target);
-      
-      if (!isInCard && !isInDropdown) {
-        setIsExpanded(false);
-      }
-    };
-
-    const handleScroll = (event: Event) => {
-      if (isExpanded) {
-        const target = event.target as Node;
-        // Only close if scroll is outside the dropdown
-        const isScrollInDropdown = dropdownRef.current && dropdownRef.current.contains(target);
-        
-        if (!isScrollInDropdown) {
-          setIsExpanded(false);
-        }
-      }
-    };
-
-    if (isExpanded) {
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', handleScroll, true);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        window.removeEventListener('scroll', handleScroll, true);
-      };
-    }
-  }, [isExpanded]);
 
   // Fetch subcategories for this category
   const { data: subcategories = [], isLoading: subcategoriesLoading } = useQuery<ServiceSubcategory[]>({
@@ -151,51 +79,85 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     enabled: showSubcategories,
   });
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    if (showSubcategories) {
-      e.preventDefault();
-      
-      // Don't do anything while loading
-      if (subcategoriesLoading) return;
-      
-      if (subcategories.length > 0) {
-        // Toggle subcategories dropdown
-        setIsExpanded(!isExpanded);
-      } else {
-        // Navigate to providers page if no subcategories
-        window.location.href = `/providers?category=${category.id}`;
-      }
+  const handleCardClick = () => {
+    // Don't do anything while loading
+    if (subcategoriesLoading) return;
+    
+    if (showSubcategories && subcategories.length > 0) {
+      // Open popover to show subcategories
+      setOpen(true);
     } else {
-      // Navigate to providers page if subcategories disabled
+      // Navigate to providers page if no subcategories
       window.location.href = `/providers?category=${category.id}`;
     }
   };
 
-  const handleSubcategoryClick = (e: React.MouseEvent, subcategoryId: string) => {
-    e.stopPropagation();
-    setIsExpanded(false); // Close dropdown
+  const handleSubcategoryClick = (subcategoryId: string) => {
+    setOpen(false);
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
-  // Portal dropdown component
-  const PortalDropdown = () => {
-    if (!showSubcategories || subcategories.length === 0 || !isExpanded) {
-      return null;
-    }
+  const cardContent = (
+    <Card 
+      className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
+      onClick={handleCardClick}
+    >
+      <CardContent className="p-8 text-center relative">
+        {/* Enhanced background decorations */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        
+        {/* Icon container with improved design */}
+        <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
+          {/* Shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
+        </div>
+        
+        {/* Content */}
+        <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
+          {getCategoryLabel(category.id, language, category.name)}
+        </h3>
+        <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
+          {getCategoryDescription(category.id, language, category.description || undefined)}
+        </p>
+        
+        {/* Provider count badge and expand button */}
+        <div className="flex items-center justify-center gap-3">
+          <Badge 
+            variant="secondary" 
+            className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
+          >
+            {providerCount} {t('components.serviceCard.providers')}
+          </Badge>
+          {showSubcategories && subcategories.length > 0 ? (
+            <div className="flex items-center gap-2">
+              {open ? (
+                <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
+              ) : (
+                <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
+              )}
+            </div>
+          ) : (
+            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-    return createPortal(
-      <div 
-        ref={dropdownRef}
-        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border border-gray-200 pointer-events-auto flex flex-col"
-        style={{
-          top: dropdownPosition.top,
-          left: dropdownPosition.left,
-          width: dropdownPosition.width,
-          maxHeight: `${dropdownPosition.maxHeight}px`,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-4 flex-shrink-0 border-b border-gray-100">
+  if (!showSubcategories || subcategories.length === 0) {
+    return cardContent;
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div>{cardContent}</div>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" side="bottom" align="center">
+        <div className="p-4 border-b border-gray-100">
           <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <span>{t('components.serviceCard.subcategories')}:</span>
             <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
@@ -203,78 +165,24 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
             </Badge>
           </h4>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 pt-2">
-          <div className="grid grid-cols-1 gap-2">
+        <div className="max-h-[300px] overflow-y-auto p-2">
+          <div className="grid grid-cols-1 gap-1">
             {subcategories.map((subcategory) => (
               <div 
                 key={subcategory.id}
                 className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
                 data-testid={`subcategory-${subcategory.id}`}
-                onClick={(e) => handleSubcategoryClick(e, subcategory.id)}
+                onClick={() => handleSubcategoryClick(subcategory.id)}
               >
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">{getSubcategoryLabel(subcategory.id, language, subcategory.name)}</span>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
+                  {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
+                </span>
                 <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
               </div>
             ))}
           </div>
         </div>
-      </div>,
-      document.body
-    );
-  };
-
-  return (
-    <div className="relative" ref={cardRef}>
-      <Card 
-        className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
-        onClick={handleCardClick}
-      >
-        <CardContent className="p-8 text-center relative">
-          {/* Enhanced background decorations */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          
-          {/* Icon container with improved design */}
-          <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
-            {/* Shine effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
-          </div>
-          
-          {/* Content */}
-          <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-            {getCategoryLabel(category.id, language, category.name)}
-          </h3>
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
-            {getCategoryDescription(category.id, language, category.description || undefined)}
-          </p>
-          
-          {/* Provider count badge and expand button */}
-          <div className="flex items-center justify-center gap-3">
-            <Badge 
-              variant="secondary" 
-              className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
-            >
-              {providerCount} proveedores
-            </Badge>
-            {showSubcategories && subcategories.length > 0 ? (
-              <div className="flex items-center gap-2">
-                {isExpanded ? (
-                  <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
-                ) : (
-                  <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
-                )}
-              </div>
-            ) : (
-              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Portal dropdown component */}
-      <PortalDropdown />
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }

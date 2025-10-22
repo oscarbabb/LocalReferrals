@@ -923,6 +923,7 @@ export const es = {
 
   // Service Card
   'components.serviceCard.subcategories': 'Subcategorías',
+  'components.serviceCard.providers': 'proveedores',
 
   // Advanced Review Form
   'components.advancedReview.successTitle': '¡Reseña Enviada!',
