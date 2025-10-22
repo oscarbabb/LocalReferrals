@@ -59,8 +59,8 @@ const getEmailHeader = () => `
   <div style="background: linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_ORANGE} 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
       <tr>
-        <td style="background: white; width: 160px; height: 160px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center; vertical-align: middle; padding: 25px;">
-          <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 110px; height: 110px; object-fit: contain; display: block; margin: 0 auto;" />
+        <td style="background: white; width: 120px; height: 120px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center; vertical-align: middle; padding: 12px;">
+          <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 96px; height: 96px; object-fit: contain; display: block; margin: 0 auto;" />
         </td>
       </tr>
     </table>
