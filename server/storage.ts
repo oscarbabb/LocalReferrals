@@ -59,6 +59,7 @@ import {
   providerCategories
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import bcrypt from "bcrypt";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 import { DatabaseStorage } from "./database-storage";
