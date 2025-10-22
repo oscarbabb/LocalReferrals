@@ -36,6 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Service Discovery**: Categorized listings with search and filters.
 - **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
 - **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
+- **Mutual Rating System**: Bidirectional rating capability where providers can rate customers and customers can rate providers after completed bookings. Customer ratings (provider→customer reviews) are displayed on user profiles with the same detailed criteria as provider reviews.
 - **One-Click Booking**: Calendar interface with time slot selection.
 - **Messaging System**: Comprehensive inbox for provider-consumer conversations.
 - **Admin Communication & Dashboard System**: User-to-admin messaging for support and inquiries; Admin Dashboard for message management with filters, response capabilities, and status updates, secured by role-based access.
