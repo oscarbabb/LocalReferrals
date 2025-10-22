@@ -216,9 +216,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send password reset email
-      const appUrl = process.env.REPLIT_DEV_DOMAIN 
+      const appUrl = process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN
         ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : "http://localhost:5000";
+        : "https://www.referenciaslocales.com.mx";
         
       const emailSent = await sendPasswordResetEmail(
         user.email,

@@ -50,7 +50,7 @@ const BRAND_ORANGE = "#f97316";
 
 // Get logo URL based on environment - ensure absolute HTTPS URL for email clients
 const getLogoUrl = () => {
-  if (process.env.REPLIT_DEV_DOMAIN) {
+  if (process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN) {
     // Development: construct full HTTPS URL from Replit domain
     return `https://${process.env.REPLIT_DEV_DOMAIN}/logo.png`;
   }
@@ -151,7 +151,7 @@ export async function sendProfileConfirmationEmail(userEmail: string, userName: 
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/servicios` : 'https://www.referenciaslocales.com.mx/servicios'}" 
+          <a href="${process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/servicios` : 'https://www.referenciaslocales.com.mx/servicios'}" 
              style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
                     color: white; 
                     padding: 14px 35px; 
