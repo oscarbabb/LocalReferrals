@@ -1202,6 +1202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Consume the token (invalidate it after successful use)
       providerSetupTokens.delete(providerSetupToken);
+
+      // Send welcome WhatsApp message to new provider if phone number is available
+      if (user.phone) {
+        try {
+          await sendWelcomeWhatsApp(user.phone, user.fullName);
+          console.log(`✅ Provider welcome WhatsApp sent to ${user.phone}`);
+        } catch (whatsappError) {
+          console.error("Failed to send provider welcome WhatsApp:", whatsappError);
+          // Don't fail provider creation if WhatsApp fails
+        }
+      }
       
       res.status(201).json({ 
         ...provider,
