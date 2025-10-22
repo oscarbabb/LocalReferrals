@@ -1441,7 +1441,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const providerUser = await storage.getUser(provider.userId);
           
           if (providerUser) {
-            const requestDate = new Date().toLocaleDateString('es-MX');
+            // Format the booking date and time from the actual service request
+            const bookingDate = serviceRequest.preferredDate 
+              ? new Date(serviceRequest.preferredDate).toLocaleDateString('es-MX', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })
+              : 'Por coordinar';
+            
+            const bookingTime = serviceRequest.preferredTime || 'Por coordinar';
             
             // Send confirmation to user
             await sendBookingConfirmationEmail(
@@ -1449,8 +1459,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               user.fullName,
               provider.title,
               serviceRequest.title || 'Servicio solicitado',
-              requestDate,
-              'Por coordinar'
+              bookingDate,
+              bookingTime
             );
             
             // Send notification to provider
@@ -1459,15 +1469,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               provider.title,
               user.fullName,
               serviceRequest.title || 'Servicio solicitado',
-              requestDate,
-              'Por coordinar'
+              bookingDate,
+              bookingTime
             );
             
-            console.log(`Service request emails sent for request ${serviceRequest.id}`);
+            console.log(`✅ Service request emails sent for request ${serviceRequest.id}`);
           }
         }
       } catch (emailError) {
-        console.error("Failed to send service request emails:", emailError);
+        console.error("❌ Failed to send service request emails:", emailError);
         // Don't fail service request creation if email fails
       }
       
@@ -1617,10 +1627,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Appointments
-  app.get("/api/appointments/:providerId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/appointments/:providerId", async (req: any, res) => {
     try {
       const appointments = await storage.getAppointmentsByProvider(req.params.providerId);
-      res.json(appointments);
+      
+      // If user is authenticated, return full details
+      if (req.user) {
+        res.json(appointments);
+      } else {
+        // For non-authenticated users, only return minimal data needed for availability checking
+        const minimalAppointments = appointments.map(apt => ({
+          id: apt.id,
+          appointmentDate: apt.appointmentDate,
+          startTime: apt.startTime,
+        }));
+        res.json(minimalAppointments);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch appointments" });
     }
@@ -1715,19 +1737,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/service-requests/provider/:providerId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/service-requests/provider/:providerId", async (req: any, res) => {
     try {
       const requests = await storage.getServiceRequestsByProvider(req.params.providerId);
       
-      // Populate with requester details
-      const requestsWithRequesters = await Promise.all(
-        requests.map(async (request) => {
-          const requester = await storage.getUser(request.requesterId);
-          return { ...request, requester };
-        })
-      );
-      
-      res.json(requestsWithRequesters);
+      // If user is authenticated, return full details with requester info
+      if (req.user) {
+        const requestsWithRequesters = await Promise.all(
+          requests.map(async (request) => {
+            const requester = await storage.getUser(request.requesterId);
+            return { ...request, requester };
+          })
+        );
+        res.json(requestsWithRequesters);
+      } else {
+        // For non-authenticated users, only return minimal data needed for availability checking
+        const minimalRequests = requests.map(request => ({
+          id: request.id,
+          status: request.status,
+          preferredDate: request.preferredDate,
+          preferredTime: request.preferredTime,
+        }));
+        res.json(minimalRequests);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch service requests" });
     }
