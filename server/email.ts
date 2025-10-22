@@ -57,8 +57,8 @@ const getLogoUrl = () => {
 // Reusable email header template
 const getEmailHeader = () => `
   <div style="background: linear-gradient(135deg, ${BRAND_BLUE} 0%, ${BRAND_ORANGE} 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
-    <div style="background: white; width: 90px; height: 90px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 10px;">
-      <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 70px; height: 70px; object-fit: contain;" />
+    <div style="background: white; width: 140px; height: 140px; margin: 0 auto 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 20px;">
+      <img src="${getLogoUrl()}" alt="Referencias Locales Logo" style="width: 100%; height: 100%; max-width: 100px; max-height: 100px; object-fit: contain; display: block;" />
     </div>
     <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Referencias Locales</h1>
     <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0; font-size: 14px;">Tu comunidad de servicios locales de confianza</p>
