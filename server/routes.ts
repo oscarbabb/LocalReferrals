@@ -28,6 +28,7 @@ import {
   insertMenuItemVariationSchema
 } from "@shared/schema";
 import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail, sendPasswordResetEmail } from "./email.js";
+import { sendWelcomeWhatsApp, sendBookingConfirmationWhatsApp, sendBookingNotificationWhatsApp } from "./whatsapp.js";
 import bcrypt from "bcrypt";
 
 // Lazy initialize Stripe - only when needed
@@ -1316,10 +1317,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send welcome email after successful registration
         try {
           await sendProfileConfirmationEmail(user.email, user.fullName);
-          console.log(`Welcome email sent to ${user.email}`);
+          console.log(`✅ Welcome email sent to ${user.email}`);
         } catch (emailError) {
           console.error("Failed to send welcome email:", emailError);
           // Don't fail registration if email fails
+        }
+
+        // Send welcome WhatsApp message if phone number is provided
+        if (user.phone) {
+          try {
+            await sendWelcomeWhatsApp(user.phone, user.fullName);
+            console.log(`✅ Welcome WhatsApp sent to ${user.phone}`);
+          } catch (whatsappError) {
+            console.error("Failed to send welcome WhatsApp:", whatsappError);
+            // Don't fail registration if WhatsApp fails
+          }
         }
 
         res.status(201).json({ 
