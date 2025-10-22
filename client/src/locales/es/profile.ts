@@ -101,6 +101,12 @@ export const profile = {
   'profile.provider.stats.rating': 'Calificación',
   'profile.provider.stats.thisMonth': 'Este mes',
   
+  // Reviews section - Customer reviews
+  'profile.reviews.customerTitle': 'Reseñas como Cliente',
+  'profile.reviews.customerDescription': 'Estas son las calificaciones que proveedores han dejado sobre ti después de trabajos completados.',
+  'profile.reviews.noCustomerReviews': 'No tienes reseñas aún',
+  'profile.reviews.noCustomerReviewsDesc': 'Las reseñas aparecerán aquí cuando los proveedores te califiquen después de completar servicios.',
+  
   // Requests tab - My requests
   'profile.requests.my.title': 'Mis Solicitudes',
   'profile.requests.my.cleaning': 'Limpieza Apartamento',

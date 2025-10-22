@@ -101,6 +101,12 @@ export const profile = {
   'profile.provider.stats.rating': 'Rating',
   'profile.provider.stats.thisMonth': 'This month',
   
+  // Reviews section - Customer reviews
+  'profile.reviews.customerTitle': 'Reviews as a Customer',
+  'profile.reviews.customerDescription': 'These are the ratings that providers have left about you after completed jobs.',
+  'profile.reviews.noCustomerReviews': 'No reviews yet',
+  'profile.reviews.noCustomerReviewsDesc': 'Reviews will appear here when providers rate you after completing services.',
+  
   // Requests tab - My requests
   'profile.requests.my.title': 'My Requests',
   'profile.requests.my.cleaning': 'Apartment Cleaning',
