@@ -11,6 +11,7 @@ import Providers from "@/pages/providers";
 import ProviderDetail from "@/pages/provider-detail";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
+import ResetPassword from "@/pages/reset-password";
 import Bookings from "@/pages/bookings";
 import Checkout from "@/pages/checkout";
 import PaymentSuccess from "@/pages/payment-success";
@@ -65,6 +66,7 @@ function Router() {
         <Route path="/admin-dashboard" component={AdminDashboard} />
         <Route path="/profile" component={Profile} />
         <Route path="/auth" component={Auth} />
+        <Route path="/reset-password" component={ResetPassword} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/faq" component={FAQ} />

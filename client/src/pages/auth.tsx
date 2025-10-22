@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ForgotPasswordDialog } from "@/components/forgot-password-dialog";
 
 import { Mail, Lock, User, Phone, Briefcase, Eye, EyeOff } from "lucide-react";
 
@@ -21,6 +22,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -232,9 +234,14 @@ export default function Auth() {
                         {t('auth.login.rememberMe')}
                       </Label>
                     </div>
-                    <a href="#" className="text-sm text-primary hover:underline">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-primary hover:underline"
+                      data-testid="link-forgot-password"
+                    >
                       {t('auth.login.forgotPassword')}
-                    </a>
+                    </button>
                   </div>
                   <Button 
                     type="submit" 
@@ -546,6 +553,11 @@ export default function Auth() {
           </Link>
         </div>
       </div>
+
+      <ForgotPasswordDialog
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+      />
     </div>
   );
 }
