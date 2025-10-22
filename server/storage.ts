@@ -94,6 +94,7 @@ export interface IStorage {
 
   // Reviews
   getReviewsByProvider(providerId: string): Promise<Review[]>;
+  getReviewsByUser(userId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
 
   // Service Requests
@@ -572,7 +573,11 @@ export class MemStorage implements IStorage {
 
   // Reviews
   async getReviewsByProvider(providerId: string): Promise<Review[]> {
-    return Array.from(this.reviews.values()).filter(r => r.providerId === providerId);
+    return Array.from(this.reviews.values()).filter(r => r.providerId === providerId && r.reviewType === 'provider_review');
+  }
+
+  async getReviewsByUser(userId: string): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(r => r.reviewedUserId === userId && r.reviewType === 'customer_review');
   }
 
   async createReview(insertReview: InsertReview): Promise<Review> {
@@ -580,6 +585,8 @@ export class MemStorage implements IStorage {
     const review: Review = { 
       ...insertReview, 
       id, 
+      reviewType: insertReview.reviewType ?? 'provider_review',
+      reviewedUserId: insertReview.reviewedUserId ?? null,
       comment: insertReview.comment ?? null,
       isVerified: insertReview.isVerified ?? false,
       photos: insertReview.photos ?? null,

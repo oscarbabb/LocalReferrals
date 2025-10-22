@@ -910,6 +910,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get customer reviews for a user (reviews written by providers about this customer)
+  app.get("/api/users/:userId/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getReviewsByUser(req.params.userId);
+      
+      // Get reviewer (provider) details for each review
+      const reviewsWithReviewers = await Promise.all(
+        reviews.map(async (review) => {
+          const reviewer = await storage.getUser(review.reviewerId);
+          const provider = await storage.getProvider(review.providerId);
+          return {
+            ...review,
+            reviewer: reviewer ? {
+              fullName: reviewer.fullName,
+              avatar: reviewer.avatar,
+              building: reviewer.building,
+              apartment: reviewer.apartment
+            } : null,
+            provider: provider ? {
+              title: provider.title
+            } : null
+          };
+        })
+      );
+      
+      res.json(reviewsWithReviewers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user reviews" });
+    }
+  });
+
   // Create new review (requires authentication)
   app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
