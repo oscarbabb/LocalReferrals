@@ -66,3 +66,11 @@ Preferred communication style: Simple, everyday language.
 - **Express**: Web framework.
 - **Connect PG Simple**: PostgreSQL session store.
 - **SendGrid**: Email delivery system.
+- **Twilio**: WhatsApp messaging integration for user notifications.
+
+## Messaging & Notifications
+- **Email Notifications**: SendGrid integration for welcome emails, booking confirmations, and password resets.
+- **WhatsApp Notifications**: Twilio WhatsApp API for welcome messages to users and providers (requires phone number during registration).
+  - **Configuration**: Uses `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_WHATSAPP_NUMBER` environment variables.
+  - **Important**: Users must opt-in to receive WhatsApp messages (sandbox users need to send join code; production users must have previously messaged the business number).
+  - **Integration Points**: Welcome messages sent during user registration and provider profile setup (only if phone number is provided).
