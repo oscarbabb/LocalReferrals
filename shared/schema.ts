@@ -333,6 +333,9 @@ export const insertServiceRequestSchema = createInsertSchema(serviceRequests).om
   status: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  preferredDate: z.coerce.date().optional(),
+  totalAmount: z.union([z.string(), z.number().transform(n => n.toString())]).optional(),
 });
 
 export const insertProviderAvailabilitySchema = createInsertSchema(providerAvailability).omit({
