@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ForgotPasswordDialog } from "@/components/forgot-password-dialog";
+import { COUNTRY_CODES, COUNTRIES } from "@/lib/countries";
 
 import { Mail, Lock, User, Phone, Briefcase, Eye, EyeOff } from "lucide-react";
 
@@ -23,6 +25,8 @@ export default function Auth() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+52"); // Default to Mexico
+  const [selectedCountry, setSelectedCountry] = useState("MX"); // Default to Mexico
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -132,12 +136,17 @@ export default function Auth() {
     const isProvider = formData.get("isProvider") === "on";
     setIsProviderRegistration(isProvider);
 
+    // Combine country code with phone number for WhatsApp compatibility
+    const phoneNumber = formData.get("phone") as string;
+    const fullPhoneNumber = phoneNumber ? `${selectedCountryCode}${phoneNumber}` : "";
+
     const userData = {
       username: formData.get("username") as string,
       email: formData.get("email") as string,
       password: password,
       fullName: `${formData.get("firstName")} ${formData.get("lastName")}`,
-      phone: formData.get("phone") as string,
+      phone: fullPhoneNumber,
+      country: selectedCountry,
       isProvider: isProvider,
       // Mexican Address Fields
       condominioMaestro: formData.get("condominioMaestro") as string,
@@ -315,16 +324,52 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">{t('auth.register.phone')}</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        placeholder={t('auth.register.phonePlaceholder')}
-                        className="pl-10"
-                      />
+                    <div className="flex gap-2">
+                      <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
+                        <SelectTrigger className="w-[140px]" data-testid="select-country-code">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COUNTRY_CODES.map((country) => (
+                            <SelectItem key={country.code} value={country.dialCode}>
+                              <span className="flex items-center gap-2">
+                                <span>{country.flag}</span>
+                                <span>{country.dialCode}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="relative flex-1">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          placeholder={t('auth.register.phonePlaceholder')}
+                          className="pl-10"
+                          data-testid="input-phone"
+                        />
+                      </div>
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country">{t('auth.register.country')}</Label>
+                    <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                      <SelectTrigger data-testid="select-country">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{country.flag}</span>
+                              <span>{country.nameEs}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   {/* Mexican Address Structure */}
                   <div className="space-y-4 border-t pt-4">

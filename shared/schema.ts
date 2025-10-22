@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   apartment: text("apartment"),
   building: text("building"),
   phone: text("phone"),
+  country: text("country"), // Country of residence
   isProvider: boolean("is_provider").default(false),
   isAdmin: boolean("is_admin").default(false),
   avatar: text("avatar"),
