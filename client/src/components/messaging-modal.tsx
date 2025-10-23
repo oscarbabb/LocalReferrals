@@ -40,9 +40,11 @@ export default function MessagingModal({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Fetch conversation between current user and recipient
+  // Poll every 3 seconds when modal is open to get real-time updates
   const { data: messages = [], isLoading: isLoadingMessages } = useQuery<Message[]>({
     queryKey: ["/api/messages/conversation", currentUserId, recipientUserId],
     enabled: !!currentUserId && !!recipientUserId && open,
+    refetchInterval: open ? 3000 : false, // Poll every 3 seconds when open
   });
 
   // Auto-scroll to bottom when messages change

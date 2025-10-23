@@ -22,9 +22,11 @@ export default function Messages() {
   } | null>(null);
 
   // Fetch user's conversations
+  // Poll every 5 seconds to check for new messages
   const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
     queryKey: [`/api/messages/user/${userId}`],
     enabled: !!userId && isAuthenticated,
+    refetchInterval: 5000, // Poll every 5 seconds for new conversations
   });
 
   // Format relative time
