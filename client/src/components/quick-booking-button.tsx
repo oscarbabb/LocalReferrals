@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Calendar, Clock } from "lucide-react";
 import BookingCalendar from "./booking-calendar";
 import { useLanguage } from "@/hooks/use-language";
-import type { Provider } from "@shared/schema";
+import type { Provider, User } from "@shared/schema";
 
 interface QuickBookingButtonProps {
   provider: Provider;
@@ -24,7 +24,7 @@ export default function QuickBookingButton({
   const { t } = useLanguage();
 
   // Get current user
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
