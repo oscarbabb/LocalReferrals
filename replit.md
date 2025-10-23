@@ -8,6 +8,14 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## October 23, 2025 - Real-Time Messaging Synchronization
+- **Messaging System Enhancement**: Implemented automatic polling for real-time message synchronization
+  - Added 3-second polling to conversation modal when open - recipients see new messages within 3 seconds
+  - Added 5-second polling to messages page conversation list for real-time updates
+  - Solved critical issue where message recipients couldn't see new messages without manual page refresh
+  - Polling intervals optimized for performance - modal only polls when open, preventing unnecessary network traffic
+  - React Query handles polling lifecycle - no memory leaks or lingering timers
+
 ## October 23, 2025 - Menu Document Management Enhancement
 - **Enhanced Provider Profile**: Added comprehensive menu document upload, replace, and delete functionality
   - Upload interface with drag-and-drop UI for new menu documents (PDF, JPG, PNG up to 10MB)
