@@ -32,9 +32,21 @@ const profileSchema = (t: any) => z.object({
   username: z.string().min(3, t('profile.validation.usernameMin')),
   email: z.string().email(t('profile.validation.emailInvalid')),
   phone: z.string().min(10, t('profile.validation.phoneMin')),
-  building: z.string().min(1, t('profile.validation.buildingRequired')),
-  apartment: z.string().min(1, t('profile.validation.apartmentRequired')),
-  address: z.string().min(10, t('profile.validation.addressMin')),
+  building: z.string().optional(),
+  apartment: z.string().optional(),
+  address: z.string().optional(),
+  // Detailed Mexican Address Fields
+  condominioMaestro: z.string().optional(),
+  condominio: z.string().optional(),
+  edificioOArea: z.string().optional(),
+  calle: z.string().optional(),
+  colonia: z.string().optional(),
+  codigoPostal: z.string().optional(),
+  numeroExterior: z.string().optional(),
+  numeroInterior: z.string().optional(),
+  municipio: z.string().optional(),
+  estado: z.string().optional(),
+  addressNotes: z.string().optional(),
   serviceRadiusKm: z.preprocess(
     (val) => {
       if (val === "" || val === null || val === undefined) return undefined;
@@ -93,6 +105,18 @@ export default function Profile() {
       building: user?.building || "",
       apartment: user?.apartment || "",
       address: user?.address || "",
+      // Mexican address fields
+      condominioMaestro: user?.condominioMaestro || "",
+      condominio: user?.condominio || "",
+      edificioOArea: user?.edificioOArea || "",
+      calle: user?.calle || "",
+      colonia: user?.colonia || "",
+      codigoPostal: user?.codigoPostal || "",
+      numeroExterior: user?.numeroExterior || "",
+      numeroInterior: user?.numeroInterior || "",
+      municipio: user?.municipio || "",
+      estado: user?.estado || "",
+      addressNotes: user?.addressNotes || "",
       serviceRadiusKm: user?.serviceRadiusKm || undefined,
     }
   });
@@ -108,6 +132,18 @@ export default function Profile() {
         building: user.building || "",
         apartment: user.apartment || "",
         address: user.address || "",
+        // Mexican address fields
+        condominioMaestro: user.condominioMaestro || "",
+        condominio: user.condominio || "",
+        edificioOArea: user.edificioOArea || "",
+        calle: user.calle || "",
+        colonia: user.colonia || "",
+        codigoPostal: user.codigoPostal || "",
+        numeroExterior: user.numeroExterior || "",
+        numeroInterior: user.numeroInterior || "",
+        municipio: user.municipio || "",
+        estado: user.estado || "",
+        addressNotes: user.addressNotes || "",
         serviceRadiusKm: user.serviceRadiusKm || undefined,
       });
       setProfilePicture(user.avatar || null);
@@ -557,7 +593,7 @@ export default function Profile() {
                                 <FormLabel>{t('profile.personal.address')}</FormLabel>
                                 <FormControl>
                                   <AppleMapsAddressInput
-                                    value={field.value}
+                                    value={field.value || ""}
                                     onChange={field.onChange}
                                     placeholder={t('profile.personal.addressPlaceholder')}
                                     data-testid="input-address"
@@ -567,6 +603,152 @@ export default function Profile() {
                               </FormItem>
                             )}
                           />
+
+                          {/* Detailed Mexican Address Fields */}
+                          <FormField
+                            control={profileForm.control}
+                            name="condominioMaestro"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Condominio Maestro</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-condominio-maestro" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="condominio"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Condominio</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-condominio" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="edificioOArea"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Edificio o Área</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-edificio-area" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="calle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Calle</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-calle" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="colonia"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Colonia</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-colonia" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="codigoPostal"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Código Postal</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-codigo-postal" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="numeroExterior"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Número Exterior</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-numero-exterior" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="numeroInterior"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Número Interior</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-numero-interior" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="municipio"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Municipio</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-municipio" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="estado"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Estado</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-estado" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="addressNotes"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Notas de Dirección</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="Información adicional sobre tu dirección" data-testid="input-address-notes" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
                           <FormField
                             control={profileForm.control}
                             name="serviceRadiusKm"
