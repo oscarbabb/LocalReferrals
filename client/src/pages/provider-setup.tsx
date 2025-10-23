@@ -105,6 +105,18 @@ export default function ProviderSetup() {
 
   // Get provider setup token from session storage (set during registration)
   const providerSetupToken = sessionStorage.getItem('providerSetupToken');
+
+  // ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURN (Rules of Hooks)
+  const { data: categories = [] } = useQuery<ServiceCategory[]>({
+    queryKey: ["/api/categories"],
+    enabled: !!providerSetupToken, // Only fetch if we have a token
+  });
+
+  // Fetch subcategories for temporary selection
+  const { data: tempSubcategories = [], isLoading: tempSubcategoriesLoading } = useQuery<ServiceSubcategory[]>({
+    queryKey: [`/api/categories/${tempCategoryId}/subcategories`],
+    enabled: !!tempCategoryId && !!providerSetupToken, // Only fetch if we have a token and categoryId
+  });
   
   // Redirect to auth if no setup token (using useEffect to avoid render-time side effects)
   useEffect(() => {
@@ -113,19 +125,10 @@ export default function ProviderSetup() {
     }
   }, [providerSetupToken, setLocation]);
   
+  // IMPORTANT: Early return must come AFTER all hooks are defined
   if (!providerSetupToken) {
     return null;
   }
-
-  const { data: categories = [] } = useQuery<ServiceCategory[]>({
-    queryKey: ["/api/categories"],
-  });
-
-  // Fetch subcategories for temporary selection
-  const { data: tempSubcategories = [], isLoading: tempSubcategoriesLoading } = useQuery<ServiceSubcategory[]>({
-    queryKey: [`/api/categories/${tempCategoryId}/subcategories`],
-    enabled: !!tempCategoryId,
-  });
 
   // Profile picture upload functions
   const handleProfilePictureUpload = async () => {
@@ -266,6 +269,7 @@ export default function ProviderSetup() {
     mutationFn: async (providerData: ProviderSetupForm) => {
       // Validate that at least one category is selected
       if (selectedCategories.length === 0) {
+        console.error("Provider setup validation failed: No categories selected");
         throw new Error(t('providerSetup.validation.categoryRequired'));
       }
 
@@ -337,6 +341,7 @@ export default function ProviderSetup() {
       setLocation("/");
     },
     onError: (error: any) => {
+      console.error("Provider setup error:", error);
       toast({
         title: t('providerSetup.toast.error.title'),
         description: error.message || t('providerSetup.toast.error.description'),

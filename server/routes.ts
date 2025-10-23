@@ -1124,6 +1124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Security: Validate the setup token instead of trusting client-supplied userId
       if (!providerSetupToken) {
+        console.error("Provider creation failed: No provider setup token provided");
         return res.status(400).json({ message: "Provider setup token is required" });
       }
       
