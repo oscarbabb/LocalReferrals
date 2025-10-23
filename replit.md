@@ -8,6 +8,15 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## October 23, 2025 - Profile Data Persistence Enhancement
+- **Complete Address Field Visibility**: Fixed issue where detailed Mexican address fields from registration weren't visible or editable on profile page
+  - Added all 11 detailed Mexican address fields to profile form: condominioMaestro, condominio, edificioOArea, calle, colonia, codigoPostal, numeroExterior, numeroInterior, municipio, estado, addressNotes
+  - Updated profile form schema, default values, and reset logic to include all address fields
+  - Enhanced profile page UI with editable FormField components for each address field
+  - Updated backend validation schema (PATCH /api/users/:id) to accept all Mexican address fields
+  - All fields are optional to allow gradual profile completion
+  - Verified end-to-end: registration → profile view → editing → persistence after refresh
+
 ## October 23, 2025 - Real-Time Messaging Synchronization
 - **Messaging System Enhancement**: Implemented automatic polling for real-time message synchronization
   - Added 3-second polling to conversation modal when open - recipients see new messages within 3 seconds
