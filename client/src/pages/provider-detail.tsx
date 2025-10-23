@@ -150,29 +150,51 @@ export default function ProviderDetail() {
                   </div>
                 )}
 
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center space-x-4 text-gray-600 mb-4 md:mb-0">
-                    <div className="flex items-center" data-testid="text-provider-location">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      <span>{provider.user?.building || t('providerDetail.localBuilding')}</span>
+                {/* Provider Location & Address */}
+                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white mb-1" data-testid="text-provider-address">
+                        {provider.user?.building || t('providerDetail.localBuilding')}
+                        {provider.user?.apartment && `, ${t('providerDetail.apartment')} ${provider.user.apartment}`}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {provider.user?.section || t('providerDetail.localCommunity')}
+                      </p>
                     </div>
-                    {provider.serviceRadiusKm && (
-                      <div className="flex items-center" data-testid="text-service-radius">
-                        <Globe className="w-4 h-4 mr-1" />
-                        <span>{t('providerDetail.radius')} {provider.serviceRadiusKm} km</span>
-                      </div>
-                    )}
                   </div>
-                  
-                  {provider.hourlyRate && (
+                </div>
+
+                {/* Service Radius */}
+                {provider.serviceRadiusKm && (
+                  <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-3">
+                      <Globe className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white mb-1" data-testid="text-service-coverage">
+                          {t('providerDetail.serviceAreaTitle')}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {t('providerDetail.serviceAreaDesc').replace('{radius}', provider.serviceRadiusKm.toString())}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Hourly Rate */}
+                {provider.hourlyRate && (
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">{t('providerDetail.hourlyRate')}</span>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
                         MXN ${provider.hourlyRate}
                       </div>
-                      <div className="text-gray-500">{t('providerDetail.perHour')}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{t('providerDetail.perHour')}</div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
