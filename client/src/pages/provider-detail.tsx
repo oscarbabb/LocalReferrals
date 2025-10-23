@@ -260,7 +260,7 @@ export default function ProviderDetail() {
                           </div>
                         </div>
                         <Button
-                          onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                          onClick={() => provider.menuDocumentUrl && window.open(provider.menuDocumentUrl, '_blank')}
                           className="bg-orange-600 hover:bg-orange-700"
                           data-testid="button-view-pdf-menu"
                         >
@@ -272,13 +272,13 @@ export default function ProviderDetail() {
                   ) : (
                     <div className="space-y-3">
                       <img 
-                        src={`/objects/${provider.menuDocumentUrl}`} 
+                        src={provider.menuDocumentUrl} 
                         alt={t('providerDetail.fullMenu')} 
                         className="w-full h-auto rounded-lg border shadow-sm"
                         data-testid="img-full-menu"
                       />
                       <Button
-                        onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                        onClick={() => provider.menuDocumentUrl && window.open(provider.menuDocumentUrl, '_blank')}
                         variant="outline"
                         className="w-full"
                         data-testid="button-view-image-menu"
