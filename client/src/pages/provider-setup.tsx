@@ -575,6 +575,7 @@ export default function ProviderSetup() {
                         <ObjectUploader
                           maxNumberOfFiles={1}
                           maxFileSize={5 * 1024 * 1024}
+                          allowedFileTypes={['.jpg', '.jpeg', '.png']}
                           onGetUploadParameters={handleProfilePictureUpload}
                           onComplete={handleProfilePictureComplete}
                           buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"

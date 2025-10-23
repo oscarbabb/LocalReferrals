@@ -592,6 +592,7 @@ export default function MenuManagement() {
                   onGetUploadParameters={handleMenuDocumentUpload}
                   onComplete={handleMenuDocumentComplete}
                   maxFileSize={10 * 1024 * 1024}
+                  allowedFileTypes={['.jpg', '.jpeg', '.png', '.pdf']}
                   buttonClassName="bg-orange-600 hover:bg-orange-700"
                 >
                   <Upload className="w-4 h-4 mr-2" />

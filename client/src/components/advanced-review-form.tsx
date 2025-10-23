@@ -319,6 +319,7 @@ export default function AdvancedReviewForm({
               <ObjectUploader
                 maxNumberOfFiles={5}
                 maxFileSize={5242880} // 5MB
+                allowedFileTypes={['.jpg', '.jpeg', '.png']}
                 onGetUploadParameters={handlePhotoUpload}
                 onComplete={handlePhotoComplete}
                 buttonClassName="bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-dashed border-gray-300"

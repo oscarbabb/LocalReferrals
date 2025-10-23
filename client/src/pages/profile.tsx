@@ -490,6 +490,7 @@ export default function Profile() {
                         <ObjectUploader
                           maxNumberOfFiles={1}
                           maxFileSize={2 * 1024 * 1024} // 2MB
+                          allowedFileTypes={['.jpg', '.jpeg', '.png']}
                           onGetUploadParameters={handleProfilePictureUpload}
                           onComplete={handleProfilePictureComplete}
                           buttonClassName="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
@@ -991,6 +992,7 @@ export default function Profile() {
                           <ObjectUploader
                             maxNumberOfFiles={1}
                             maxFileSize={10 * 1024 * 1024} // 10MB
+                            allowedFileTypes={['.jpg', '.jpeg', '.png', '.pdf']}
                             onGetUploadParameters={handleMenuDocumentUpload}
                             onComplete={handleMenuDocumentComplete}
                             buttonClassName="w-full border border-blue-600 bg-blue-600 hover:bg-blue-700 text-white"
@@ -1027,6 +1029,7 @@ export default function Profile() {
                           <ObjectUploader
                             maxNumberOfFiles={1}
                             maxFileSize={10 * 1024 * 1024} // 10MB
+                            allowedFileTypes={['.jpg', '.jpeg', '.png', '.pdf']}
                             onGetUploadParameters={handleMenuDocumentUpload}
                             onComplete={handleMenuDocumentComplete}
                             buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
