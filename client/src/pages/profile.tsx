@@ -54,6 +54,8 @@ export default function Profile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [isUploadingMenuDocument, setIsUploadingMenuDocument] = useState(false);
+  const [isDeletingMenuDocument, setIsDeletingMenuDocument] = useState(false);
 
   // Get current user data
   const { data: user, isLoading } = useQuery<any>({
@@ -194,6 +196,81 @@ export default function Profile() {
       } finally {
         setIsUploadingPicture(false);
       }
+    }
+  };
+
+  // Menu document upload functions
+  const handleMenuDocumentUpload = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload");
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL as string,
+    };
+  };
+
+  const handleMenuDocumentComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      setIsUploadingMenuDocument(true);
+      try {
+        const uploadedFile = result.successful[0];
+        const documentURL = uploadedFile.uploadURL as string;
+        
+        // Make the uploaded document public and get the display URL
+        const response = await apiRequest("PUT", "/api/menu-documents", {
+          documentURL: documentURL
+        });
+        const data = await response.json();
+        
+        // Update the provider with the menu document URL
+        await apiRequest("PATCH", `/api/providers/${provider.id}/menu-document`, {
+          menuDocumentUrl: data.objectPath
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
+        
+        toast({
+          title: "Menú actualizado",
+          description: "Tu documento de menú ha sido subido exitosamente.",
+        });
+      } catch (error) {
+        console.error("Error uploading menu document:", error);
+        toast({
+          title: "Error al subir menú",
+          description: "Hubo un problema al subir tu documento. Por favor intenta de nuevo.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingMenuDocument(false);
+      }
+    }
+  };
+
+  // Menu document delete function
+  const handleDeleteMenuDocument = async () => {
+    if (!provider?.id) return;
+    
+    setIsDeletingMenuDocument(true);
+    try {
+      await apiRequest("PATCH", `/api/providers/${provider.id}/menu-document`, {
+        menuDocumentUrl: null
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
+      
+      toast({
+        title: "Menú eliminado",
+        description: "Tu documento de menú ha sido eliminado.",
+      });
+    } catch (error) {
+      console.error("Error deleting menu document:", error);
+      toast({
+        title: "Error al eliminar menú",
+        description: "Hubo un problema al eliminar tu documento. Por favor intenta de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingMenuDocument(false);
     }
   };
 
@@ -666,57 +743,116 @@ export default function Profile() {
                 )}
 
                 {/* Menu Document Section */}
-                {provider?.menuDocumentUrl && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <FileText className="w-5 h-5" />
-                        <span>Menú Completo</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') ? (
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="w-8 h-8 text-red-600" />
-                            <div>
-                              <p className="font-medium text-gray-900">Menú en PDF</p>
-                              <p className="text-sm text-gray-500">Documento del menú</p>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Menú Completo</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {provider?.menuDocumentUrl ? (
+                      /* Display existing menu document */
+                      <div className="space-y-4">
+                        {provider.menuDocumentUrl.toLowerCase().endsWith('.pdf') ? (
+                          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-blue-100">
+                            <div className="flex items-center space-x-3">
+                              <FileText className="w-8 h-8 text-red-600" />
+                              <div>
+                                <p className="font-medium text-gray-900">Menú en PDF</p>
+                                <p className="text-sm text-gray-500">Documento del menú</p>
+                              </div>
                             </div>
+                            <Button
+                              onClick={() => provider.menuDocumentUrl && window.open(provider.menuDocumentUrl, '_blank')}
+                              size="sm"
+                              className="bg-orange-600 hover:bg-orange-700"
+                              data-testid="button-view-menu-pdf"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Ver
+                            </Button>
                           </div>
-                          <Button
-                            onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
-                            size="sm"
-                            className="bg-orange-600 hover:bg-orange-700"
-                            data-testid="button-view-menu-pdf"
+                        ) : (
+                          <div className="space-y-3">
+                            <img 
+                              src={provider.menuDocumentUrl} 
+                              alt="Menú Completo" 
+                              className="w-full h-auto rounded-lg border shadow-sm"
+                              data-testid="img-menu-document"
+                            />
+                            <Button
+                              onClick={() => provider.menuDocumentUrl && window.open(provider.menuDocumentUrl, '_blank')}
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              data-testid="button-view-menu-image"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Ver en tamaño completo
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Replace and Delete Actions */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                          <ObjectUploader
+                            maxNumberOfFiles={1}
+                            maxFileSize={10 * 1024 * 1024} // 10MB
+                            onGetUploadParameters={handleMenuDocumentUpload}
+                            onComplete={handleMenuDocumentComplete}
+                            buttonClassName="w-full border border-blue-600 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Download className="w-4 h-4 mr-2" />
-                            Ver
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <img 
-                            src={`/objects/${provider.menuDocumentUrl}`} 
-                            alt="Menú Completo" 
-                            className="w-full h-auto rounded-lg border"
-                            data-testid="img-menu-document"
-                          />
+                            Reemplazar Menú
+                          </ObjectUploader>
                           <Button
-                            onClick={() => window.open(`/objects/${provider.menuDocumentUrl}`, '_blank')}
+                            onClick={handleDeleteMenuDocument}
+                            disabled={isDeletingMenuDocument}
                             variant="outline"
-                            size="sm"
-                            className="w-full"
-                            data-testid="button-view-menu-image"
+                            className="w-full border-red-600 text-red-600 hover:bg-red-50"
+                            data-testid="button-delete-menu"
                           >
-                            <Download className="w-4 h-4 mr-2" />
-                            Ver en tamaño completo
+                            <X className="w-4 h-4 mr-2" />
+                            {isDeletingMenuDocument ? 'Eliminando...' : 'Eliminar Menú'}
                           </Button>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                        {isUploadingMenuDocument && (
+                          <p className="text-sm text-blue-600 text-center">Subiendo documento...</p>
+                        )}
+                      </div>
+                    ) : (
+                      /* Upload new menu document */
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-gradient-to-b from-white to-blue-50">
+                          <FileText className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            Sube tu menú completo
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Comparte un documento PDF o imagen de tu menú para que los clientes puedan ver todos tus servicios
+                          </p>
+                          <ObjectUploader
+                            maxNumberOfFiles={1}
+                            maxFileSize={10 * 1024 * 1024} // 10MB
+                            onGetUploadParameters={handleMenuDocumentUpload}
+                            onComplete={handleMenuDocumentComplete}
+                            buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Seleccionar Archivo
+                          </ObjectUploader>
+                          <p className="text-xs text-gray-500 mt-3">
+                            PDF, JPG, PNG (máximo 10MB)
+                          </p>
+                          {isUploadingMenuDocument && (
+                            <p className="text-sm text-blue-600 mt-3">Subiendo documento...</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Menu Management */}
                 <Card>
