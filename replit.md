@@ -6,6 +6,18 @@
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## October 23, 2025 - Menu Document Management Enhancement
+- **Enhanced Provider Profile**: Added comprehensive menu document upload, replace, and delete functionality
+  - Upload interface with drag-and-drop UI for new menu documents (PDF, JPG, PNG up to 10MB)
+  - Preview display for existing menu documents (PDF indicator or image preview)
+  - Replace menu document with new file
+  - Delete existing menu document
+  - Fixed double `/objects/` prefix bug in menu document URLs
+  - Added proper provider existence guards to prevent runtime errors
+  - Integrated with existing ObjectStorage service and API endpoints
+
 # System Architecture
 
 ## Frontend Architecture
@@ -43,7 +55,7 @@ Preferred communication style: Simple, everyday language.
 - **Admin Communication & Dashboard System**: User-to-admin messaging for support and inquiries; Admin Dashboard for message management with filters, response capabilities, and status updates, secured by role-based access.
 - **Category Request System**: User-driven feature allowing authenticated users to suggest new service categories or subcategories with admin review workflow.
 - **Geographical Service Radius**: Slider-based radius filter for providers (service delivery range) and consumers (service reception range).
-- **Provider Tools**: Availability Management, Menu Management, Multi-Category Registration.
+- **Provider Tools**: Availability Management, Menu Management, Multi-Category Registration, Menu Document Upload/Replacement/Deletion.
 - **Legal Documentation**: Comprehensive, bilingual Terms & Conditions and Privacy Policy pages.
 - **Disclaimer System**: Non-dismissible disclaimer dialog for authenticated users on key pages and post-onboarding, tracking acceptance in the database.
 - **Internationalization**: Full bilingual support (Spanish/English) with modular locale architecture, feature-based translation files, and persistent language preferences.

@@ -211,6 +211,16 @@ export default function Profile() {
 
   const handleMenuDocumentComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (result.successful && result.successful.length > 0) {
+      // Guard: ensure provider is loaded
+      if (!provider?.id) {
+        toast({
+          title: "Error al subir menú",
+          description: "No se pudo cargar la información del proveedor. Por favor recarga la página.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsUploadingMenuDocument(true);
       try {
         const uploadedFile = result.successful[0];
