@@ -45,10 +45,16 @@ export default function ProviderDetail() {
     enabled: !!providerId,
   });
 
-  const { data: menuItems = [] } = useQuery<MenuItemWithVariations[]>({
+  const { data: menuItems = [], isLoading: menuItemsLoading, error: menuItemsError } = useQuery<MenuItemWithVariations[]>({
     queryKey: ["/api/menu-items", providerId],
     enabled: !!providerId,
   });
+
+  // Debug logging
+  console.log('🍔 Provider ID:', providerId);
+  console.log('🍔 Menu Items:', menuItems);
+  console.log('🍔 Menu Items Loading:', menuItemsLoading);
+  console.log('🍔 Menu Items Error:', menuItemsError);
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
