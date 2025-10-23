@@ -409,16 +409,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               categoryId: metadata.categoryId,
               title: metadata.serviceTitle || 'Servicio',
               description: metadata.notes || '',
-              preferredDate: metadata.date ? new Date(metadata.date) : null,
-              preferredTime: metadata.time || null,
-              estimatedDuration: metadata.duration ? parseInt(metadata.duration) : null,
+              preferredDate: metadata.date ? new Date(metadata.date) : undefined,
+              preferredTime: metadata.time || undefined,
+              estimatedDuration: metadata.duration ? parseInt(metadata.duration) : undefined,
               location: metadata.location || '',
               notes: metadata.notes || '',
               totalAmount: (paymentIntent.amount / 100).toString(), // Convert from centavos to pesos
               status: 'confirmed',
               paymentIntentId: paymentIntent.id,
               confirmedDate: new Date(),
-              confirmedTime: metadata.time || null,
+              confirmedTime: metadata.time || undefined,
             };
 
             const newBooking = await storage.createServiceRequest(bookingData);
@@ -871,18 +871,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single provider by ID
-  app.get("/api/providers/:id", async (req, res) => {
-    try {
-      const provider = await storage.getProvider(req.params.id);
-      if (!provider) {
-        return res.status(404).json({ message: "Provider not found" });
-      }
-      res.json(provider);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch provider" });
-    }
-  });
 
   // Reviews
   app.get("/api/reviews/:providerId", async (req, res) => {
