@@ -119,7 +119,7 @@ export default function CustomerRatingDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]" data-testid="dialog-customer-rating">
         <DialogHeader>
-          <DialogTitle>{t('bookings.rateCustomer.title', { customerName })}</DialogTitle>
+          <DialogTitle>{t('bookings.rateCustomer.title').replace('{customerName}', customerName)}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
