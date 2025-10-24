@@ -1021,7 +1021,7 @@ export default function Profile() {
                         <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-gradient-to-b from-white to-blue-50">
                           <FileText className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                           <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            Sube tu menú completo
+                            Presenta tu negocio
                           </h4>
                           <p className="text-sm text-gray-600 mb-4">
                             Comparte un documento PDF o imagen de tu menú para que los clientes puedan ver todos tus servicios
