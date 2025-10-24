@@ -110,7 +110,9 @@ export default function Providers() {
       const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
       const matchesSubcategory = !selectedSubcategory || selectedSubcategory === "all" || provider.subcategoryId === selectedSubcategory;
       
-      // Filter by radius: show providers whose service radius is >= selected radius
+      // Filter by radius: show providers who can travel at least the selected distance
+      // radiusKm of 100 means "any distance" (no filter)
+      // Example: slider at 10km shows providers with serviceRadiusKm >= 10km (they can reach customers within 10km)
       const matchesRadius = radiusKm === 100 || (provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm);
       
       return matchesCategory && matchesSubcategory && matchesRadius;
