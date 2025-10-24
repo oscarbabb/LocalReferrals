@@ -8,6 +8,15 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## October 24, 2025 - File Upload Type Restrictions
+- **Enhanced File Upload Security**: Implemented file type restrictions across all upload components
+  - Added `allowedFileTypes` prop to ObjectUploader component for Uppy-based validation
+  - Profile pictures restricted to JPEG/PNG formats (.jpg, .jpeg, .png)
+  - Menu documents accept JPEG/PNG/PDF formats (.jpg, .jpeg, .png, .pdf)
+  - Review photos restricted to JPEG/PNG formats (.jpg, .jpeg, .png)
+  - Applied restrictions to all 7 upload instances across the application (profile page, provider setup, menu management, review forms)
+  - Uppy automatically enforces file type validation at the upload interface level
+
 ## October 23, 2025 - Profile Data Persistence Enhancement
 - **Complete Address Field Visibility**: Fixed issue where detailed Mexican address fields from registration weren't visible or editable on profile page
   - Added all 11 detailed Mexican address fields to profile form: condominioMaestro, condominio, edificioOArea, calle, colonia, codigoPostal, numeroExterior, numeroInterior, municipio, estado, addressNotes
