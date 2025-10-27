@@ -123,6 +123,9 @@ export interface IStorage {
   getConversation(userId1: string, userId2: string): Promise<Message[]>;
   getUserConversations(userId: string): Promise<Conversation[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+  getMessage(id: string): Promise<Message | undefined>;
+  markMessageAsRead(id: string): Promise<Message | undefined>;
+  getUnreadMessageCount(userId: string): Promise<number>;
 
   // Admin Messages
   getAdminMessages(): Promise<AdminMessage[]>;
@@ -130,6 +133,10 @@ export interface IStorage {
   getAdminMessage(id: string): Promise<AdminMessage | undefined>;
   createAdminMessage(message: InsertAdminMessage): Promise<AdminMessage>;
   updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined>;
+  markAdminMessageAsReadByUser(id: string): Promise<AdminMessage | undefined>;
+  markAdminMessageAsReadByAdmin(id: string): Promise<AdminMessage | undefined>;
+  getUnreadAdminMessageCountForUser(userId: string): Promise<number>;
+  getUnreadAdminMessageCountForAdmin(): Promise<number>;
 
   // Category Requests
   getCategoryRequests(): Promise<CategoryRequest[]>;
@@ -194,6 +201,7 @@ export class MemStorage implements IStorage {
   private providerAvailability: Map<string, ProviderAvailability>;
   private appointments: Map<string, Appointment>;
   private messages: Map<string, Message>;
+  private adminMessages: Map<string, AdminMessage>;
   private verificationDocuments: Map<string, VerificationDocument>;
   private backgroundChecks: Map<string, BackgroundCheck>;
   private verificationReviews: Map<string, VerificationReview>;
@@ -214,6 +222,7 @@ export class MemStorage implements IStorage {
     this.providerAvailability = new Map();
     this.appointments = new Map();
     this.messages = new Map();
+    this.adminMessages = new Map();
     this.verificationDocuments = new Map();
     this.backgroundChecks = new Map();
     this.verificationReviews = new Map();
@@ -767,10 +776,75 @@ export class MemStorage implements IStorage {
       ...insertMessage, 
       id, 
       requestId: insertMessage.requestId || null,
+      isRead: false,
       createdAt: new Date() 
     };
     this.messages.set(id, message);
     return message;
+  }
+
+  async getMessage(id: string): Promise<Message | undefined> {
+    return this.messages.get(id);
+  }
+
+  async markMessageAsRead(id: string): Promise<Message | undefined> {
+    const message = this.messages.get(id);
+    if (message) {
+      message.isRead = true;
+      this.messages.set(id, message);
+      return message;
+    }
+    return undefined;
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    let count = 0;
+    for (const message of this.messages.values()) {
+      if (message.receiverId === userId && !message.isRead) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  async markAdminMessageAsReadByUser(id: string): Promise<AdminMessage | undefined> {
+    const message = this.adminMessages.get(id);
+    if (message) {
+      message.isReadByUser = true;
+      this.adminMessages.set(id, message);
+      return message;
+    }
+    return undefined;
+  }
+
+  async markAdminMessageAsReadByAdmin(id: string): Promise<AdminMessage | undefined> {
+    const message = this.adminMessages.get(id);
+    if (message) {
+      message.isReadByAdmin = true;
+      this.adminMessages.set(id, message);
+      return message;
+    }
+    return undefined;
+  }
+
+  async getUnreadAdminMessageCountForUser(userId: string): Promise<number> {
+    let count = 0;
+    for (const message of this.adminMessages.values()) {
+      if (message.userId === userId && !message.isReadByUser) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  async getUnreadAdminMessageCountForAdmin(): Promise<number> {
+    let count = 0;
+    for (const message of this.adminMessages.values()) {
+      if (!message.isReadByAdmin) {
+        count++;
+      }
+    }
+    return count;
   }
 
   // Admin Messages - stubbed for MemStorage (not used in production)

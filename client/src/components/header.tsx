@@ -11,6 +11,8 @@ import { useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import NotificationBadge from "@/components/notification-badge";
 
 export default function Header() {
   const [location, setLocation] = useLocation();
@@ -19,6 +21,26 @@ export default function Header() {
   const { t } = useLanguage();
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const userId = (user as any)?.id;
+  const isAdmin = (user as any)?.isAdmin;
+
+  // Fetch unread message counts
+  const { data: unreadMessagesData } = useQuery<{ count: number }>({
+    queryKey: [`/api/messages/user/${userId}/unread-count`],
+    enabled: !!userId && isAuthenticated,
+    refetchInterval: 10000, // Poll every 10 seconds
+  });
+
+  const { data: unreadAdminMessagesData } = useQuery<{ count: number }>({
+    queryKey: isAdmin 
+      ? [`/api/admin-messages/admin-unread-count`]
+      : [`/api/admin-messages/user/${userId}/unread-count`],
+    enabled: !!userId && isAuthenticated,
+    refetchInterval: 10000, // Poll every 10 seconds
+  });
+
+  const unreadMessagesCount = unreadMessagesData?.count || 0;
+  const unreadAdminMessagesCount = unreadAdminMessagesData?.count || 0;
 
   const handleLogout = async () => {
     try {
@@ -153,11 +175,17 @@ export default function Header() {
                   <DropdownMenuItem key={item.href} asChild>
                     <Link 
                       href={item.href}
-                      className="flex items-center cursor-pointer"
+                      className="flex items-center cursor-pointer relative"
                       data-testid={`dropdown-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {item.icon && <item.icon className="w-4 h-4 mr-2" />}
                       <span>{item.label}</span>
+                      {item.href === "/messages" && unreadMessagesCount > 0 && (
+                        <NotificationBadge count={unreadMessagesCount} className="-top-1 -right-1" />
+                      )}
+                      {item.href === "/contact-admin" && unreadAdminMessagesCount > 0 && !isAdmin && (
+                        <NotificationBadge count={unreadAdminMessagesCount} className="-top-1 -right-1" />
+                      )}
                     </Link>
                   </DropdownMenuItem>
                 ))}
@@ -167,11 +195,14 @@ export default function Header() {
                     <DropdownMenuItem asChild>
                       <Link 
                         href={adminNavItem.href}
-                        className="flex items-center cursor-pointer"
+                        className="flex items-center cursor-pointer relative"
                         data-testid="dropdown-link-admin-dashboard"
                       >
                         <Shield className="w-4 h-4 mr-2" />
                         <span>{adminNavItem.label}</span>
+                        {unreadAdminMessagesCount > 0 && (
+                          <NotificationBadge count={unreadAdminMessagesCount} className="-top-1 -right-1" />
+                        )}
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -194,7 +225,7 @@ export default function Header() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform ${
+                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform relative ${
                       location === item.href
                         ? "text-primary bg-gradient-to-r from-primary/10 to-accent/5 font-semibold border-l-4 border-primary shadow-sm scale-105"
                         : "text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 hover:scale-102 hover:shadow-sm"
@@ -207,13 +238,19 @@ export default function Header() {
                     <span className="block transition-transform duration-200">
                       {item.label}
                     </span>
+                    {item.href === "/messages" && unreadMessagesCount > 0 && (
+                      <NotificationBadge count={unreadMessagesCount} className="top-2 right-2" />
+                    )}
+                    {item.href === "/contact-admin" && unreadAdminMessagesCount > 0 && !isAdmin && (
+                      <NotificationBadge count={unreadAdminMessagesCount} className="top-2 right-2" />
+                    )}
                   </Link>
                 ))}
                 {(user as any)?.isAdmin && (
                   <Link
                     href={adminNavItem.href}
                     onClick={() => setIsOpen(false)}
-                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform flex items-center gap-2 ${
+                    className={`mobile-menu-item text-left p-3 rounded-lg transition-all duration-300 transform flex items-center gap-2 relative ${
                       location === adminNavItem.href
                         ? "text-primary bg-gradient-to-r from-primary/10 to-accent/5 font-semibold border-l-4 border-primary shadow-sm scale-105"
                         : "text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 hover:scale-102 hover:shadow-sm"
@@ -224,6 +261,9 @@ export default function Header() {
                     <span className="block transition-transform duration-200">
                       {adminNavItem.label}
                     </span>
+                    {unreadAdminMessagesCount > 0 && (
+                      <NotificationBadge count={unreadAdminMessagesCount} className="top-2 right-2" />
+                    )}
                   </Link>
                 )}
                 <hr className="my-4" />

@@ -47,6 +47,32 @@ export default function MessagingModal({
     refetchInterval: open ? 3000 : false, // Poll every 3 seconds when open
   });
 
+  // Mark messages as read when modal is open and messages are loaded
+  useEffect(() => {
+    if (!messages || !currentUserId || !open) return;
+    
+    // Find unread messages sent to the current user
+    const unreadMessages = messages.filter(
+      msg => msg.receiverId === currentUserId && !msg.isRead
+    );
+    
+    // Mark each unread message as read
+    unreadMessages.forEach(async (msg) => {
+      try {
+        await apiRequest("PATCH", `/api/messages/${msg.id}/mark-read`, {});
+      } catch (error) {
+        console.error("Failed to mark message as read:", error);
+      }
+    });
+    
+    // Invalidate unread count query to refresh badge
+    if (unreadMessages.length > 0) {
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/messages/user/${currentUserId}/unread-count`] 
+      });
+    }
+  }, [messages, currentUserId, open, queryClient]);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {

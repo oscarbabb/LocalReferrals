@@ -160,6 +160,7 @@ export const messages = pgTable("messages", {
   receiverId: varchar("receiver_id").references(() => users.id).notNull(),
   requestId: varchar("request_id").references(() => serviceRequests.id),
   content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -287,6 +288,8 @@ export const adminMessages = pgTable("admin_messages", {
   adminResponse: text("admin_response"),
   respondedBy: varchar("responded_by").references(() => users.id),
   respondedAt: timestamp("responded_at"),
+  isReadByUser: boolean("is_read_by_user").default(false),
+  isReadByAdmin: boolean("is_read_by_admin").default(false),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });

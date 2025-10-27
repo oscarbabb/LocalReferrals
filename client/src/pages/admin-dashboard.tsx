@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,8 @@ interface AdminMessage {
   adminResponse: string | null;
   respondedBy: string | null;
   respondedAt: string | null;
+  isReadByUser: boolean;
+  isReadByAdmin: boolean;
   createdAt: string;
   user?: {
     id: string;
@@ -49,6 +51,30 @@ export default function AdminDashboard() {
   const { data: messages, isLoading } = useQuery<AdminMessage[]>({
     queryKey: ["/api/admin-messages"],
   });
+
+  // Mark admin messages as read when admin views them
+  useEffect(() => {
+    if (!messages) return;
+    
+    // Find unread messages
+    const unreadMessages = messages.filter(msg => !msg.isReadByAdmin);
+    
+    // Mark each unread message as read
+    unreadMessages.forEach(async (msg) => {
+      try {
+        await apiRequest("PATCH", `/api/admin-messages/${msg.id}/mark-read-admin`, {});
+      } catch (error) {
+        console.error("Failed to mark admin message as read:", error);
+      }
+    });
+    
+    // Invalidate unread count query to refresh badge
+    if (unreadMessages.length > 0) {
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/admin-messages/admin-unread-count`] 
+      });
+    }
+  }, [messages]);
 
   const respondMutation = useMutation({
     mutationFn: async (data: { id: string; adminResponse?: string; status: string }) => {

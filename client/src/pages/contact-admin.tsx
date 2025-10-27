@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +39,30 @@ export default function ContactAdmin() {
     queryKey: ["/api/admin-messages/user", user?.id],
     enabled: !!user?.id,
   });
+
+  // Mark admin messages as read when user views them
+  useEffect(() => {
+    if (!messages || !user?.id) return;
+    
+    // Find unread messages
+    const unreadMessages = messages.filter(msg => !msg.isReadByUser);
+    
+    // Mark each unread message as read
+    unreadMessages.forEach(async (msg) => {
+      try {
+        await apiRequest("PATCH", `/api/admin-messages/${msg.id}/mark-read-user`, {});
+      } catch (error) {
+        console.error("Failed to mark admin message as read:", error);
+      }
+    });
+    
+    // Invalidate unread count query to refresh badge
+    if (unreadMessages.length > 0) {
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/admin-messages/user/${user.id}/unread-count`] 
+      });
+    }
+  }, [messages, user?.id]);
 
   const createMessageMutation = useMutation({
     mutationFn: async (data: {

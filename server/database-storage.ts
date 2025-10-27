@@ -321,6 +321,31 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
 
+  async getMessage(id: string): Promise<Message | undefined> {
+    const [message] = await db.select().from(messages).where(eq(messages.id, id));
+    return message;
+  }
+
+  async markMessageAsRead(id: string): Promise<Message | undefined> {
+    const [updated] = await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(eq(messages.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(messages)
+      .where(and(
+        eq(messages.receiverId, userId),
+        eq(messages.isRead, false)
+      ));
+    return Number(result[0]?.count || 0);
+  }
+
   // Admin Messages
   async getAdminMessages(): Promise<AdminMessage[]> {
     const results = await db
@@ -360,6 +385,43 @@ export class DatabaseStorage implements IStorage {
   async updateAdminMessage(id: string, message: Partial<AdminMessage>): Promise<AdminMessage | undefined> {
     const [updatedMessage] = await db.update(adminMessages).set({...message, updatedAt: new Date()}).where(eq(adminMessages.id, id)).returning();
     return updatedMessage || undefined;
+  }
+
+  async markAdminMessageAsReadByUser(id: string): Promise<AdminMessage | undefined> {
+    const [updated] = await db
+      .update(adminMessages)
+      .set({ isReadByUser: true })
+      .where(eq(adminMessages.id, id))
+      .returning();
+    return updated;
+  }
+
+  async markAdminMessageAsReadByAdmin(id: string): Promise<AdminMessage | undefined> {
+    const [updated] = await db
+      .update(adminMessages)
+      .set({ isReadByAdmin: true })
+      .where(eq(adminMessages.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getUnreadAdminMessageCountForUser(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(adminMessages)
+      .where(and(
+        eq(adminMessages.userId, userId),
+        eq(adminMessages.isReadByUser, false)
+      ));
+    return Number(result[0]?.count || 0);
+  }
+
+  async getUnreadAdminMessageCountForAdmin(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(adminMessages)
+      .where(eq(adminMessages.isReadByAdmin, false));
+    return Number(result[0]?.count || 0);
   }
 
   // Category Requests

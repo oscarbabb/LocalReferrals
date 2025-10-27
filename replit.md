@@ -8,6 +8,26 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## October 27, 2025 - Message Alert System
+- **Real-Time Notification System**: Implemented comprehensive unread message alert system with database-backed tracking
+  - **Database Schema**: Added `isRead` boolean field to `messages` table and `isReadByUser`/`isReadByAdmin` fields to `admin_messages` table for persistent tracking
+  - **Backend API**: Created secure REST endpoints for marking messages as read and retrieving unread counts:
+    - `GET /api/messages/user/:userId/unread-count` - Returns count of unread regular messages (with authorization check)
+    - `PATCH /api/messages/:id/mark-read` - Marks a regular message as read (verifies message ownership via `storage.getMessage()`)
+    - `GET /api/admin-messages/user-unread-count` - Returns count of unread admin messages for user
+    - `PATCH /api/admin-messages/:id/mark-read-user` - Marks admin message as read by user (verifies ownership)
+    - `GET /api/admin-messages/admin-unread-count` - Returns count of unread admin messages for admin
+    - `PATCH /api/admin-messages/:id/mark-read-admin` - Marks admin message as read by admin (admin-only)
+  - **Security**: All endpoints enforce proper authorization - users can only mark their own received messages as read; ownership verified before any update
+  - **Frontend Components**: Created `NotificationBadge` component integrated into navbar showing real-time unread counts
+    - 10-second polling interval for unread count updates on all pages
+    - Red badge displays count for unread regular messages (users) or admin messages (admins)
+    - Badge only appears when count > 0, automatically disappears when all read
+  - **Automatic Mark-as-Read**: Messages and admin messages automatically marked as read when viewed
+    - Regular messages: Marked read when conversation modal opens
+    - Admin messages: Marked read when message detail view is opened
+  - **Storage Layer**: Implemented complete methods in both DatabaseStorage and MemStorage classes for unread tracking and message retrieval
+
 ## October 27, 2025 - Production Authentication Fix
 - **Session Cookie Configuration**: Fixed authentication issues on published site by adding `sameSite: 'lax'` attribute to session cookies
   - Updated session configuration in `server/replitAuth.ts` to include proper cookie attributes for cross-domain authentication

@@ -2101,6 +2101,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/messages/:id/mark-read", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // First, get the message to verify ownership
+      const message = await storage.getMessage(req.params.id);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      // Verify the current user is the receiver of this message
+      if (message.receiverId !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only mark your own messages as read" });
+      }
+      
+      const updatedMessage = await storage.markMessageAsRead(req.params.id);
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error("Failed to mark message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
+  app.get("/api/messages/user/:userId/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user can only access their own unread count
+      if (req.user.claims.sub !== req.params.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const count = await storage.getUnreadMessageCount(req.params.userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Failed to fetch unread message count:", error);
+      res.status(500).json({ message: "Failed to fetch unread message count" });
+    }
+  });
+
   // Admin Messages
   app.post("/api/admin-messages", isAuthenticated, async (req: any, res) => {
     try {
@@ -2174,6 +2213,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to update admin message:", error);
       res.status(500).json({ message: "Failed to update admin message" });
+    }
+  });
+
+  app.patch("/api/admin-messages/:id/mark-read-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // First, get the message to verify ownership
+      const adminMessage = await storage.getAdminMessage(req.params.id);
+      
+      if (!adminMessage) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      // Verify the current user owns this admin message
+      if (adminMessage.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only mark your own admin messages as read" });
+      }
+      
+      const message = await storage.markAdminMessageAsReadByUser(req.params.id);
+      res.json(message);
+    } catch (error) {
+      console.error("Failed to mark admin message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
+  app.patch("/api/admin-messages/:id/mark-read-admin", isAdmin, async (req: any, res) => {
+    try {
+      const message = await storage.markAdminMessageAsReadByAdmin(req.params.id);
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      res.json(message);
+    } catch (error) {
+      console.error("Failed to mark admin message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
+  app.get("/api/admin-messages/user/:userId/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      // Validate user can only access their own unread count
+      if (req.user.claims.sub !== req.params.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const count = await storage.getUnreadAdminMessageCountForUser(req.params.userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Failed to fetch unread admin message count:", error);
+      res.status(500).json({ message: "Failed to fetch unread message count" });
+    }
+  });
+
+  app.get("/api/admin-messages/admin-unread-count", isAdmin, async (req: any, res) => {
+    try {
+      const count = await storage.getUnreadAdminMessageCountForAdmin();
+      res.json({ count });
+    } catch (error) {
+      console.error("Failed to fetch admin unread message count:", error);
+      res.status(500).json({ message: "Failed to fetch unread message count" });
     }
   });
 
