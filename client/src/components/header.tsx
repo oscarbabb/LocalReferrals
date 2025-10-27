@@ -13,6 +13,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import NotificationBadge from "@/components/notification-badge";
+import MessageAlertMonitor from "@/components/message-alert-monitor";
 
 export default function Header() {
   const [location, setLocation] = useLocation();
@@ -83,8 +84,12 @@ export default function Header() {
   const adminNavItem = { href: "/admin-dashboard", label: t('nav.adminDashboard'), icon: Shield };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      {/* Utility Bar - Top Row (Desktop Only) */}
+    <>
+      {/* Message alert monitor - invisible component that shows toast notifications */}
+      {isAuthenticated && <MessageAlertMonitor />}
+      
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        {/* Utility Bar - Top Row (Desktop Only) */}
       <div className="hidden lg:block border-b border-gray-100 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-end items-center h-10 space-x-2">
@@ -328,5 +333,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 }

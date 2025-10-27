@@ -26,4 +26,10 @@ export const messages = {
   'messages.toast.tryAgain': 'No se pudo enviar el mensaje. Intenta nuevamente.',
   'messages.toast.emptyMessage': 'Mensaje vacío',
   'messages.toast.writeMessage': 'Por favor escribe un mensaje antes de enviar.',
+  
+  // Alerts
+  'messages.unreadAlert.title': 'Tienes mensajes sin leer',
+  'messages.unreadAlert.description': 'Tienes {{count}} mensajes sin leer esperándote.',
+  'messages.newMessageAlert.title': 'Nuevo mensaje recibido',
+  'messages.newMessageAlert.description': 'Recibiste {{count}} mensaje(s) nuevo(s).',
 };

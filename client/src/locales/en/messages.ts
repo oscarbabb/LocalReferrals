@@ -26,4 +26,10 @@ export const messages = {
   'messages.toast.tryAgain': 'Could not send message. Please try again.',
   'messages.toast.emptyMessage': 'Empty message',
   'messages.toast.writeMessage': 'Please write a message before sending.',
+  
+  // Alerts
+  'messages.unreadAlert.title': 'You have unread messages',
+  'messages.unreadAlert.description': 'You have {{count}} unread messages waiting for you.',
+  'messages.newMessageAlert.title': 'New message received',
+  'messages.newMessageAlert.description': 'You received {{count}} new message(s).',
 };

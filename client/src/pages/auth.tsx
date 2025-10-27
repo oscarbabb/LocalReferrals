@@ -90,7 +90,7 @@ export default function Auth() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       // Invalidate auth queries to refresh user state
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       
@@ -98,6 +98,48 @@ export default function Auth() {
         title: t('auth.toast.loginSuccess.title'),
         description: t('auth.toast.loginSuccess.description'),
       });
+
+      // Check for unread messages after successful login
+      try {
+        const userId = data.user?.id;
+        const isAdmin = data.user?.isAdmin;
+
+        if (userId) {
+          let unreadCount = 0;
+          
+          if (isAdmin) {
+            // Check admin messages for admins
+            const adminResponse = await fetch("/api/admin-messages/admin-unread-count", {
+              credentials: "include",
+            });
+            if (adminResponse.ok) {
+              const adminData = await adminResponse.json();
+              unreadCount = adminData.count || 0;
+            }
+          } else {
+            // Check regular messages for users
+            const userResponse = await fetch(`/api/messages/user/${userId}/unread-count`, {
+              credentials: "include",
+            });
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              unreadCount = userData.count || 0;
+            }
+          }
+
+          // Show notification if there are unread messages
+          if (unreadCount > 0) {
+            toast({
+              title: t('messages.unreadAlert.title'),
+              description: t('messages.unreadAlert.description').replace('{{count}}', unreadCount.toString()),
+              duration: 5000,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking unread messages:", error);
+      }
+
       setLocation("/");
     },
     onError: (error: any) => {
