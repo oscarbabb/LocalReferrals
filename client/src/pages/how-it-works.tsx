@@ -452,7 +452,7 @@ export default function HowItWorks(): JSX.Element {
                 {t('howItWorks.exploreServices')}
               </Button>
             </Link>
-            <Link href="/providers">
+            <Link href="/provider-setup">
               <Button size="lg" variant="outline" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg w-full sm:w-auto shadow-lg" data-testid="button-become-provider">
                 {t('howItWorks.becomeProvider')}
               </Button>
