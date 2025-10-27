@@ -101,6 +101,24 @@ export const profile = {
   'profile.provider.stats.rating': 'Calificación',
   'profile.provider.stats.thisMonth': 'Este mes',
   
+  // Provider tab - Edit profile
+  'profile.provider.edit.title': 'Editar Perfil de Proveedor',
+  'profile.provider.edit.showButton': 'Editar Perfil',
+  'profile.provider.edit.hideButton': 'Cancelar',
+  'profile.provider.edit.saveButton': 'Guardar Cambios',
+  'profile.provider.edit.saving': 'Guardando...',
+  'profile.provider.edit.title.label': 'Título del Servicio',
+  'profile.provider.edit.title.placeholder': 'Ej: Plomero Profesional',
+  'profile.provider.edit.description.label': 'Descripción',
+  'profile.provider.edit.description.placeholder': 'Describe tus servicios y experiencia...',
+  'profile.provider.edit.experience.label': 'Experiencia',
+  'profile.provider.edit.experience.placeholder': 'Describe tu experiencia profesional...',
+  'profile.provider.edit.hourlyRate.label': 'Tarifa por Hora (opcional)',
+  'profile.provider.edit.hourlyRate.placeholder': '500',
+  'profile.provider.edit.serviceRadius.label': 'Radio de Servicio (km, opcional)',
+  'profile.provider.edit.serviceRadius.placeholder': 'Ej: 10',
+  'profile.provider.edit.serviceRadius.help': 'Distancia máxima que estás dispuesto a viajar para ofrecer servicios',
+  
   // Reviews section - Customer reviews
   'profile.reviews.customerTitle': 'Reseñas como Cliente',
   'profile.reviews.customerDescription': 'Estas son las calificaciones que proveedores han dejado sobre ti después de trabajos completados.',
@@ -159,6 +177,8 @@ export const profile = {
   'profile.validation.addressMin': 'La dirección debe ser más específica',
   'profile.validation.radiusMin': 'El radio debe ser al menos 1 km',
   'profile.validation.radiusMax': 'El radio no puede exceder 100 km',
+  'profile.validation.titleMin': 'El título debe tener al menos 5 caracteres',
+  'profile.validation.descriptionMin': 'La descripción debe tener al menos 20 caracteres',
   
   // Toast messages
   'profile.toast.roleUpdated.title': 'Rol actualizado',
@@ -174,4 +194,8 @@ export const profile = {
   'profile.toast.profileUpdated.description': 'Tus cambios han sido guardados exitosamente.',
   'profile.toast.profileError.title': 'Error al actualizar perfil',
   'profile.toast.profileError.description': 'No se pudo actualizar tu perfil. Inténtalo de nuevo.',
+  'profile.toast.providerUpdated.title': 'Perfil de proveedor actualizado',
+  'profile.toast.providerUpdated.description': 'Tu perfil de proveedor se ha actualizado exitosamente.',
+  'profile.toast.providerError.title': 'Error al actualizar perfil de proveedor',
+  'profile.toast.providerError.description': 'No se pudo actualizar tu perfil de proveedor. Inténtalo de nuevo.',
 };

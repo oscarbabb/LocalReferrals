@@ -59,6 +59,24 @@ const profileSchema = (t: any) => z.object({
 
 type ProfileForm = z.infer<ReturnType<typeof profileSchema>>;
 
+// Provider form schema - accepts translation function
+const providerFormSchema = (t: any) => z.object({
+  title: z.string().min(5, t('profile.validation.titleMin')),
+  description: z.string().min(20, t('profile.validation.descriptionMin')),
+  experience: z.string().optional(),
+  hourlyRate: z.string().optional(),
+  serviceRadiusKm: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().int().min(1, t('profile.validation.radiusMin')).max(100, t('profile.validation.radiusMax')).optional()
+  ),
+});
+
+type ProviderForm = z.infer<ReturnType<typeof providerFormSchema>>;
+
 export default function Profile() {
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -68,6 +86,7 @@ export default function Profile() {
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const [isUploadingMenuDocument, setIsUploadingMenuDocument] = useState(false);
   const [isDeletingMenuDocument, setIsDeletingMenuDocument] = useState(false);
+  const [isEditingProviderProfile, setIsEditingProviderProfile] = useState(false);
 
   // Get current user data
   const { data: user, isLoading } = useQuery<any>({
@@ -121,6 +140,18 @@ export default function Profile() {
     }
   });
 
+  // Provider profile form
+  const providerForm = useForm<ProviderForm>({
+    resolver: zodResolver(providerFormSchema(t)),
+    defaultValues: {
+      title: provider?.title || "",
+      description: provider?.description || "",
+      experience: provider?.experience || "",
+      hourlyRate: provider?.hourlyRate || "",
+      serviceRadiusKm: provider?.serviceRadiusKm || undefined,
+    }
+  });
+
   // Update form when user data loads
   useEffect(() => {
     if (user) {
@@ -149,6 +180,19 @@ export default function Profile() {
       setProfilePicture(user.avatar || null);
     }
   }, [user, profileForm]);
+
+  // Update provider form when provider data loads
+  useEffect(() => {
+    if (provider) {
+      providerForm.reset({
+        title: provider.title || "",
+        description: provider.description || "",
+        experience: provider.experience || "",
+        hourlyRate: provider.hourlyRate || "",
+        serviceRadiusKm: provider.serviceRadiusKm || undefined,
+      });
+    }
+  }, [provider, providerForm]);
 
   // Role switching mutation
   const roleSwitchMutation = useMutation({
@@ -345,6 +389,34 @@ export default function Profile() {
 
   const onSubmitProfile = (data: ProfileForm) => {
     updateProfileMutation.mutate(data);
+  };
+
+  // Provider profile update mutation
+  const updateProviderMutation = useMutation({
+    mutationFn: async (providerData: ProviderForm) => {
+      if (!provider?.id) throw new Error("Provider not found");
+      
+      return await apiRequest("PATCH", `/api/providers/${provider.id}`, providerData);
+    },
+    onSuccess: () => {
+      toast({
+        title: t('profile.toast.providerUpdated.title'),
+        description: t('profile.toast.providerUpdated.description'),
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
+      setIsEditingProviderProfile(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('profile.toast.providerError.title'),
+        description: error.message || t('profile.toast.providerError.description'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmitProviderProfile = (data: ProviderForm) => {
+    updateProviderMutation.mutate(data);
   };
 
   const getInitials = (name: string) => {
@@ -932,6 +1004,157 @@ export default function Profile() {
                         </div>
                       </div>
                     </CardContent>
+                  </Card>
+                )}
+
+                {/* Edit Provider Profile Form */}
+                {provider && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>{t('profile.provider.edit.title')}</span>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditingProviderProfile(!isEditingProviderProfile)}
+                          data-testid="button-toggle-provider-edit"
+                        >
+                          {isEditingProviderProfile ? t('profile.provider.edit.hideButton') : t('profile.provider.edit.showButton')}
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    {isEditingProviderProfile && (
+                      <CardContent>
+                        <Form {...providerForm}>
+                          <form onSubmit={providerForm.handleSubmit(onSubmitProviderProfile)} className="space-y-6">
+                            <FormField
+                              control={providerForm.control}
+                              name="title"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>{t('profile.provider.edit.title.label')}</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder={t('profile.provider.edit.title.placeholder')}
+                                      data-testid="input-provider-title"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={providerForm.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>{t('profile.provider.edit.description.label')}</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder={t('profile.provider.edit.description.placeholder')}
+                                      rows={4}
+                                      data-testid="textarea-provider-description"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={providerForm.control}
+                              name="experience"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>{t('profile.provider.edit.experience.label')}</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder={t('profile.provider.edit.experience.placeholder')}
+                                      rows={4}
+                                      data-testid="textarea-provider-experience"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={providerForm.control}
+                              name="hourlyRate"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>{t('profile.provider.edit.hourlyRate.label')}</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      type="number"
+                                      placeholder={t('profile.provider.edit.hourlyRate.placeholder')}
+                                      data-testid="input-provider-hourlyRate"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={providerForm.control}
+                              name="serviceRadiusKm"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>{t('profile.provider.edit.serviceRadius.label')}</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      type="number"
+                                      min={1}
+                                      max={100}
+                                      placeholder={t('profile.provider.edit.serviceRadius.placeholder')}
+                                      value={field.value ?? ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value === '' ? undefined : Number(value));
+                                      }}
+                                      data-testid="input-provider-serviceRadius"
+                                    />
+                                  </FormControl>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    {t('profile.provider.edit.serviceRadius.help')}
+                                  </p>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="flex space-x-3">
+                              <Button
+                                type="submit"
+                                disabled={updateProviderMutation.isPending}
+                                className="bg-orange-600 hover:bg-orange-700"
+                                data-testid="button-save-provider"
+                              >
+                                {updateProviderMutation.isPending ? t('profile.provider.edit.saving') : t('profile.provider.edit.saveButton')}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  setIsEditingProviderProfile(false);
+                                  providerForm.reset();
+                                }}
+                                data-testid="button-cancel-provider-edit"
+                              >
+                                {t('profile.provider.edit.hideButton')}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </CardContent>
+                    )}
                   </Card>
                 )}
 
