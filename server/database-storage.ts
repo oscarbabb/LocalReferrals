@@ -59,7 +59,7 @@ import {
   providerCategories
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, sql } from "drizzle-orm";
+import { eq, and, or, sql, ne } from "drizzle-orm";
 import type { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
@@ -86,6 +86,36 @@ export class DatabaseStorage implements IStorage {
   async getUserByResetToken(token: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.resetToken, token));
     return user || undefined;
+  }
+
+  async getUsers(excludeUserId?: string): Promise<User[]> {
+    if (excludeUserId) {
+      return await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          fullName: users.fullName,
+          avatar: users.avatar,
+          isProvider: users.isProvider,
+          isAdmin: users.isAdmin,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .where(ne(users.id, excludeUserId));
+    }
+    return await db
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        fullName: users.fullName,
+        avatar: users.avatar,
+        isProvider: users.isProvider,
+        isAdmin: users.isAdmin,
+        createdAt: users.createdAt,
+      })
+      .from(users);
   }
 
   async createUser(user: InsertUser): Promise<User> {
