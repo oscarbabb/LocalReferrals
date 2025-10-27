@@ -112,46 +112,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.post("/api/auth/login", async (req, res) => {
     try {
-      console.log("📨 Raw request body:", JSON.stringify(req.body));
-      console.log("📨 Request headers:", req.headers['content-type']);
-      
       const { email, password } = req.body;
       
-      console.log("🔐 Login attempt:", { 
-        email, 
-        emailType: typeof email,
-        password: password ? '***' + password.slice(-3) : 'undefined',
-        passwordLength: password?.length,
-        passwordType: typeof password
-      });
-      
       if (!email || !password) {
-        console.log("❌ Missing email or password");
         return res.status(400).json({ message: "Email and password are required" });
       }
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        console.log("❌ User not found:", email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
-      console.log("✅ User found:", { id: user.id, email: user.email, hasPassword: !!user.password });
 
       // Securely compare passwords using bcrypt
       const isPasswordValid = await bcrypt.compare(password, user.password);
-      console.log("🔑 Password validation:", { 
-        isValid: isPasswordValid, 
-        providedPasswordLast3: password.slice(-3),
-        storedHashStart: user.password.substring(0, 20) 
-      });
       
       if (!isPasswordValid) {
-        console.log("❌ Invalid password for user:", email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
-      console.log("✅ Login successful for:", email);
 
       // Create authenticated session
       const sessionUser = {
