@@ -251,7 +251,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(messages).where(eq(messages.requestId, requestId));
   }
 
-  async getConversation(userId1: string, userId2: string): Promise<Message[]> {
+  async getConversation(userId1: string, userId2: string, viewerId?: string): Promise<Message[]> {
     const result = await db.select().from(messages).where(
       or(
         and(
@@ -264,6 +264,15 @@ export class DatabaseStorage implements IStorage {
         )
       )
     ).orderBy(messages.createdAt);
+    
+    // Filter out deleted messages based on viewer
+    if (viewerId) {
+      return result.filter(m => {
+        if (m.senderId === viewerId && m.deletedBySender) return false;
+        if (m.receiverId === viewerId && m.deletedByReceiver) return false;
+        return true;
+      });
+    }
     
     return result;
   }
@@ -344,6 +353,47 @@ export class DatabaseStorage implements IStorage {
         eq(messages.isRead, false)
       ));
     return Number(result[0]?.count || 0);
+  }
+
+  async deleteMessage(messageId: string, userId: string): Promise<Message | undefined> {
+    const message = await this.getMessage(messageId);
+    if (!message) {
+      return undefined;
+    }
+    
+    let updateData: Partial<Message> = { deletedAt: new Date() };
+    
+    if (message.senderId === userId) {
+      updateData.deletedBySender = true;
+    } else if (message.receiverId === userId) {
+      updateData.deletedByReceiver = true;
+    } else {
+      return undefined;
+    }
+    
+    const [updated] = await db
+      .update(messages)
+      .set(updateData)
+      .where(eq(messages.id, messageId))
+      .returning();
+    
+    return updated;
+  }
+
+  async forwardMessage(messageId: string, newReceiverId: string, senderId: string): Promise<Message> {
+    const originalMessage = await this.getMessage(messageId);
+    if (!originalMessage) {
+      throw new Error('Original message not found');
+    }
+    
+    const [forwardedMessage] = await db.insert(messages).values({
+      senderId,
+      receiverId: newReceiverId,
+      content: originalMessage.content,
+      forwardedFrom: messageId,
+    }).returning();
+    
+    return forwardedMessage;
   }
 
   // Admin Messages

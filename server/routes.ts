@@ -2079,7 +2079,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/messages/conversation/:userId1/:userId2", isAuthenticated, async (req: any, res) => {
     try {
-      const messages = await storage.getConversation(req.params.userId1, req.params.userId2);
+      const currentUserId = req.user.claims.sub;
+      const messages = await storage.getConversation(req.params.userId1, req.params.userId2, currentUserId);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch conversation" });
@@ -2137,6 +2138,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to fetch unread message count:", error);
       res.status(500).json({ message: "Failed to fetch unread message count" });
+    }
+  });
+
+  app.delete("/api/messages/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const messageId = req.params.id;
+      
+      const deletedMessage = await storage.deleteMessage(messageId, userId);
+      
+      if (!deletedMessage) {
+        return res.status(404).json({ message: "Message not found or you don't have permission to delete it" });
+      }
+      
+      res.json(deletedMessage);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
+  app.post("/api/messages/forward", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { messageId, receiverId } = req.body;
+      
+      if (!messageId || !receiverId) {
+        return res.status(400).json({ message: "Message ID and receiver ID are required" });
+      }
+      
+      // Verify the original message exists and the user has access to it
+      const originalMessage = await storage.getMessage(messageId);
+      if (!originalMessage) {
+        return res.status(404).json({ message: "Original message not found" });
+      }
+      
+      // Verify the user is either sender or receiver of the original message
+      if (originalMessage.senderId !== userId && originalMessage.receiverId !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only forward messages you're involved in" });
+      }
+      
+      const forwardedMessage = await storage.forwardMessage(messageId, receiverId, userId);
+      res.status(201).json(forwardedMessage);
+    } catch (error) {
+      console.error("Failed to forward message:", error);
+      res.status(500).json({ message: "Failed to forward message" });
     }
   });
 

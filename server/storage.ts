@@ -120,12 +120,14 @@ export interface IStorage {
 
   // Messages
   getMessagesByRequest(requestId: string): Promise<Message[]>;
-  getConversation(userId1: string, userId2: string): Promise<Message[]>;
+  getConversation(userId1: string, userId2: string, viewerId?: string): Promise<Message[]>;
   getUserConversations(userId: string): Promise<Conversation[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   getMessage(id: string): Promise<Message | undefined>;
   markMessageAsRead(id: string): Promise<Message | undefined>;
   getUnreadMessageCount(userId: string): Promise<number>;
+  deleteMessage(messageId: string, userId: string): Promise<Message | undefined>;
+  forwardMessage(messageId: string, newReceiverId: string, senderId: string): Promise<Message>;
 
   // Admin Messages
   getAdminMessages(): Promise<AdminMessage[]>;
@@ -725,12 +727,23 @@ export class MemStorage implements IStorage {
       .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
   }
 
-  async getConversation(userId1: string, userId2: string): Promise<Message[]> {
+  async getConversation(userId1: string, userId2: string, viewerId?: string): Promise<Message[]> {
     return Array.from(this.messages.values())
-      .filter(m => 
-        (m.senderId === userId1 && m.receiverId === userId2) ||
-        (m.senderId === userId2 && m.receiverId === userId1)
-      )
+      .filter(m => {
+        // Check if message is part of this conversation
+        const isInConversation = (m.senderId === userId1 && m.receiverId === userId2) ||
+                                  (m.senderId === userId2 && m.receiverId === userId1);
+        
+        if (!isInConversation) return false;
+        
+        // If viewerId is provided, filter out deleted messages
+        if (viewerId) {
+          if (m.senderId === viewerId && m.deletedBySender) return false;
+          if (m.receiverId === viewerId && m.deletedByReceiver) return false;
+        }
+        
+        return true;
+      })
       .sort((a, b) => a.createdAt!.getTime() - b.createdAt!.getTime());
   }
 
@@ -805,6 +818,50 @@ export class MemStorage implements IStorage {
       }
     }
     return count;
+  }
+
+  async deleteMessage(messageId: string, userId: string): Promise<Message | undefined> {
+    const message = this.messages.get(messageId);
+    if (!message) {
+      return undefined;
+    }
+    
+    if (message.senderId === userId) {
+      message.deletedBySender = true;
+    } else if (message.receiverId === userId) {
+      message.deletedByReceiver = true;
+    } else {
+      return undefined;
+    }
+    
+    message.deletedAt = new Date();
+    this.messages.set(messageId, message);
+    return message;
+  }
+
+  async forwardMessage(messageId: string, newReceiverId: string, senderId: string): Promise<Message> {
+    const originalMessage = this.messages.get(messageId);
+    if (!originalMessage) {
+      throw new Error('Original message not found');
+    }
+    
+    const id = randomUUID();
+    const forwardedMessage: Message = {
+      id,
+      senderId,
+      receiverId: newReceiverId,
+      requestId: null,
+      content: originalMessage.content,
+      isRead: false,
+      deletedBySender: false,
+      deletedByReceiver: false,
+      deletedAt: null,
+      forwardedFrom: messageId,
+      createdAt: new Date()
+    };
+    
+    this.messages.set(id, forwardedMessage);
+    return forwardedMessage;
   }
 
   async markAdminMessageAsReadByUser(id: string): Promise<AdminMessage | undefined> {
