@@ -161,6 +161,10 @@ export const messages = pgTable("messages", {
   requestId: varchar("request_id").references(() => serviceRequests.id),
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
+  deletedBySender: boolean("deleted_by_sender").default(false),
+  deletedByReceiver: boolean("deleted_by_receiver").default(false),
+  deletedAt: timestamp("deleted_at"),
+  forwardedFrom: varchar("forwarded_from").references((): any => messages.id),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
