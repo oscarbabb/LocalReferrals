@@ -19,14 +19,21 @@ Preferred communication style: Simple, everyday language.
     - `GET /api/admin-messages/admin-unread-count` - Returns count of unread admin messages for admin
     - `PATCH /api/admin-messages/:id/mark-read-admin` - Marks admin message as read by admin (admin-only)
   - **Security**: All endpoints enforce proper authorization - users can only mark their own received messages as read; ownership verified before any update
-  - **Frontend Components**: Created `NotificationBadge` component integrated into navbar showing real-time unread counts
-    - 10-second polling interval for unread count updates on all pages
+  - **Frontend Components**: 
+    - **NotificationBadge**: Integrated into navbar showing real-time unread counts (10-second polling)
+    - **MessageAlertMonitor**: Detects count increases and shows toast notifications for new messages
+    - **Sign-in Pop-up Alert**: Checks unread count after login and shows toast if messages are waiting
+  - **Alert Features**:
     - Red badge displays count for unread regular messages (users) or admin messages (admins)
     - Badge only appears when count > 0, automatically disappears when all read
+    - Sign-in alert fires immediately after successful login if unread count > 0
+    - Live alert fires when new messages arrive (count increases) while user is on the site
+    - Both alerts use bilingual translations (Spanish/English) with dynamic count placeholders
   - **Automatic Mark-as-Read**: Messages and admin messages automatically marked as read when viewed
     - Regular messages: Marked read when conversation modal opens
     - Admin messages: Marked read when message detail view is opened
   - **Storage Layer**: Implemented complete methods in both DatabaseStorage and MemStorage classes for unread tracking and message retrieval
+  - **Performance Optimization**: Single shared query cache for header badge and alert monitor prevents duplicate polling requests
 
 ## October 27, 2025 - Production Authentication Fix
 - **Session Cookie Configuration**: Fixed authentication issues on published site by adding `sameSite: 'lax'` attribute to session cookies
