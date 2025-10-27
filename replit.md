@@ -8,6 +8,17 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## October 27, 2025 - Production Authentication Fix
+- **Session Cookie Configuration**: Fixed authentication issues on published site by adding `sameSite: 'lax'` attribute to session cookies
+  - Updated session configuration in `server/replitAuth.ts` to include proper cookie attributes for cross-domain authentication
+  - Session cookies now properly work on both development (preview) and production (published) environments
+- **Production Database Configuration**: Resolved admin login failure on published site
+  - **Critical Discovery**: Replit uses SEPARATE databases for development (preview) and production (published)
+  - Agent can only modify development database; production database must be updated manually through Replit Database tool
+  - Admin account (oscar@finnbix.com / admin123) configured in both development and production databases
+  - Production database updated by switching to "Production" database in Replit Database tool and running update SQL
+- **Key Learning**: Any database changes (schema or data) must be applied to BOTH databases when deploying to production
+
 ## October 24, 2025 - File Upload Type Restrictions
 - **Enhanced File Upload Security**: Implemented file type restrictions across all upload components
   - Added `allowedFileTypes` prop to ObjectUploader component for Uppy-based validation
