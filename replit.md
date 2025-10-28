@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
 - **Mutual Rating System**: Bidirectional rating for providers and customers.
 - **One-Click Booking**: Calendar interface with time slot selection.
+- **Booking Management**: Unified scheduled appointments view that displays both confirmed service requests and formal appointments, with duplicate prevention logic to avoid showing the same booking twice.
 - **Messaging System**: Comprehensive inbox for provider-consumer conversations with real-time synchronization, delete, and forward capabilities. Includes an unread message alert system with database-backed tracking.
 - **Admin Communication & Dashboard System**: User-to-admin messaging and an Admin Dashboard for message management, secured by role-based access.
 - **Category Request System**: User-driven feature for suggesting new service categories with admin review workflow.

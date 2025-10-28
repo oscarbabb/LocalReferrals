@@ -109,6 +109,14 @@ export default function Bookings() {
     enabled: !!user?.id,
   });
 
+  // Combine confirmed service requests with scheduled appointments
+  // Exclude service requests that already have appointments created
+  const appointmentServiceRequestIds = new Set(myAppointments.map(apt => apt.serviceRequestId));
+  const confirmedRequestsWithoutAppointments = myRequests.filter(
+    req => req.status === 'confirmed' && !appointmentServiceRequestIds.has(req.id)
+  );
+  const allScheduledItems = [...myAppointments, ...confirmedRequestsWithoutAppointments];
+
   // Mutation for updating service request status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {
@@ -559,7 +567,7 @@ export default function Bookings() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {appointmentsLoading ? (
+                {(appointmentsLoading || requestsLoading) ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="animate-pulse">
@@ -567,11 +575,16 @@ export default function Bookings() {
                       </div>
                     ))}
                   </div>
-                ) : myAppointments.length > 0 ? (
+                ) : allScheduledItems.length > 0 ? (
                   <div className="space-y-4">
-                    {myAppointments.map((appointment: Appointment) => (
-                      <AppointmentCard key={appointment.id} appointment={appointment} currentUser={user} />
-                    ))}
+                    {allScheduledItems.map((item: Appointment | ServiceRequest) => {
+                      // Check if it's an appointment or a confirmed service request
+                      if ('appointmentDate' in item) {
+                        return <AppointmentCard key={item.id} appointment={item as Appointment} currentUser={user} />;
+                      } else {
+                        return <ServiceRequestCard key={item.id} request={item as ServiceRequest} currentUser={user} />;
+                      }
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12">
