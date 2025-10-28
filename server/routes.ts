@@ -945,40 +945,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reviewData = insertReviewSchema.parse({ ...req.body, reviewerId });
       const review = await storage.createReview(reviewData);
       
-      // Send email notification to provider (async, don't block response)
+      // Send email notification to appropriate recipient based on review type (async, don't block response)
       (async () => {
         try {
-          const provider = await storage.getProvider(review.providerId);
-          if (!provider) {
-            console.warn(`[Review Notification] Provider not found for review ${review.id}`);
-            return;
-          }
-          
-          const providerUser = await storage.getUser(provider.userId);
           const reviewer = await storage.getUser(review.reviewerId);
-          
-          if (!providerUser?.email) {
-            console.warn(`[Review Notification] Provider user email not found for review ${review.id}`);
-            return;
-          }
-          
           if (!reviewer) {
             console.warn(`[Review Notification] Reviewer not found for review ${review.id}`);
             return;
           }
           
-          const emailSent = await sendReviewNotificationEmail(
-            providerUser.email,
-            provider.title,
-            reviewer.fullName || reviewer.username,
-            review.rating,
-            review.comment || undefined
-          );
-          
-          if (emailSent) {
-            console.log(`✅ [Review Notification] Email sent to ${providerUser.email} for review ${review.id}`);
+          // Determine recipient based on review type
+          if (review.reviewType === 'customer_review') {
+            // Provider reviewing customer - notify the customer
+            const customer = await storage.getUser(review.reviewedUserId!);
+            const provider = await storage.getProvider(review.providerId);
+            
+            if (!customer?.email) {
+              console.warn(`[Review Notification] Customer email not found for review ${review.id}`);
+              return;
+            }
+            
+            if (!provider) {
+              console.warn(`[Review Notification] Provider not found for review ${review.id}`);
+              return;
+            }
+            
+            const emailSent = await sendReviewNotificationEmail(
+              customer.email,
+              customer.fullName || customer.username,
+              provider.title,
+              review.rating,
+              review.comment || undefined
+            );
+            
+            if (emailSent) {
+              console.log(`✅ [Customer Review Notification] Email sent to ${customer.email} for review ${review.id}`);
+            } else {
+              console.error(`❌ [Customer Review Notification] Failed to send email to ${customer.email} for review ${review.id}`);
+            }
           } else {
-            console.error(`❌ [Review Notification] Failed to send email to ${providerUser.email} for review ${review.id}`);
+            // Customer reviewing provider - notify the provider (default behavior)
+            const provider = await storage.getProvider(review.providerId);
+            if (!provider) {
+              console.warn(`[Review Notification] Provider not found for review ${review.id}`);
+              return;
+            }
+            
+            const providerUser = await storage.getUser(provider.userId);
+            if (!providerUser?.email) {
+              console.warn(`[Review Notification] Provider user email not found for review ${review.id}`);
+              return;
+            }
+            
+            const emailSent = await sendReviewNotificationEmail(
+              providerUser.email,
+              provider.title,
+              reviewer.fullName || reviewer.username,
+              review.rating,
+              review.comment || undefined
+            );
+            
+            if (emailSent) {
+              console.log(`✅ [Provider Review Notification] Email sent to ${providerUser.email} for review ${review.id}`);
+            } else {
+              console.error(`❌ [Provider Review Notification] Failed to send email to ${providerUser.email} for review ${review.id}`);
+            }
           }
         } catch (emailError) {
           console.error(`❌ [Review Notification] Error sending email for review ${review.id}:`, emailError);

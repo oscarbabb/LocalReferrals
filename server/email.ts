@@ -410,8 +410,8 @@ function escapeHtml(unsafe: string): string {
 }
 
 export async function sendReviewNotificationEmail(
-  providerEmail: string,
-  providerName: string,
+  recipientEmail: string,
+  recipientName: string,
   reviewerName: string,
   rating: number,
   comment?: string
@@ -431,7 +431,7 @@ export async function sendReviewNotificationEmail(
   // Sanitize user-generated content to prevent HTML injection
   const safeComment = comment ? escapeHtml(comment) : undefined;
   const safeReviewerName = escapeHtml(reviewerName);
-  const safeProviderName = escapeHtml(providerName);
+  const safeRecipientName = escapeHtml(recipientName);
   
   const html = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
@@ -446,14 +446,14 @@ export async function sendReviewNotificationEmail(
         </div>
         
         <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px; text-align: center;">
-          ¡Hola <strong>${safeProviderName}</strong>! Has recibido una nueva reseña.
+          ¡Hola <strong>${safeRecipientName}</strong>! Has recibido una nueva reseña.
         </p>
         
         <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
           <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 20px; text-align: center;">Detalles de la Reseña</h3>
           <div style="background: white; padding: 20px; border-radius: 8px;">
             <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Cliente</p>
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">De</p>
               <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${safeReviewerName}</p>
             </div>
             <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
@@ -497,10 +497,10 @@ export async function sendReviewNotificationEmail(
     </div>
   `;
   
-  const text = `¡Hola ${safeProviderName}! Has recibido una nueva reseña de ${safeReviewerName}. Calificación: ${clampedRating} de 5 estrellas.${safeComment ? ` Comentario: "${safeComment}"` : ''} Inicia sesión en tu cuenta para ver la reseña completa y responder. ${appUrl}/profile`;
+  const text = `¡Hola ${safeRecipientName}! Has recibido una nueva reseña de ${safeReviewerName}. Calificación: ${clampedRating} de 5 estrellas.${safeComment ? ` Comentario: "${safeComment}"` : ''} Inicia sesión en tu cuenta para ver la reseña completa. ${appUrl}/profile`;
 
   return await sendEmail({
-    to: providerEmail,
+    to: recipientEmail,
     from: FROM_EMAIL,
     subject,
     text,
