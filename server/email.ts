@@ -399,6 +399,115 @@ export async function sendPasswordResetEmail(
   });
 }
 
+// Helper function to escape HTML in user-generated content
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+export async function sendReviewNotificationEmail(
+  providerEmail: string,
+  providerName: string,
+  reviewerName: string,
+  rating: number,
+  comment?: string
+): Promise<boolean> {
+  const appUrl = process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : 'https://www.referenciaslocales.com.mx';
+    
+  const subject = "⭐ Nueva Reseña Recibida - Referencias Locales";
+  
+  // Clamp rating to 1-5 range for safety
+  const clampedRating = Math.max(1, Math.min(5, Math.round(rating)));
+  
+  // Generate star rating display
+  const stars = '⭐'.repeat(clampedRating) + '☆'.repeat(5 - clampedRating);
+  
+  // Sanitize user-generated content to prevent HTML injection
+  const safeComment = comment ? escapeHtml(comment) : undefined;
+  const safeReviewerName = escapeHtml(reviewerName);
+  const safeProviderName = escapeHtml(providerName);
+  
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; text-align: center; line-height: 70px;">
+            <span style="font-size: 28px;">⭐</span>
+          </div>
+          <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Nueva Reseña Recibida!</h2>
+        </div>
+        
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px; text-align: center;">
+          ¡Hola <strong>${safeProviderName}</strong>! Has recibido una nueva reseña.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 20px; text-align: center;">Detalles de la Reseña</h3>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Cliente</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${safeReviewerName}</p>
+            </div>
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Calificación</p>
+              <p style="margin: 0; color: ${BRAND_ORANGE}; font-size: 24px; font-weight: 600; letter-spacing: 2px;">${stars}</p>
+              <p style="margin: 5px 0 0; color: #666; font-size: 14px;">${clampedRating} de 5 estrellas</p>
+            </div>
+            ${safeComment ? `
+            <div>
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Comentario</p>
+              <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6; font-style: italic;">"${safeComment}"</p>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid ${BRAND_BLUE};">
+          <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+            <strong>💬 Responde a tu cliente:</strong><br>
+            Inicia sesión en tu cuenta para ver la reseña completa y responder al cliente.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${appUrl}/profile" 
+             style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
+                    color: white; 
+                    padding: 14px 35px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    display: inline-block; 
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(244, 114, 46, 0.3);">
+            Ver Mi Perfil
+          </a>
+        </div>
+        
+        ${getEmailFooter()}
+      </div>
+    </div>
+  `;
+  
+  const text = `¡Hola ${safeProviderName}! Has recibido una nueva reseña de ${safeReviewerName}. Calificación: ${clampedRating} de 5 estrellas.${safeComment ? ` Comentario: "${safeComment}"` : ''} Inicia sesión en tu cuenta para ver la reseña completa y responder. ${appUrl}/profile`;
+
+  return await sendEmail({
+    to: providerEmail,
+    from: FROM_EMAIL,
+    subject,
+    text,
+    html
+  });
+}
+
 export async function sendServiceRequestNotificationEmail(
   providerEmail: string,
   providerName: string,
