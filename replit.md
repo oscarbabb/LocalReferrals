@@ -13,6 +13,8 @@
 - Fixed bilateral review notification emails routing based on reviewType
 - Fixed rating button visibility logic in bookings page using robust provider identification
 - Added status filter system (All/Pending/Completed) to "Received Requests" tab with bilingual support
+- **Fixed "Remember Me" checkbox functionality** - Session cookies now properly persist (1 day default, 30 days when checked)
+- **Fixed "Become a Provider" button** on testimonials page - Now navigates to registration with provider checkbox pre-selected via URL parameters
 
 # User Preferences
 

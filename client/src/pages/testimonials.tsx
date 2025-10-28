@@ -179,7 +179,7 @@ export default function Testimonials() {
                     {t('testimonials.findServices')}
                   </Button>
                 </Link>
-                <Link href="/providers">
+                <Link href="/auth?tab=register&provider=true">
                   <Button variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8" data-testid="button-become-provider">
                     {t('testimonials.becomeProvider')}
                   </Button>

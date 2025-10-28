@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -21,6 +21,8 @@ export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useLanguage();
+  
+  const [activeTab, setActiveTab] = useState('login');
   const [isProviderRegistration, setIsProviderRegistration] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -32,6 +34,20 @@ export default function Auth() {
   const [address, setAddress] = useState(""); // Address from AppleMapsAddressInput
   const [latitude, setLatitude] = useState<number | null>(null); // Latitude coordinate
   const [longitude, setLongitude] = useState<number | null>(null); // Longitude coordinate
+
+  // Read URL parameters on mount to pre-select tab and provider registration
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    const providerParam = urlParams.get('provider');
+    
+    if (tabParam === 'register') {
+      setActiveTab('register');
+    }
+    if (providerParam === 'true') {
+      setIsProviderRegistration(true);
+    }
+  }, []);
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -240,7 +256,7 @@ export default function Auth() {
 
         <Card>
           <CardContent className="p-6">
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">{t('auth.login.tab')}</TabsTrigger>
                 <TabsTrigger value="register">{t('auth.register.tab')}</TabsTrigger>
@@ -629,7 +645,19 @@ export default function Auth() {
                   {/* Provider Option - Enhanced */}
                   <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 space-y-3 hover:border-orange-300 transition-colors">
                     <div className="flex items-center space-x-3">
-                      <Checkbox id="provider-option" name="isProvider" className="w-5 h-5" />
+                      <Checkbox 
+                        id="provider-option" 
+                        className="w-5 h-5"
+                        checked={isProviderRegistration}
+                        onCheckedChange={(checked) => setIsProviderRegistration(checked as boolean)}
+                        data-testid="checkbox-provider-option"
+                      />
+                      {/* Hidden input to ensure form submission includes provider status */}
+                      <input 
+                        type="hidden" 
+                        name="isProvider" 
+                        value={isProviderRegistration ? "on" : "off"} 
+                      />
                       <div className="flex items-center space-x-2">
                         <Briefcase className="w-5 h-5 text-orange-600" />
                         <Label htmlFor="provider-option" className="text-base font-semibold text-gray-800 cursor-pointer">
