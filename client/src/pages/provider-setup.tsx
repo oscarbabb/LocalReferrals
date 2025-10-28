@@ -320,6 +320,7 @@ export default function ProviderSetup() {
         title: providerData.title,
         description: providerData.description,
         experience: providerData.experience,
+        serviceRadiusKm: providerData.serviceRadiusKm,
         profilePicture: profilePicture,
         providerSetupToken: providerSetupToken,
         categories: selectedCategories, // Send all categories
