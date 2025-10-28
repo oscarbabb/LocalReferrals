@@ -268,8 +268,7 @@ export default function Header() {
                     data-testid={`mobile-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="block transition-transform duration-200 flex items-center gap-2">
-                        {item.icon && <item.icon className="w-4 h-4" />}
+                      <span className="block transition-transform duration-200">
                         {item.label}
                       </span>
                       {item.href === "/messages" && unreadMessagesCount > 0 && (
