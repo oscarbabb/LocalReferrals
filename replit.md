@@ -36,7 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Service Discovery**: Categorized listings with search and filters, including intelligent autocomplete search.
 - **Smart Search System**: Type-ahead autocomplete comboboxes for categories/subcategories, supporting bilingual search.
 - **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
-- **Advanced Review System**: Detailed criteria, photo uploads, verification badges.
+- **Advanced Review System**: Detailed criteria, photo uploads, verification badges, with automatic email notifications to providers when they receive reviews.
 - **Mutual Rating System**: Bidirectional rating for providers and customers.
 - **One-Click Booking**: Calendar interface with time slot selection.
 - **Booking Management**: Unified scheduled appointments view that displays both confirmed service requests and formal appointments, with duplicate prevention logic to avoid showing the same booking twice.
@@ -66,5 +66,5 @@ Preferred communication style: Simple, everyday language.
 ## Backend & Session
 - **Express**: Web framework.
 - **Connect PG Simple**: PostgreSQL session store.
-- **SendGrid**: Email delivery system.
+- **SendGrid**: Email delivery system for notifications (profile confirmation, booking confirmations, service request notifications, review notifications with HTML sanitization).
 - **Twilio**: WhatsApp messaging integration for user notifications.
