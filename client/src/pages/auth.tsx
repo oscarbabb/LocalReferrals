@@ -27,6 +27,7 @@ export default function Auth() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState("+52"); // Default to Mexico
   const [selectedCountry, setSelectedCountry] = useState("MX"); // Default to Mexico
+  const [rememberMe, setRememberMe] = useState(false); // Remember Me checkbox state
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -158,6 +159,7 @@ export default function Auth() {
     const loginData = {
       email: formData.get("email") as string,
       password: formData.get("password") as string,
+      rememberMe: rememberMe, // Use state variable instead of FormData
     };
 
     loginMutation.mutate(loginData);
@@ -284,8 +286,13 @@ export default function Auth() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="remember-me" />
-                      <Label htmlFor="remember-me" className="text-sm">
+                      <Checkbox 
+                        id="remember-me" 
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        data-testid="checkbox-remember-me"
+                      />
+                      <Label htmlFor="remember-me" className="text-sm cursor-pointer">
                         {t('auth.login.rememberMe')}
                       </Label>
                     </div>

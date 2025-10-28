@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, rememberMe } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
@@ -128,6 +128,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set session duration based on "Remember Me" checkbox
+      if (rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      } else {
+        req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 1 day
       }
 
       // Create authenticated session
