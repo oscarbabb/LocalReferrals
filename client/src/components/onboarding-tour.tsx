@@ -254,10 +254,10 @@ export default function OnboardingTour({ isOpen, onClose }: OnboardingTourProps)
                                     <span className="text-2xl">{category.icon}</span>
                                   </div>
                                   <h4 className="font-semibold text-gray-900 mb-1">
-                                    {getCategoryLabel(category.id, language, category.name)}
+                                    {getCategoryLabel(category.slug || category.id, language, category.name)}
                                   </h4>
                                   <p className="text-xs text-gray-600 line-clamp-2">
-                                    {getCategoryDescription(category.id, language, category.description || undefined)}
+                                    {getCategoryDescription(category.slug || category.id, language, category.description || undefined)}
                                   </p>
                                 </CardContent>
                               </Card>

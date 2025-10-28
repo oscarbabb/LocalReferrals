@@ -59,7 +59,7 @@ export default function Providers() {
 
   const categoriesMap = useMemo(() => {
     return categories.reduce((acc, category) => {
-      acc[category.id] = getCategoryLabel(category.id, language, category.name);
+      acc[category.id] = getCategoryLabel(category.slug || category.id, language, category.name);
       return acc;
     }, {} as Record<string, string>);
   }, [categories, language]);
@@ -235,7 +235,7 @@ export default function Providers() {
                   <SelectItem value="all">{t('providers.filter.allCategories')}</SelectItem>
                   {availableCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {getCategoryLabel(category.id, language, category.name)}
+                      {getCategoryLabel(category.slug || category.id, language, category.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -251,7 +251,7 @@ export default function Providers() {
                     <SelectItem value="all">{t('providers.filter.allSubcategories')}</SelectItem>
                     {availableSubcategories.map((subcategory) => (
                       <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
+                        {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
                       </SelectItem>
                     ))}
                   </SelectContent>

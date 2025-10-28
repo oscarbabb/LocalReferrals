@@ -117,10 +117,10 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
         
         {/* Content */}
         <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-          {getCategoryLabel(category.id, language, category.name)}
+          {getCategoryLabel(category.slug || category.id, language, category.name)}
         </h3>
         <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
-          {getCategoryDescription(category.id, language, category.description || undefined)}
+          {getCategoryDescription(category.slug || category.id, language, category.description || undefined)}
         </p>
         
         {/* Provider count badge and expand button */}
@@ -175,7 +175,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
                 onClick={() => handleSubcategoryClick(subcategory.id)}
               >
                 <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
-                  {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
+                  {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
                 </span>
                 <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
               </div>

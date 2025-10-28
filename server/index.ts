@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { autoSeedFromCSV } from "./auto-seed";
+import { migrateSlugsToExistingRecords } from "./migrate-slugs";
 
 const app = express();
 app.use(express.json());
@@ -38,8 +39,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Migrate slugs first - adds columns and populates existing records
+  // This must run BEFORE auto-seed since auto-seed now expects slug columns
+  try {
+    const migrateResult = await migrateSlugsToExistingRecords();
+    if (migrateResult.success) {
+      log(`✅ Slug migration complete: ${migrateResult.categoriesUpdated} categories, ${migrateResult.subcategoriesUpdated} subcategories`);
+    } else {
+      log(`⚠️  Slug migration warning: ${migrateResult.error || 'Unknown error'}`);
+    }
+  } catch (error: any) {
+    log(`❌ Slug migration error: ${error?.message || 'Unknown error'}`);
+  }
+
   // Automatically seed database from CSV on startup if needed
-  // This runs BEFORE the server starts to ensure database is populated
+  // This runs AFTER slug migration to ensure columns exist
   try {
     const result = await autoSeedFromCSV();
     if (result.success) {

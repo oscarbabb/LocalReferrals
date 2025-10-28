@@ -453,7 +453,7 @@ export default function ProviderSetup() {
                               <SelectItem key={category.id} value={category.id}>
                                 <div className="flex items-center space-x-2">
                                   <span>{category.icon}</span>
-                                  <span>{getCategoryLabel(category.id, language, category.name)}</span>
+                                  <span>{getCategoryLabel(category.slug || category.id, language, category.name)}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -485,7 +485,7 @@ export default function ProviderSetup() {
                                     data-testid={`checkbox-subcategory-${subcategory.id}`}
                                   />
                                   <Label htmlFor={`subcategory-${subcategory.id}`} className="cursor-pointer">
-                                    {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
+                                    {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
                                   </Label>
                                 </div>
                               ))

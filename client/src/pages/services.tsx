@@ -46,7 +46,7 @@ export default function Services() {
     
     // Add all categories
     categories.forEach(cat => {
-      const label = getCategoryLabel(cat.id, language, cat.name);
+      const label = getCategoryLabel(cat.slug || cat.id, language, cat.name);
       options.push({
         type: 'category',
         id: cat.id,
@@ -57,9 +57,9 @@ export default function Services() {
 
     // Add all subcategories
     subcategories.forEach(sub => {
-      const label = getSubcategoryLabel(sub.id, language, sub.name);
+      const label = getSubcategoryLabel(sub.slug || sub.id, language, sub.name);
       const category = categories.find(c => c.id === sub.categoryId);
-      const categoryLabel = category ? getCategoryLabel(category.id, language, category.name) : '';
+      const categoryLabel = category ? getCategoryLabel(category.slug || category.id, language, category.name) : '';
       options.push({
         type: 'subcategory',
         id: sub.id,
@@ -80,7 +80,7 @@ export default function Services() {
   }, [selectedFilter, searchableOptions]);
 
   const filteredCategories = categories.filter(category => {
-    const matchesSearch = categoryMatchesSearch(category.id, searchTerm) ||
+    const matchesSearch = categoryMatchesSearch(category.slug || category.id, searchTerm) ||
                          (category.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     // Filter by selected category or subcategory
@@ -236,7 +236,7 @@ export default function Services() {
                         .filter(opt => opt.type === 'subcategory')
                         .map((option) => {
                           const category = categories.find(c => c.id === option.categoryId);
-                          const categoryLabel = category ? getCategoryLabel(category.id, language, category.name) : '';
+                          const categoryLabel = category ? getCategoryLabel(category.slug || category.id, language, category.name) : '';
                           return (
                             <CommandItem
                               key={option.id}
@@ -294,7 +294,7 @@ export default function Services() {
         onOpenChange={setRequestDialogOpen}
         categories={categories.map(cat => ({
           id: cat.id,
-          name: getCategoryLabel(cat.id, language, cat.name)
+          name: getCategoryLabel(cat.slug || cat.id, language, cat.name)
         }))}
       />
       </div>

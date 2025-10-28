@@ -3,6 +3,7 @@ import { serviceCategories, serviceSubcategories } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
+import { generateSlug } from './slug-utils';
 
 // Automatic CSV import for production database seeding
 // This runs once on startup and is idempotent (safe to run multiple times)
@@ -120,7 +121,9 @@ export async function autoSeedFromCSV() {
 
       // Insert category
       const categoryIcon = categoryIcons[categoryName] || '🔧';
+      const categorySlug = generateSlug(categoryName);
       const categoryResult = await db.insert(serviceCategories).values({
+        slug: categorySlug,
         name: categoryName,
         description: `Servicios profesionales de ${categoryName.toLowerCase()}`,
         icon: categoryIcon,
@@ -135,8 +138,12 @@ export async function autoSeedFromCSV() {
       for (let j = 1; j < Math.min(row.length, 26); j++) {
         const subcategoryName = row[j]?.trim();
         if (subcategoryName && subcategoryName !== '') {
+          // Generate slug with category prefix for uniqueness
+          const baseSubcategorySlug = generateSlug(subcategoryName);
+          const subcategorySlug = `${categorySlug}-${baseSubcategorySlug}`;
           await db.insert(serviceSubcategories).values({
             categoryId: category.id,
+            slug: subcategorySlug,
             name: subcategoryName,
             order: j - 1
           });

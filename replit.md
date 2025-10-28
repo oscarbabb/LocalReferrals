@@ -2,6 +2,18 @@
 
 "Referencias Locales" is a full-stack TypeScript application designed as a local services marketplace. Its core purpose is to connect community residents with verified local service providers, enabling easy discovery, rating, and requesting of services. The platform aims to foster trust and stimulate local commerce within residential areas.
 
+# Recent Changes (October 2025)
+
+- **Implemented slug-based translation system** for categories/subcategories to fix production translation issues
+  - Added slug columns to database schema with automatic migration on startup
+  - Converted serviceTaxonomy.ts to use slugs instead of UUIDs as keys (55 categories, 431 subcategories)
+  - Updated all translation function calls across frontend to use slugs with ID fallbacks for backwards compatibility
+  - Auto-seed now generates slugs with category prefixes for subcategories to ensure uniqueness
+  - Subcategory slugs follow pattern: `{category-slug}-{subcategory-slug}` for global uniqueness
+- Fixed bilateral review notification emails routing based on reviewType
+- Fixed rating button visibility logic in bookings page using robust provider identification
+- Added status filter system (All/Pending/Completed) to "Received Requests" tab with bilingual support
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

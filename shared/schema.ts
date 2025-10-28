@@ -42,6 +42,7 @@ export const users = pgTable("users", {
 
 export const serviceCategories = pgTable("service_categories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: text("slug").unique(), // Stable identifier for translations (nullable during migration)
   name: text("name").notNull(),
   description: text("description"),
   icon: text("icon"),
@@ -51,6 +52,7 @@ export const serviceCategories = pgTable("service_categories", {
 export const serviceSubcategories = pgTable("service_subcategories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   categoryId: varchar("category_id").references(() => serviceCategories.id).notNull(),
+  slug: text("slug").unique(), // Stable identifier for translations (nullable during migration)
   name: text("name").notNull(),
   order: integer("order").default(0),
   createdAt: timestamp("created_at").default(sql`now()`),
