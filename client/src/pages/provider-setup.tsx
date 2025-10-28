@@ -101,7 +101,7 @@ export default function ProviderSetup() {
   // State for managing selected categories
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategory[]>([]);
   const [tempCategoryId, setTempCategoryId] = useState<string>("");
-  const [tempSubcategoryId, setTempSubcategoryId] = useState<string>("");
+  const [tempSubcategoryIds, setTempSubcategoryIds] = useState<string[]>([]);
 
   // Get provider setup token from session storage (set during registration)
   const providerSetupToken = sessionStorage.getItem('providerSetupToken');
@@ -205,37 +205,68 @@ export default function ProviderSetup() {
       return;
     }
 
-    // Check if category already exists
-    const exists = selectedCategories.some(
-      cat => cat.categoryId === tempCategoryId && 
-             (cat.subcategoryId || "") === (tempSubcategoryId || "")
-    );
+    // If no subcategories selected, add category only
+    if (tempSubcategoryIds.length === 0) {
+      const exists = selectedCategories.some(
+        cat => cat.categoryId === tempCategoryId && !cat.subcategoryId
+      );
 
-    if (exists) {
-      toast({
-        title: t('providerSetup.toast.categoryExists.title'),
-        description: t('providerSetup.toast.categoryExists.description'),
-        variant: "destructive",
-      });
-      return;
+      if (exists) {
+        toast({
+          title: t('providerSetup.toast.categoryExists.title'),
+          description: t('providerSetup.toast.categoryExists.description'),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newCategory: SelectedCategory = {
+        categoryId: tempCategoryId,
+        subcategoryId: undefined,
+        isPrimary: selectedCategories.length === 0
+      };
+
+      setSelectedCategories([...selectedCategories, newCategory]);
+    } else {
+      // Add one entry for EACH selected subcategory
+      const newCategories: SelectedCategory[] = [];
+      
+      for (const subcategoryId of tempSubcategoryIds) {
+        // Check if this combination already exists
+        const exists = selectedCategories.some(
+          cat => cat.categoryId === tempCategoryId && cat.subcategoryId === subcategoryId
+        );
+
+        if (!exists) {
+          newCategories.push({
+            categoryId: tempCategoryId,
+            subcategoryId: subcategoryId,
+            isPrimary: selectedCategories.length === 0 && newCategories.length === 0
+          });
+        }
+      }
+
+      if (newCategories.length === 0) {
+        toast({
+          title: t('providerSetup.toast.categoryExists.title'),
+          description: "Todas las subcategorías seleccionadas ya están agregadas.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSelectedCategories([...selectedCategories, ...newCategories]);
     }
 
-    // Add the category
-    const newCategory: SelectedCategory = {
-      categoryId: tempCategoryId,
-      subcategoryId: tempSubcategoryId || undefined,
-      isPrimary: selectedCategories.length === 0 // First one is primary by default
-    };
-
-    setSelectedCategories([...selectedCategories, newCategory]);
-    
     // Reset temp selections
     setTempCategoryId("");
-    setTempSubcategoryId("");
+    setTempSubcategoryIds([]);
     
     toast({
       title: t('providerSetup.toast.categoryAdded.title'),
-      description: t('providerSetup.toast.categoryAdded.description'),
+      description: tempSubcategoryIds.length > 0 
+        ? `Se agregaron ${tempSubcategoryIds.length} subcategorías`
+        : t('providerSetup.toast.categoryAdded.description'),
     });
   };
 
@@ -403,7 +434,7 @@ export default function ProviderSetup() {
                           value={tempCategoryId}
                           onValueChange={(value) => {
                             setTempCategoryId(value);
-                            setTempSubcategoryId(""); // Reset subcategory when category changes
+                            setTempSubcategoryIds([]); // Reset subcategories array when category changes
                           }}
                         >
                           <SelectTrigger id="temp-category" data-testid="select-category">
@@ -424,28 +455,34 @@ export default function ProviderSetup() {
 
                       {tempCategoryId && tempSubcategories.length > 0 && (
                         <div>
-                          <Label htmlFor="temp-subcategory" className="text-sm font-medium">{t('providerSetup.categories.subcategoryLabel')}</Label>
-                          <Select 
-                            value={tempSubcategoryId}
-                            onValueChange={setTempSubcategoryId}
-                          >
-                            <SelectTrigger id="temp-subcategory" data-testid="select-subcategory">
-                              <SelectValue placeholder={t('providerSetup.categories.selectSubcategory')} />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {tempSubcategoriesLoading ? (
-                                <div className="p-4 text-center text-sm text-gray-500">
-                                  {t('providerSetup.categories.loadingSubcategories')}
-                                </div>
-                              ) : (
-                                tempSubcategories.map((subcategory) => (
-                                  <SelectItem key={subcategory.id} value={subcategory.id}>
+                          <Label className="text-sm font-medium">Subcategorías (selecciona todas las que apliquen)</Label>
+                          <div className="space-y-2 max-h-[300px] overflow-y-auto border rounded-md p-3">
+                            {tempSubcategoriesLoading ? (
+                              <div className="p-4 text-center text-sm text-gray-500">
+                                {t('providerSetup.categories.loadingSubcategories')}
+                              </div>
+                            ) : (
+                              tempSubcategories.map((subcategory) => (
+                                <div key={subcategory.id} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`subcategory-${subcategory.id}`}
+                                    checked={tempSubcategoryIds.includes(subcategory.id)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setTempSubcategoryIds([...tempSubcategoryIds, subcategory.id]);
+                                      } else {
+                                        setTempSubcategoryIds(tempSubcategoryIds.filter(id => id !== subcategory.id));
+                                      }
+                                    }}
+                                    data-testid={`checkbox-subcategory-${subcategory.id}`}
+                                  />
+                                  <Label htmlFor={`subcategory-${subcategory.id}`} className="cursor-pointer">
                                     {getSubcategoryLabel(subcategory.id, language, subcategory.name)}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
+                                  </Label>
+                                </div>
+                              ))
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
