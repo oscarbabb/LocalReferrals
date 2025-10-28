@@ -198,4 +198,32 @@ export const profile = {
   'profile.toast.providerUpdated.description': 'Tu perfil de proveedor se ha actualizado exitosamente.',
   'profile.toast.providerError.title': 'Error al actualizar perfil de proveedor',
   'profile.toast.providerError.description': 'No se pudo actualizar tu perfil de proveedor. Inténtalo de nuevo.',
+  
+  // Requests tab - Empty states
+  'profile.requests.my.noRequests': 'No tienes solicitudes',
+  'profile.requests.my.noRequestsDesc': 'Aquí verás las solicitudes de servicio que hayas realizado',
+  'profile.requests.received.noRequests': 'No has recibido solicitudes',
+  'profile.requests.received.noRequestsDesc': 'Aquí verás las solicitudes de servicio que recibas de clientes',
+  
+  // Provider tab - Menu document upload
+  'profile.provider.menu.presentBusiness': 'Presenta tu negocio',
+  'profile.provider.menu.shareDescription': 'Comparte un documento PDF o imagen de tu menú para que los clientes puedan ver todos tus servicios',
+  'profile.provider.menu.selectFile': 'Seleccionar Archivo',
+  'profile.provider.menu.fileRequirements': 'PDF, JPG, PNG (máximo 10MB)',
+  'profile.provider.menu.uploadingDoc': 'Subiendo documento...',
+  'profile.provider.menu.replaceMenu': 'Reemplazar Menú',
+  'profile.provider.menu.deleting': 'Eliminando...',
+  'profile.provider.menu.deleteMenu': 'Eliminar Menú',
+  
+  // Menu document toast messages
+  'profile.toast.menuUploadError.title': 'Error al subir menú',
+  'profile.toast.menuUploadError.description': 'No se pudo cargar la información del proveedor. Por favor recarga la página.',
+  'profile.toast.menuUpdated.title': 'Menú actualizado',
+  'profile.toast.menuUpdated.description': 'Tu documento de menú ha sido subido exitosamente.',
+  'profile.toast.menuUploadFailed.title': 'Error al subir menú',
+  'profile.toast.menuUploadFailed.description': 'Hubo un problema al subir tu documento. Por favor intenta de nuevo.',
+  'profile.toast.menuDeleted.title': 'Menú eliminado',
+  'profile.toast.menuDeleted.description': 'Tu documento de menú ha sido eliminado.',
+  'profile.toast.menuDeleteFailed.title': 'Error al eliminar menú',
+  'profile.toast.menuDeleteFailed.description': 'Hubo un problema al eliminar tu documento. Por favor intenta de nuevo.',
 };

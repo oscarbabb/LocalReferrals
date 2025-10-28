@@ -174,4 +174,32 @@ export const profile = {
   'profile.toast.profileUpdated.description': 'Your changes have been saved successfully.',
   'profile.toast.profileError.title': 'Error updating profile',
   'profile.toast.profileError.description': 'Could not update your profile. Please try again.',
+  
+  // Requests tab - Empty states
+  'profile.requests.my.noRequests': 'You have no requests',
+  'profile.requests.my.noRequestsDesc': 'Here you will see the service requests you have made',
+  'profile.requests.received.noRequests': 'You have not received any requests',
+  'profile.requests.received.noRequestsDesc': 'Here you will see the service requests you receive from clients',
+  
+  // Provider tab - Menu document upload
+  'profile.provider.menu.presentBusiness': 'Present your business',
+  'profile.provider.menu.shareDescription': 'Share a PDF document or image of your menu so clients can see all your services',
+  'profile.provider.menu.selectFile': 'Select File',
+  'profile.provider.menu.fileRequirements': 'PDF, JPG, PNG (maximum 10MB)',
+  'profile.provider.menu.uploadingDoc': 'Uploading document...',
+  'profile.provider.menu.replaceMenu': 'Replace Menu',
+  'profile.provider.menu.deleting': 'Deleting...',
+  'profile.provider.menu.deleteMenu': 'Delete Menu',
+  
+  // Menu document toast messages
+  'profile.toast.menuUploadError.title': 'Error uploading menu',
+  'profile.toast.menuUploadError.description': 'Could not load provider information. Please reload the page.',
+  'profile.toast.menuUpdated.title': 'Menu updated',
+  'profile.toast.menuUpdated.description': 'Your menu document has been uploaded successfully.',
+  'profile.toast.menuUploadFailed.title': 'Error uploading menu',
+  'profile.toast.menuUploadFailed.description': 'There was a problem uploading your document. Please try again.',
+  'profile.toast.menuDeleted.title': 'Menu deleted',
+  'profile.toast.menuDeleted.description': 'Your menu document has been deleted.',
+  'profile.toast.menuDeleteFailed.title': 'Error deleting menu',
+  'profile.toast.menuDeleteFailed.description': 'There was a problem deleting your document. Please try again.',
 };

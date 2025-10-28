@@ -302,8 +302,8 @@ export default function Profile() {
       // Guard: ensure provider is loaded
       if (!provider?.id) {
         toast({
-          title: "Error al subir menú",
-          description: "No se pudo cargar la información del proveedor. Por favor recarga la página.",
+          title: t('profile.toast.menuUploadError.title'),
+          description: t('profile.toast.menuUploadError.description'),
           variant: "destructive",
         });
         return;
@@ -328,14 +328,14 @@ export default function Profile() {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
         
         toast({
-          title: "Menú actualizado",
-          description: "Tu documento de menú ha sido subido exitosamente.",
+          title: t('profile.toast.menuUpdated.title'),
+          description: t('profile.toast.menuUpdated.description'),
         });
       } catch (error) {
         console.error("Error uploading menu document:", error);
         toast({
-          title: "Error al subir menú",
-          description: "Hubo un problema al subir tu documento. Por favor intenta de nuevo.",
+          title: t('profile.toast.menuUploadFailed.title'),
+          description: t('profile.toast.menuUploadFailed.description'),
           variant: "destructive",
         });
       } finally {
@@ -357,14 +357,14 @@ export default function Profile() {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/provider"] });
       
       toast({
-        title: "Menú eliminado",
-        description: "Tu documento de menú ha sido eliminado.",
+        title: t('profile.toast.menuDeleted.title'),
+        description: t('profile.toast.menuDeleted.description'),
       });
     } catch (error) {
       console.error("Error deleting menu document:", error);
       toast({
-        title: "Error al eliminar menú",
-        description: "Hubo un problema al eliminar tu documento. Por favor intenta de nuevo.",
+        title: t('profile.toast.menuDeleteFailed.title'),
+        description: t('profile.toast.menuDeleteFailed.description'),
         variant: "destructive",
       });
     } finally {
@@ -981,7 +981,7 @@ export default function Profile() {
                           {provider.profilePicture ? (
                             <img 
                               src={provider.profilePicture} 
-                              alt="Foto de proveedor" 
+                              alt={t('profile.provider.profile.photo')} 
                               className="w-16 h-16 rounded-lg object-cover"
                             />
                           ) : (
@@ -993,7 +993,7 @@ export default function Profile() {
                           <p className="text-gray-600">{provider.description}</p>
                           <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
                             <span>📍 {user.building}</span>
-                            <span>🕒 Activo desde {parseSafeDate(provider.createdAt).getFullYear()}</span>
+                            <span>🕒 {t('profile.provider.profile.activeSince')} {parseSafeDate(provider.createdAt).getFullYear()}</span>
                           </div>
                         </div>
                       </div>
@@ -1157,7 +1157,7 @@ export default function Profile() {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <FileText className="w-5 h-5" />
-                      <span>Menú Completo</span>
+                      <span>{t('profile.provider.menu.fullTitle')}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1169,8 +1169,8 @@ export default function Profile() {
                             <div className="flex items-center space-x-3">
                               <FileText className="w-8 h-8 text-red-600" />
                               <div>
-                                <p className="font-medium text-gray-900">Menú en PDF</p>
-                                <p className="text-sm text-gray-500">Documento del menú</p>
+                                <p className="font-medium text-gray-900">{t('profile.provider.menu.pdfTitle')}</p>
+                                <p className="text-sm text-gray-500">{t('profile.provider.menu.documentTitle')}</p>
                               </div>
                             </div>
                             <Button
@@ -1180,14 +1180,14 @@ export default function Profile() {
                               data-testid="button-view-menu-pdf"
                             >
                               <Download className="w-4 h-4 mr-2" />
-                              Ver
+                              {t('profile.provider.menu.viewButton')}
                             </Button>
                           </div>
                         ) : (
                           <div className="space-y-3">
                             <img 
                               src={provider.menuDocumentUrl} 
-                              alt="Menú Completo" 
+                              alt={t('profile.provider.menu.fullImage')} 
                               className="w-full h-auto rounded-lg border shadow-sm"
                               data-testid="img-menu-document"
                             />
@@ -1199,7 +1199,7 @@ export default function Profile() {
                               data-testid="button-view-menu-image"
                             >
                               <Download className="w-4 h-4 mr-2" />
-                              Ver en tamaño completo
+                              {t('profile.provider.menu.viewFullSize')}
                             </Button>
                           </div>
                         )}
@@ -1215,7 +1215,7 @@ export default function Profile() {
                             buttonClassName="w-full border border-blue-600 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Download className="w-4 h-4 mr-2" />
-                            Reemplazar Menú
+                            {t('profile.provider.menu.replaceMenu')}
                           </ObjectUploader>
                           <Button
                             onClick={handleDeleteMenuDocument}
@@ -1225,11 +1225,11 @@ export default function Profile() {
                             data-testid="button-delete-menu"
                           >
                             <X className="w-4 h-4 mr-2" />
-                            {isDeletingMenuDocument ? 'Eliminando...' : 'Eliminar Menú'}
+                            {isDeletingMenuDocument ? t('profile.provider.menu.deleting') : t('profile.provider.menu.deleteMenu')}
                           </Button>
                         </div>
                         {isUploadingMenuDocument && (
-                          <p className="text-sm text-blue-600 text-center">Subiendo documento...</p>
+                          <p className="text-sm text-blue-600 text-center">{t('profile.provider.menu.uploadingDoc')}</p>
                         )}
                       </div>
                     ) : (
@@ -1238,10 +1238,10 @@ export default function Profile() {
                         <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-gradient-to-b from-white to-blue-50">
                           <FileText className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                           <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            Presenta tu negocio
+                            {t('profile.provider.menu.presentBusiness')}
                           </h4>
                           <p className="text-sm text-gray-600 mb-4">
-                            Comparte un documento PDF o imagen de tu menú para que los clientes puedan ver todos tus servicios
+                            {t('profile.provider.menu.shareDescription')}
                           </p>
                           <ObjectUploader
                             maxNumberOfFiles={1}
@@ -1252,13 +1252,13 @@ export default function Profile() {
                             buttonClassName="bg-orange-600 hover:bg-orange-700 text-white"
                           >
                             <Download className="w-4 h-4 mr-2" />
-                            Seleccionar Archivo
+                            {t('profile.provider.menu.selectFile')}
                           </ObjectUploader>
                           <p className="text-xs text-gray-500 mt-3">
-                            PDF, JPG, PNG (máximo 10MB)
+                            {t('profile.provider.menu.fileRequirements')}
                           </p>
                           {isUploadingMenuDocument && (
-                            <p className="text-sm text-blue-600 mt-3">Subiendo documento...</p>
+                            <p className="text-sm text-blue-600 mt-3">{t('profile.provider.menu.uploadingDoc')}</p>
                           )}
                         </div>
                       </div>
@@ -1272,7 +1272,7 @@ export default function Profile() {
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <MenuIcon className="w-5 h-5" />
-                        <span>Menú de Servicios</span>
+                        <span>{t('profile.provider.menuMgmt.title')}</span>
                       </div>
                       <Button 
                         onClick={() => setLocation('/menu-management')}
@@ -1280,7 +1280,7 @@ export default function Profile() {
                         data-testid="button-manage-menu"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Gestionar Menú
+                        {t('profile.provider.menuMgmt.manageButton')}
                       </Button>
                     </CardTitle>
                   </CardHeader>
@@ -1289,10 +1289,10 @@ export default function Profile() {
                       <div className="text-center py-8">
                         <MenuIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <h4 className="font-medium text-gray-900 mb-2">
-                          No tienes servicios en tu menú
+                          {t('profile.provider.menuMgmt.noServices')}
                         </h4>
                         <p className="text-gray-600 mb-4">
-                          Agrega servicios para que los clientes puedan encontrarte
+                          {t('profile.provider.menuMgmt.addServices')}
                         </p>
                         <Button 
                           onClick={() => setLocation('/menu-management')}
@@ -1300,13 +1300,13 @@ export default function Profile() {
                           data-testid="button-add-first-service"
                         >
                           <Plus className="w-4 h-4 mr-2" />
-                          Agregar Primer Servicio
+                          {t('profile.provider.menuMgmt.addFirst')}
                         </Button>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <p className="text-sm text-gray-600 mb-4">
-                          Tienes {menuItems.length} servicio{menuItems.length !== 1 ? 's' : ''} en tu menú:
+                          {t('profile.provider.menuMgmt.servicesCount').replace('{count}', menuItems.length.toString()).replace('{plural}', menuItems.length !== 1 ? 's' : '')}
                         </p>
                         <div className="grid gap-3">
                           {menuItems.slice(0, 3).map((item) => (
@@ -1322,14 +1322,14 @@ export default function Profile() {
                                 </div>
                               </div>
                               <Badge variant={item.isAvailable ? "default" : "secondary"}>
-                                {item.isAvailable ? 'Disponible' : 'No disponible'}
+                                {item.isAvailable ? t('profile.provider.menuMgmt.available') : t('profile.provider.menuMgmt.unavailable')}
                               </Badge>
                             </div>
                           ))}
                         </div>
                         {menuItems.length > 3 && (
                           <p className="text-sm text-gray-500 text-center">
-                            ... y {menuItems.length - 3} más
+                            {t('profile.provider.menuMgmt.andMore').replace('{count}', (menuItems.length - 3).toString())}
                           </p>
                         )}
                       </div>
@@ -1343,7 +1343,7 @@ export default function Profile() {
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-5 h-5" />
-                        <span>Disponibilidad</span>
+                        <span>{t('profile.provider.availability.title')}</span>
                       </div>
                       <Button 
                         onClick={() => setLocation('/availability-management')}
@@ -1351,7 +1351,7 @@ export default function Profile() {
                         data-testid="button-manage-availability"
                       >
                         <Calendar className="w-4 h-4 mr-2" />
-                        Gestionar Disponibilidad
+                        {t('profile.provider.availability.manageButton')}
                       </Button>
                     </CardTitle>
                   </CardHeader>
@@ -1359,7 +1359,7 @@ export default function Profile() {
                     <div className="text-center py-4">
                       <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600 mb-4">
-                        Configura tus horarios semanales para que los clientes puedan agendar servicios
+                        {t('profile.provider.availability.description')}
                       </p>
                       <Button 
                         onClick={() => setLocation('/availability-management')}
@@ -1367,7 +1367,7 @@ export default function Profile() {
                         data-testid="button-setup-availability"
                       >
                         <Settings className="w-4 h-4 mr-2" />
-                        Configurar Horarios
+                        {t('profile.provider.availability.setupButton')}
                       </Button>
                     </div>
                   </CardContent>
@@ -1376,13 +1376,13 @@ export default function Profile() {
                 {/* Quick Stats */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Estadísticas Rápidas</CardTitle>
+                    <CardTitle>{t('profile.provider.stats.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">{menuItems.length}</div>
-                        <div className="text-sm text-gray-600">Servicios</div>
+                        <div className="text-sm text-gray-600">{t('profile.provider.stats.services')}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -1397,16 +1397,16 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Mis Solicitudes</CardTitle>
+                    <CardTitle>{t('profile.requests.my.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-center py-8">
                       <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                       <h4 className="font-medium text-gray-900 mb-2">
-                        No tienes solicitudes
+                        {t('profile.requests.my.noRequests')}
                       </h4>
                       <p className="text-gray-600 text-sm">
-                        Aquí verás las solicitudes de servicio que hayas realizado
+                        {t('profile.requests.my.noRequestsDesc')}
                       </p>
                     </div>
                   </CardContent>
@@ -1415,16 +1415,16 @@ export default function Profile() {
                 {user?.isProvider && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Solicitudes Recibidas</CardTitle>
+                      <CardTitle>{t('profile.requests.received.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-center py-8">
                         <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                         <h4 className="font-medium text-gray-900 mb-2">
-                          No has recibido solicitudes
+                          {t('profile.requests.received.noRequests')}
                         </h4>
                         <p className="text-gray-600 text-sm">
-                          Aquí verás las solicitudes de servicio que recibas de clientes
+                          {t('profile.requests.received.noRequestsDesc')}
                         </p>
                       </div>
                     </CardContent>
@@ -1444,22 +1444,22 @@ export default function Profile() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">Nuevas solicitudes</h4>
-                      <p className="text-sm text-gray-600">Recibe notificaciones cuando alguien solicite tus servicios</p>
+                      <h4 className="font-medium">{t('profile.settings.notifications.newRequests.title')}</h4>
+                      <p className="text-sm text-gray-600">{t('profile.settings.notifications.newRequests.description')}</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">Mensajes</h4>
-                      <p className="text-sm text-gray-600">Recibe notificaciones de nuevos mensajes</p>
+                      <h4 className="font-medium">{t('profile.settings.notifications.messages.title')}</h4>
+                      <p className="text-sm text-gray-600">{t('profile.settings.notifications.messages.description')}</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">Reseñas</h4>
-                      <p className="text-sm text-gray-600">Recibe notificaciones de nuevas reseñas</p>
+                      <h4 className="font-medium">{t('profile.settings.notifications.reviews.title')}</h4>
+                      <p className="text-sm text-gray-600">{t('profile.settings.notifications.reviews.description')}</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -1473,15 +1473,15 @@ export default function Profile() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">Perfil público</h4>
-                      <p className="text-sm text-gray-600">Permite que otros residentes vean tu perfil</p>
+                      <h4 className="font-medium">{t('profile.settings.privacy.publicProfile.title')}</h4>
+                      <p className="text-sm text-gray-600">{t('profile.settings.privacy.publicProfile.description')}</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">Mostrar teléfono</h4>
-                      <p className="text-sm text-gray-600">Muestra tu número de teléfono en tu perfil</p>
+                      <h4 className="font-medium">{t('profile.settings.privacy.showPhone.title')}</h4>
+                      <p className="text-sm text-gray-600">{t('profile.settings.privacy.showPhone.description')}</p>
                     </div>
                     <Switch />
                   </div>
