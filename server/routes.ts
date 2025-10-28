@@ -1497,57 +1497,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requestData = insertServiceRequestSchema.parse(req.body);
       const serviceRequest = await storage.createServiceRequest(requestData);
       
-      // Send service request emails
-      try {
-        // Get user and provider details for emails
-        const user = await storage.getUser(serviceRequest.requesterId);
-        const provider = await storage.getProvider(serviceRequest.providerId);
-        
-        if (user && provider) {
-          // Get provider user details for email
-          const providerUser = await storage.getUser(provider.userId);
-          
-          if (providerUser) {
-            // Format the booking date and time from the actual service request
-            const bookingDate = serviceRequest.preferredDate 
-              ? new Date(serviceRequest.preferredDate).toLocaleDateString('es-MX', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })
-              : 'Por coordinar';
-            
-            const bookingTime = serviceRequest.preferredTime || 'Por coordinar';
-            
-            // Send confirmation to user
-            await sendBookingConfirmationEmail(
-              user.email,
-              user.fullName,
-              provider.title,
-              serviceRequest.title || 'Servicio solicitado',
-              bookingDate,
-              bookingTime
-            );
-            
-            // Send notification to provider
-            await sendBookingNotificationEmail(
-              providerUser.email,
-              provider.title,
-              user.fullName,
-              serviceRequest.title || 'Servicio solicitado',
-              bookingDate,
-              bookingTime
-            );
-            
-            console.log(`✅ Service request emails sent for request ${serviceRequest.id}`);
-          }
-        }
-      } catch (emailError) {
-        console.error("❌ Failed to send service request emails:", emailError);
-        // Don't fail service request creation if email fails
-      }
-      
       res.status(201).json(serviceRequest);
     } catch (error) {
       console.error("Service request creation error:", error);
@@ -1593,6 +1542,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!updatedRequest) {
         return res.status(500).json({ message: "Failed to update service request" });
+      }
+      
+      // Send emails only when status changes to "confirmed"
+      if (validatedData.status === "confirmed") {
+        try {
+          // Get user and provider details for emails
+          const user = await storage.getUser(updatedRequest.requesterId);
+          const provider = await storage.getProvider(updatedRequest.providerId);
+          
+          if (user && provider) {
+            // Get provider user details for email
+            const providerUser = await storage.getUser(provider.userId);
+            
+            if (providerUser) {
+              // Format the booking date and time from the updated service request
+              const bookingDate = updatedRequest.confirmedDate 
+                ? new Date(updatedRequest.confirmedDate).toLocaleDateString('es-MX', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+                : updatedRequest.preferredDate
+                  ? new Date(updatedRequest.preferredDate).toLocaleDateString('es-MX', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  : 'Por coordinar';
+              
+              const bookingTime = updatedRequest.confirmedTime || updatedRequest.preferredTime || 'Por coordinar';
+              
+              // Send confirmation to user
+              await sendBookingConfirmationEmail(
+                user.email,
+                user.fullName,
+                provider.title,
+                updatedRequest.title || 'Servicio solicitado',
+                bookingDate,
+                bookingTime
+              );
+              
+              // Send notification to provider
+              await sendBookingNotificationEmail(
+                providerUser.email,
+                provider.title,
+                user.fullName,
+                updatedRequest.title || 'Servicio solicitado',
+                bookingDate,
+                bookingTime
+              );
+              
+              console.log(`✅ Service request confirmation emails sent for request ${updatedRequest.id}`);
+            }
+          }
+        } catch (emailError) {
+          console.error("❌ Failed to send service request confirmation emails:", emailError);
+          // Don't fail service request update if email fails
+        }
       }
       
       res.json(updatedRequest);

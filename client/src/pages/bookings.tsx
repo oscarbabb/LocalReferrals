@@ -17,7 +17,7 @@ import {
   Calendar, 
   Clock, 
   MapPin, 
-  User, 
+  User as UserIcon, 
   DollarSign, 
   CheckCircle, 
   XCircle, 
@@ -25,6 +25,7 @@ import {
   Star,
   MessageCircle
 } from "lucide-react";
+import { Provider, User as UserType } from "@shared/schema";
 
 interface User {
   id: string;
@@ -83,6 +84,13 @@ export default function Bookings() {
     retry: false,
   });
 
+  // Get user's provider profile (if they are a provider)
+  const { data: provider } = useQuery<Provider>({
+    queryKey: ["/api/auth/provider"],
+    enabled: !!user?.id,
+    retry: false,
+  });
+
   // Get user's service requests
   const { data: myRequests = [], isLoading: requestsLoading } = useQuery<ServiceRequest[]>({
     queryKey: ["/api/service-requests/user", user?.id],
@@ -91,8 +99,8 @@ export default function Bookings() {
 
   // Get requests received (if user is a provider)
   const { data: receivedRequests = [], isLoading: receivedLoading } = useQuery<ServiceRequest[]>({
-    queryKey: ["/api/service-requests/provider", user?.id],
-    enabled: !!user?.id,
+    queryKey: ["/api/service-requests/provider", provider?.id],
+    enabled: !!provider?.id,
   });
 
   // Get user's appointments
@@ -114,7 +122,7 @@ export default function Bookings() {
       });
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ["/api/service-requests/user", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/service-requests/provider", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/service-requests/provider", provider?.id] });
     },
     onError: (error: Error) => {
       toast({
@@ -447,7 +455,7 @@ export default function Bookings() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="requests" className="flex items-center gap-2" data-testid="tab-my-requests">
-              <User className="w-4 h-4" />
+              <UserIcon className="w-4 h-4" />
               {t('bookings.tabs.myRequests')}
             </TabsTrigger>
             <TabsTrigger value="received" className="flex items-center gap-2" data-testid="tab-received-requests">
@@ -464,7 +472,7 @@ export default function Bookings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
+                  <UserIcon className="w-5 h-5" />
                   {t('bookings.requests.title')}
                 </CardTitle>
               </CardHeader>
