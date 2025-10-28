@@ -12,6 +12,7 @@ import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
 import { useAuth } from "@/hooks/useAuth";
 import DisclaimerDialog from "@/components/disclaimer-dialog";
+import { calculateDistance, areCoordinatesValid } from "@/lib/distance";
 
 export default function Providers() {
   const { t, language } = useLanguage();
@@ -106,14 +107,48 @@ export default function Providers() {
 
   // Final filtered and sorted providers
   const filteredAndSortedProviders = useMemo(() => {
+    // Get user's coordinates
+    const userLat = (user as any)?.latitude ? parseFloat((user as any).latitude) : null;
+    const userLon = (user as any)?.longitude ? parseFloat((user as any).longitude) : null;
+    const userHasCoordinates = areCoordinatesValid(userLat, userLon);
+    
     let filtered = searchFilteredProviders.filter((provider: any) => {
       const matchesCategory = !selectedCategory || selectedCategory === "all" || provider.categoryId === selectedCategory;
       const matchesSubcategory = !selectedSubcategory || selectedSubcategory === "all" || provider.subcategoryId === selectedSubcategory;
       
-      // Filter by radius: show providers who can travel at least the selected distance
-      // radiusKm of 100 means "any distance" (no filter)
-      // Example: slider at 10km shows providers with serviceRadiusKm >= 10km (they can reach customers within 10km)
-      const matchesRadius = radiusKm === 100 || (provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm);
+      // Filter by radius based on real geographical distance
+      let matchesRadius = true;
+      
+      // If user has coordinates, calculate real distance to providers
+      if (userHasCoordinates) {
+        const providerLat = provider.latitude ? parseFloat(provider.latitude) : null;
+        const providerLon = provider.longitude ? parseFloat(provider.longitude) : null;
+        
+        if (areCoordinatesValid(providerLat, providerLon)) {
+          // Calculate actual distance between user and provider
+          const distance = calculateDistance(userLat!, userLon!, providerLat!, providerLon!);
+          
+          // Provider must be within their own service radius (if set)
+          if (provider.serviceRadiusKm) {
+            matchesRadius = distance <= provider.serviceRadiusKm;
+          }
+          
+          // Additionally, if user has set a radius filter (less than 100km), apply that too
+          if (matchesRadius && radiusKm < 100) {
+            matchesRadius = distance <= radiusKm;
+          }
+        } else {
+          // Provider has no coordinates - exclude them if user has coordinates
+          // (can't calculate distance, so can't verify they're in range)
+          matchesRadius = radiusKm === 100; // Only show if "no filter" is selected
+        }
+      } else {
+        // User has no coordinates - fall back to old logic
+        // If radius filter is active, show providers who can travel at least X km
+        if (radiusKm < 100) {
+          matchesRadius = provider.serviceRadiusKm && provider.serviceRadiusKm >= radiusKm;
+        }
+      }
       
       return matchesCategory && matchesSubcategory && matchesRadius;
     });
@@ -135,7 +170,7 @@ export default function Providers() {
           return 0;
       }
     });
-  }, [searchFilteredProviders, selectedCategory, selectedSubcategory, sortBy, radiusKm]);
+  }, [searchFilteredProviders, selectedCategory, selectedSubcategory, sortBy, radiusKm, user]);
 
   if (isLoading) {
     return (

@@ -15,6 +15,8 @@ export const users = pgTable("users", {
   building: text("building"),
   phone: text("phone"),
   country: text("country"), // Country of residence
+  latitude: decimal("latitude", { precision: 10, scale: 7 }), // Geographic latitude coordinate
+  longitude: decimal("longitude", { precision: 10, scale: 7 }), // Geographic longitude coordinate
   isProvider: boolean("is_provider").default(false),
   isAdmin: boolean("is_admin").default(false),
   avatar: text("avatar"),
@@ -64,6 +66,8 @@ export const providers = pgTable("providers", {
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   experience: text("experience"),
   serviceRadiusKm: integer("service_radius_km"), // Service delivery radius in km
+  latitude: decimal("latitude", { precision: 10, scale: 7 }), // Geographic latitude coordinate
+  longitude: decimal("longitude", { precision: 10, scale: 7 }), // Geographic longitude coordinate
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
   verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected, suspended

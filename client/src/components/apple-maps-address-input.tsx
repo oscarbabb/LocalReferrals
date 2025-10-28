@@ -13,6 +13,7 @@ interface AddressSuggestion {
 interface AppleMapsAddressInputProps {
   value: string;
   onChange: (value: string) => void;
+  onCoordinateSelect?: (lat: number, lon: number) => void;
   placeholder?: string;
   className?: string;
   id?: string;
@@ -24,6 +25,7 @@ interface AppleMapsAddressInputProps {
 export default function AppleMapsAddressInput({
   value,
   onChange,
+  onCoordinateSelect,
   placeholder = "Escribe tu dirección...",
   className = "",
   id,
@@ -128,6 +130,11 @@ export default function AppleMapsAddressInput({
     setSuggestions([]);
     setShowSuggestions(false);
     inputRef.current?.blur();
+    
+    // Call the onCoordinateSelect callback if provided
+    if (onCoordinateSelect && suggestion.coordinate) {
+      onCoordinateSelect(suggestion.coordinate.latitude, suggestion.coordinate.longitude);
+    }
   };
 
   const handleBlur = () => {

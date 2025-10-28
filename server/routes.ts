@@ -1400,6 +1400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         building: z.string().optional(),
         apartment: z.string().optional(),
         address: z.string().optional(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
         // Detailed Mexican Address Fields
         condominioMaestro: z.string().optional(),
         condominio: z.string().optional(),

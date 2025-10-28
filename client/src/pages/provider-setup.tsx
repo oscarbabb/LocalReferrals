@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import type { UploadResult } from "@uppy/core";
 import { getCategoryLabel, getSubcategoryLabel } from "@/lib/serviceTranslations";
+import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 // Provider setup form schema with conditional payment method fields
 const providerSetupSchema = (t: any) => z.object({
@@ -102,6 +103,11 @@ export default function ProviderSetup() {
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategory[]>([]);
   const [tempCategoryId, setTempCategoryId] = useState<string>("");
   const [tempSubcategoryIds, setTempSubcategoryIds] = useState<string[]>([]);
+  
+  // State for address and coordinates
+  const [address, setAddress] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   // Get provider setup token from session storage (set during registration)
   const providerSetupToken = sessionStorage.getItem('providerSetupToken');
@@ -316,7 +322,9 @@ export default function ProviderSetup() {
         experience: providerData.experience,
         profilePicture: profilePicture,
         providerSetupToken: providerSetupToken,
-        categories: selectedCategories // Send all categories
+        categories: selectedCategories, // Send all categories
+        latitude: latitude,
+        longitude: longitude
       });
       const createdProvider = await response.json();
       
@@ -1067,6 +1075,33 @@ export default function ProviderSetup() {
                     </FormItem>
                   )}
                 />
+
+                {/* Business Address */}
+                <div className="space-y-2">
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    {t('providerSetup.form.addressLabel') || 'Dirección de Negocio'}
+                  </Label>
+                  <AppleMapsAddressInput
+                    id="address"
+                    name="address"
+                    value={address}
+                    onChange={setAddress}
+                    onCoordinateSelect={(lat, lon) => {
+                      setLatitude(lat);
+                      setLongitude(lon);
+                    }}
+                    placeholder={t('providerSetup.form.addressPlaceholder') || 'Escribe la dirección de tu negocio...'}
+                    testId="input-address"
+                  />
+                  <p className="text-sm text-gray-600">
+                    {t('providerSetup.form.addressHelp') || 'Ingresa la dirección donde ofreces tus servicios para que los clientes puedan encontrarte fácilmente.'}
+                  </p>
+                  {latitude && longitude && (
+                    <p className="text-xs text-green-600">
+                      ✓ Ubicación confirmada ({latitude.toFixed(4)}, {longitude.toFixed(4)})
+                    </p>
+                  )}
+                </div>
 
                 {/* Service Radius */}
                 <FormField

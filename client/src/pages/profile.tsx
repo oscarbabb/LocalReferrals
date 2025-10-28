@@ -35,6 +35,8 @@ const profileSchema = (t: any) => z.object({
   building: z.string().optional(),
   apartment: z.string().optional(),
   address: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   // Detailed Mexican Address Fields
   condominioMaestro: z.string().optional(),
   condominio: z.string().optional(),
@@ -87,6 +89,8 @@ export default function Profile() {
   const [isUploadingMenuDocument, setIsUploadingMenuDocument] = useState(false);
   const [isDeletingMenuDocument, setIsDeletingMenuDocument] = useState(false);
   const [isEditingProviderProfile, setIsEditingProviderProfile] = useState(false);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   // Get current user data
   const { data: user, isLoading } = useQuery<any>({
@@ -163,6 +167,8 @@ export default function Profile() {
         building: user.building || "",
         apartment: user.apartment || "",
         address: user.address || "",
+        latitude: user.latitude ? parseFloat(user.latitude) : undefined,
+        longitude: user.longitude ? parseFloat(user.longitude) : undefined,
         // Mexican address fields
         condominioMaestro: user.condominioMaestro || "",
         condominio: user.condominio || "",
@@ -178,6 +184,8 @@ export default function Profile() {
         serviceRadiusKm: user.serviceRadiusKm || undefined,
       });
       setProfilePicture(user.avatar || null);
+      setLatitude(user.latitude ? parseFloat(user.latitude) : null);
+      setLongitude(user.longitude ? parseFloat(user.longitude) : null);
     }
   }, [user, profileForm]);
 
@@ -668,6 +676,12 @@ export default function Profile() {
                                   <AppleMapsAddressInput
                                     value={field.value || ""}
                                     onChange={field.onChange}
+                                    onCoordinateSelect={(lat, lon) => {
+                                      setLatitude(lat);
+                                      setLongitude(lon);
+                                      profileForm.setValue('latitude', lat);
+                                      profileForm.setValue('longitude', lon);
+                                    }}
                                     placeholder={t('profile.personal.addressPlaceholder')}
                                     data-testid="input-address"
                                   />

@@ -15,6 +15,7 @@ import { ForgotPasswordDialog } from "@/components/forgot-password-dialog";
 import { COUNTRY_CODES, COUNTRIES } from "@/lib/countries";
 
 import { Mail, Lock, User, Phone, Briefcase, Eye, EyeOff } from "lucide-react";
+import AppleMapsAddressInput from "@/components/apple-maps-address-input";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -28,6 +29,9 @@ export default function Auth() {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+52"); // Default to Mexico
   const [selectedCountry, setSelectedCountry] = useState("MX"); // Default to Mexico
   const [rememberMe, setRememberMe] = useState(false); // Remember Me checkbox state
+  const [address, setAddress] = useState(""); // Address from AppleMapsAddressInput
+  const [latitude, setLatitude] = useState<number | null>(null); // Latitude coordinate
+  const [longitude, setLongitude] = useState<number | null>(null); // Longitude coordinate
 
   const registerMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -196,6 +200,10 @@ export default function Auth() {
       phone: fullPhoneNumber,
       country: selectedCountry,
       isProvider: isProvider,
+      // General address and coordinates
+      address: address,
+      latitude: latitude,
+      longitude: longitude,
       // Mexican Address Fields
       condominioMaestro: formData.get("condominioMaestro") as string,
       condominio: formData.get("condominio") as string,
@@ -427,6 +435,24 @@ export default function Auth() {
                   {/* Mexican Address Structure */}
                   <div className="space-y-4 border-t pt-4">
                     <h3 className="font-semibold text-gray-700">{t('auth.register.addressSection')}</h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="address">{t('auth.register.address') || 'Dirección General'}</Label>
+                      <AppleMapsAddressInput
+                        value={address}
+                        onChange={setAddress}
+                        onCoordinateSelect={(lat, lon) => {
+                          setLatitude(lat);
+                          setLongitude(lon);
+                        }}
+                        placeholder={t('auth.register.addressPlaceholder') || 'Busca tu dirección...'}
+                        id="address"
+                        testId="input-address"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {t('auth.register.addressHelper') || 'Selecciona tu dirección para ubicar tu ubicación automáticamente'}
+                      </p>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
