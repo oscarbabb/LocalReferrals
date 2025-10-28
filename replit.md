@@ -36,8 +36,8 @@ Preferred communication style: Simple, everyday language.
 - **Service Discovery**: Categorized listings with search and filters, including intelligent autocomplete search.
 - **Smart Search System**: Type-ahead autocomplete comboboxes for categories/subcategories, supporting bilingual search.
 - **Provider Profiles**: Detailed pages with ratings, reviews, menu items, and availability.
-- **Advanced Review System**: Detailed criteria, photo uploads, verification badges, with automatic email notifications to providers when they receive reviews.
-- **Mutual Rating System**: Bidirectional rating for providers and customers.
+- **Advanced Review System**: Detailed criteria, photo uploads, verification badges, with automatic bilateral email notifications (providers receive emails when customers review them, customers receive emails when providers review them).
+- **Mutual Rating System**: Bidirectional rating for providers and customers with full email notification support.
 - **One-Click Booking**: Calendar interface with time slot selection.
 - **Booking Management**: Unified scheduled appointments view that displays both confirmed service requests and formal appointments, with duplicate prevention logic to avoid showing the same booking twice.
 - **Messaging System**: Comprehensive inbox for provider-consumer conversations with real-time synchronization, delete, and forward capabilities. Includes an unread message alert system with database-backed tracking.
