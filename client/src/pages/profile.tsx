@@ -872,25 +872,6 @@ export default function Profile() {
                         <span className="text-gray-600">{t('profile.account.memberSince')}</span>
                         <span className="font-medium">{t('profile.account.memberSinceValue')}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('profile.account.servicesRequested')}</span>
-                        <span className="font-medium">12</span>
-                      </div>
-                      {user?.isProvider && (
-                        <>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t('profile.account.servicesOffered')}</span>
-                            <span className="font-medium">28</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t('profile.account.averageRating')}</span>
-                            <div className="flex items-center">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                              <span className="font-medium">4.8</span>
-                            </div>
-                          </div>
-                        </>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -997,7 +978,6 @@ export default function Profile() {
                           <h3 className="font-semibold text-lg">{provider.title}</h3>
                           <p className="text-gray-600">{provider.description}</p>
                           <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                            <span>⭐ 4.9 (12 reseñas)</span>
                             <span>📍 {user.building}</span>
                             <span>🕒 Activo desde {parseSafeDate(provider.createdAt).getFullYear()}</span>
                           </div>
@@ -1385,22 +1365,10 @@ export default function Profile() {
                     <CardTitle>Estadísticas Rápidas</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">{menuItems.length}</div>
                         <div className="text-sm text-gray-600">Servicios</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">12</div>
-                        <div className="text-sm text-gray-600">Completados</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-600">4.9</div>
-                        <div className="text-sm text-gray-600">Calificación</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">MXN 2.4k</div>
-                        <div className="text-sm text-gray-600">Este mes</div>
                       </div>
                     </div>
                   </CardContent>
@@ -1418,23 +1386,14 @@ export default function Profile() {
                     <CardTitle>Mis Solicitudes</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">Limpieza Apartamento</h4>
-                          <Badge variant="secondary">Pendiente</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">Solicitado a María García</p>
-                        <p className="text-xs text-gray-500">Hace 2 días</p>
-                      </div>
-                      <div className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">Reparación Grifo</h4>
-                          <Badge className="bg-green-100 text-green-800">Completado</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">Solicitado a Carlos Mendoza</p>
-                        <p className="text-xs text-gray-500">Hace 1 semana</p>
-                      </div>
+                    <div className="text-center py-8">
+                      <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        No tienes solicitudes
+                      </h4>
+                      <p className="text-gray-600 text-sm">
+                        Aquí verás las solicitudes de servicio que hayas realizado
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -1445,19 +1404,14 @@ export default function Profile() {
                       <CardTitle>Solicitudes Recibidas</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-medium">Clases de Matemáticas</h4>
-                            <Badge className="bg-blue-100 text-blue-800">Nueva</Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">De: Ana López</p>
-                          <p className="text-xs text-gray-500">Hace 3 horas</p>
-                          <div className="flex space-x-2 mt-3">
-                            <Button size="sm" className="bg-primary text-white">Aceptar</Button>
-                            <Button size="sm" variant="outline">Rechazar</Button>
-                          </div>
-                        </div>
+                      <div className="text-center py-8">
+                        <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h4 className="font-medium text-gray-900 mb-2">
+                          No has recibido solicitudes
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          Aquí verás las solicitudes de servicio que recibas de clientes
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
