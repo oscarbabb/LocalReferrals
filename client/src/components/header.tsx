@@ -163,7 +163,29 @@ export default function Header() {
               </Link>
             ))}
             
-            {/* More Dropdown for Secondary Items */}
+            {/* Messages Icon - Standalone and always visible */}
+            {isAuthenticated && (
+              <Link href="/messages">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-gray-700 hover:text-primary hover:bg-orange-50"
+                  data-testid="button-messages-desktop"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {unreadMessagesCount > 0 && (
+                    <span 
+                      className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold animate-pulse shadow-lg"
+                      data-testid="badge-unread-messages"
+                    >
+                      {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
+            
+            {/* More Dropdown for Other Secondary Items */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -176,7 +198,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                {secondaryNavItems.map((item) => (
+                {secondaryNavItems.filter(item => item.href !== "/messages").map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
                     <Link 
                       href={item.href}
@@ -185,9 +207,6 @@ export default function Header() {
                     >
                       {item.icon && <item.icon className="w-4 h-4 mr-2" />}
                       <span>{item.label}</span>
-                      {item.href === "/messages" && unreadMessagesCount > 0 && (
-                        <NotificationBadge count={unreadMessagesCount} className="-top-1 -right-1" />
-                      )}
                       {item.href === "/contact-admin" && unreadAdminMessagesCount > 0 && !isAdmin && (
                         <NotificationBadge count={unreadAdminMessagesCount} className="-top-1 -right-1" />
                       )}
@@ -219,8 +238,16 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" data-testid="button-mobile-menu">
+              <Button variant="ghost" size="icon" className="lg:hidden relative" data-testid="button-mobile-menu">
                 <Menu className="w-5 h-5" />
+                {isAuthenticated && (unreadMessagesCount > 0 || unreadAdminMessagesCount > 0) && (
+                  <span 
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold animate-pulse shadow-lg"
+                    data-testid="badge-mobile-menu-notification"
+                  >
+                    {(unreadMessagesCount + unreadAdminMessagesCount) > 9 ? '9+' : (unreadMessagesCount + unreadAdminMessagesCount)}
+                  </span>
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px]">
@@ -240,15 +267,27 @@ export default function Header() {
                     }}
                     data-testid={`mobile-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
-                    <span className="block transition-transform duration-200">
-                      {item.label}
-                    </span>
-                    {item.href === "/messages" && unreadMessagesCount > 0 && (
-                      <NotificationBadge count={unreadMessagesCount} className="top-2 right-2" />
-                    )}
-                    {item.href === "/contact-admin" && unreadAdminMessagesCount > 0 && !isAdmin && (
-                      <NotificationBadge count={unreadAdminMessagesCount} className="top-2 right-2" />
-                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="block transition-transform duration-200 flex items-center gap-2">
+                        {item.icon && <item.icon className="w-4 h-4" />}
+                        {item.label}
+                      </span>
+                      {item.href === "/messages" && unreadMessagesCount > 0 && (
+                        <span 
+                          className="bg-red-500 text-white text-xs rounded-full px-2 py-1 font-semibold animate-pulse shadow-lg"
+                          data-testid="badge-unread-messages-mobile"
+                        >
+                          {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                        </span>
+                      )}
+                      {item.href === "/contact-admin" && unreadAdminMessagesCount > 0 && !isAdmin && (
+                        <span 
+                          className="bg-red-500 text-white text-xs rounded-full px-2 py-1 font-semibold animate-pulse shadow-lg"
+                        >
+                          {unreadAdminMessagesCount > 9 ? '9+' : unreadAdminMessagesCount}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 ))}
                 {(user as any)?.isAdmin && (
