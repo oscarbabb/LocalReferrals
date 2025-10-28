@@ -26,6 +26,12 @@ export const es = {
   'nav.logoutToastError': 'Error al cerrar sesión',
   'nav.logoutToastErrorDesc': 'Hubo un problema al cerrar tu sesión.',
   
+  // Common
+  'common.notifications.newRequest': '🔔 ¡Tienes una nueva solicitud de servicio!',
+  'common.notifications.newRequests': '🔔 ¡Tienes {count} nuevas solicitudes de servicio!',
+  'common.notifications.reviewMessage': 'Haz clic abajo para revisar y responder a tus solicitudes pendientes.',
+  'common.notifications.takeMeThere': 'Llévame Allí',
+  
   // Home page (existing)
   'home.title': 'Referencias Locales',
   'home.slogan': 'Busca y encuentra servicios cercanos a tu condominio',

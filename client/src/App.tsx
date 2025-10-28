@@ -34,15 +34,20 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import FAQ from "@/pages/faq";
 import Header from "@/components/header";
 import OnboardingTour from "@/components/onboarding-tour";
+import PendingRequestsNotification from "@/components/PendingRequestsNotification";
 import { useOnboarding, OnboardingProvider } from "@/hooks/use-onboarding";
+import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
   const { showOnboarding, completeOnboarding } = useOnboarding();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <Switch>
+      {user && (user as any)?.isProvider && <PendingRequestsNotification />}
+      <div className={(user as any)?.isProvider ? "pt-20" : ""}>
+        <Switch>
         <Route path="/" component={Home} />
         <Route path="/services" component={Services} />
         <Route path="/providers" component={Providers} />
@@ -72,6 +77,7 @@ function Router() {
         <Route path="/faq" component={FAQ} />
         <Route component={NotFound} />
       </Switch>
+      </div>
       
       <OnboardingTour 
         isOpen={showOnboarding} 

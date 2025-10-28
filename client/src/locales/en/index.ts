@@ -26,6 +26,12 @@ export const en = {
   'nav.logoutToastError': 'Logout error',
   'nav.logoutToastErrorDesc': 'There was a problem logging out.',
   
+  // Common
+  'common.notifications.newRequest': '🔔 You have a new service request!',
+  'common.notifications.newRequests': '🔔 You have {count} new service requests!',
+  'common.notifications.reviewMessage': 'Click below to review and respond to your pending requests.',
+  'common.notifications.takeMeThere': 'Take Me There',
+  
   // Home page (existing)
   'home.title': 'Local References',
   'home.slogan': 'Find and discover services near your condominium',
