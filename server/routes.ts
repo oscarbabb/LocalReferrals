@@ -130,13 +130,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Set session duration based on "Remember Me" checkbox
-      if (rememberMe) {
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-      } else {
-        req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 1 day
-      }
-
       // Create authenticated session
       const sessionUser = {
         claims: {
@@ -158,14 +151,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Failed to create session" });
         }
 
-        res.json({
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            fullName: user.fullName,
-          },
-          message: "Login successful"
+        // Set session duration based on "Remember Me" checkbox AFTER login
+        if (rememberMe) {
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+        } else {
+          req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 1 day
+        }
+
+        // Explicitly save the session to persist cookie settings
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Failed to save session" });
+          }
+
+          res.json({
+            user: {
+              id: user.id,
+              email: user.email,
+              username: user.username,
+              fullName: user.fullName,
+            },
+            message: "Login successful"
+          });
         });
       });
     } catch (error) {
