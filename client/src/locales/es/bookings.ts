@@ -41,6 +41,14 @@ export const bookings = {
   'bookings.buttons.contact': 'Contactar',
   'bookings.buttons.reschedule': 'Reprogramar',
   
+  // Filters
+  'bookings.filters.all': 'Todos',
+  'bookings.filters.pending': 'Pendientes',
+  'bookings.filters.completed': 'Completados',
+  'bookings.filters.noCompleted': 'No hay servicios completados',
+  'bookings.filters.noPending': 'No hay solicitudes pendientes',
+  'bookings.filters.completedHint': 'Los servicios completados que puedes calificar aparecerán aquí',
+  
   // Toast messages
   'bookings.toast.statusUpdated': 'Estado actualizado',
   'bookings.toast.statusSuccess': 'La solicitud ha sido actualizada exitosamente.',
@@ -51,6 +59,8 @@ export const bookings = {
   'bookings.toast.ratingSuccess': 'Calificación enviada',
   'bookings.toast.ratingSuccessDesc': 'Tu calificación del cliente ha sido enviada exitosamente.',
   'bookings.toast.ratingFailed': 'No se pudo enviar la calificación.',
+  'bookings.toast.ratingInfo': 'Calificación restringida',
+  'bookings.toast.customerRatingOnly': 'Solo los proveedores pueden calificar a los clientes por servicios completados.',
   
   // Customer Rating
   'bookings.rateCustomer.title': 'Calificar a {customerName}',

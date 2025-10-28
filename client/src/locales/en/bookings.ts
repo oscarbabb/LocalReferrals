@@ -41,6 +41,14 @@ export const bookings = {
   'bookings.buttons.contact': 'Contact',
   'bookings.buttons.reschedule': 'Reschedule',
   
+  // Filters
+  'bookings.filters.all': 'All',
+  'bookings.filters.pending': 'Pending',
+  'bookings.filters.completed': 'Completed',
+  'bookings.filters.noCompleted': 'No completed services',
+  'bookings.filters.noPending': 'No pending requests',
+  'bookings.filters.completedHint': 'Completed services you can rate will appear here',
+  
   // Toast messages
   'bookings.toast.statusUpdated': 'Status updated',
   'bookings.toast.statusSuccess': 'The request has been updated successfully.',
@@ -51,6 +59,8 @@ export const bookings = {
   'bookings.toast.ratingSuccess': 'Rating submitted',
   'bookings.toast.ratingSuccessDesc': 'Your customer rating has been submitted successfully.',
   'bookings.toast.ratingFailed': 'Could not submit rating.',
+  'bookings.toast.ratingInfo': 'Rating restricted',
+  'bookings.toast.customerRatingOnly': 'Only providers can rate customers for completed services.',
   
   // Customer Rating
   'bookings.rateCustomer.title': 'Rate {customerName}',

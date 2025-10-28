@@ -74,6 +74,7 @@ export default function Bookings() {
   const [selectedProvider, setSelectedProvider] = useState<{ id: string; name: string } | null>(null);
   const [showCustomerRatingDialog, setShowCustomerRatingDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<{id: string, name: string, providerId: string} | null>(null);
+  const [receivedFilter, setReceivedFilter] = useState<"all" | "pending" | "completed">("all");
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t, dateLocale } = useLanguage();
@@ -284,7 +285,11 @@ export default function Bookings() {
                   size="sm" 
                   data-testid={`button-rate-${request.id}`}
                   onClick={() => {
-                    if (request.provider?.userId === currentUser?.id) {
+                    // Check if current user is the provider (same logic as messaging)
+                    const isProvider = request.provider?.userId === currentUser?.id || 
+                                      (provider && request.providerId === provider.id);
+                    
+                    if (isProvider) {
                       setSelectedCustomer({
                         id: request.requesterId,
                         name: request.requester?.fullName || request.requester?.username || 'Customer',
@@ -522,10 +527,39 @@ export default function Bookings() {
           <TabsContent value="received" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5" />
-                  {t('bookings.requests.receivedTitle')}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5" />
+                    {t('bookings.requests.receivedTitle')}
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={receivedFilter === "all" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setReceivedFilter("all")}
+                      data-testid="filter-all"
+                    >
+                      {t('bookings.filters.all')}
+                    </Button>
+                    <Button
+                      variant={receivedFilter === "pending" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setReceivedFilter("pending")}
+                      data-testid="filter-pending"
+                    >
+                      {t('bookings.filters.pending')}
+                    </Button>
+                    <Button
+                      variant={receivedFilter === "completed" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setReceivedFilter("completed")}
+                      className="bg-green-600 hover:bg-green-700"
+                      data-testid="filter-completed"
+                    >
+                      {t('bookings.filters.completed')}
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {receivedLoading ? (
@@ -536,11 +570,65 @@ export default function Bookings() {
                       </div>
                     ))}
                   </div>
-                ) : receivedRequests.length > 0 ? (
+                ) : (() => {
+                  const filteredRequests = receivedRequests.filter((request: ServiceRequest) => {
+                    if (receivedFilter === "all") return true;
+                    return request.status === receivedFilter;
+                  });
+                  
+                  return filteredRequests.length > 0 ? (
+                    <div className="space-y-4">
+                      {filteredRequests.map((request: ServiceRequest) => (
+                        <ServiceRequestCard key={request.id} request={request} currentUser={user} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                        {receivedFilter === "completed" 
+                          ? t('bookings.filters.noCompleted')
+                          : receivedFilter === "pending"
+                          ? t('bookings.filters.noPending')
+                          : t('bookings.requests.noReceived')}
+                      </h3>
+                      <p className="text-gray-500">
+                        {receivedFilter === "completed" && t('bookings.filters.completedHint')}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="appointments" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  {t('bookings.appointments.title')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(appointmentsLoading || requestsLoading) ? (
                   <div className="space-y-4">
-                    {receivedRequests.map((request: ServiceRequest) => (
-                      <ServiceRequestCard key={request.id} request={request} currentUser={user} />
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-32 bg-gray-200 rounded-lg"></div>
+                      </div>
                     ))}
+                  </div>
+                ) : allScheduledItems.length > 0 ? (
+                  <div className="space-y-4">
+                    {allScheduledItems.map((item: Appointment | ServiceRequest) => {
+                      // Check if it's an appointment or a confirmed service request
+                      if ('appointmentDate' in item) {
+                        return <AppointmentCard key={item.id} appointment={item as Appointment} currentUser={user} />;
+                      } else {
+                        return <ServiceRequestCard key={item.id} request={item as ServiceRequest} currentUser={user} />;
+                      }
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12">
