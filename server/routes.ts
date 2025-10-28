@@ -27,7 +27,7 @@ import {
   insertMenuItemSchema,
   insertMenuItemVariationSchema
 } from "@shared/schema";
-import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail, sendPasswordResetEmail } from "./email.js";
+import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail, sendPasswordResetEmail, sendServiceRequestNotificationEmail } from "./email.js";
 import { sendWelcomeWhatsApp, sendBookingConfirmationWhatsApp, sendBookingNotificationWhatsApp } from "./whatsapp.js";
 import bcrypt from "bcrypt";
 
@@ -1506,6 +1506,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requestData = insertServiceRequestSchema.parse(req.body);
       const serviceRequest = await storage.createServiceRequest(requestData);
       
+      // Send email notification to provider
+      try {
+        // Get provider details
+        const provider = await storage.getProvider(serviceRequest.providerId);
+        if (provider) {
+          // Get provider's user account to get email
+          const providerUser = await storage.getUser(provider.userId);
+          // Get requester details
+          const requester = await storage.getUser(serviceRequest.requesterId);
+          // Get service category name
+          const category = await storage.getServiceCategory(serviceRequest.categoryId);
+          
+          if (providerUser && requester && category) {
+            const preferredDateStr = serviceRequest.preferredDate 
+              ? new Date(serviceRequest.preferredDate).toLocaleDateString('es-MX', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })
+              : undefined;
+              
+            await sendServiceRequestNotificationEmail(
+              providerUser.email,
+              providerUser.fullName,
+              requester.fullName,
+              serviceRequest.title,
+              serviceRequest.description,
+              preferredDateStr,
+              serviceRequest.preferredTime || undefined,
+              serviceRequest.location || undefined
+            );
+            console.log(`✅ Service request notification email sent to ${providerUser.email}`);
+          }
+        }
+      } catch (emailError) {
+        // Log error but don't fail the request
+        console.error("Failed to send service request notification email:", emailError);
+      }
+      
       res.status(201).json(serviceRequest);
     } catch (error) {
       console.error("Service request creation error:", error);
@@ -1623,6 +1663,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Service request update error:", error);
       res.status(500).json({ message: "Failed to update service request" });
+    }
+  });
+
+  // Get pending service requests count for provider
+  app.get("/api/service-requests/pending/count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get user's provider profile
+      const provider = await storage.getProviderByUserId(userId);
+      if (!provider) {
+        return res.json({ count: 0 });
+      }
+      
+      // Get pending requests for the provider
+      const requests = await storage.getServiceRequestsByProvider(provider.id);
+      const pending = requests.filter(r => r.status === 'pending');
+      
+      res.json({ count: pending.length });
+    } catch (error) {
+      console.error("Failed to get pending requests count:", error);
+      res.status(500).json({ message: "Failed to get pending requests count" });
     }
   });
 
