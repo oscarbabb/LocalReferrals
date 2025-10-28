@@ -174,6 +174,7 @@ export default function Bookings() {
     const getMessageRecipient = () => {
       if (!currentUser) return null;
       
+      // If current user is the requester, message the provider
       if (request.requesterId === currentUser.id) {
         return {
           id: request.provider?.userId,
@@ -181,7 +182,8 @@ export default function Bookings() {
         };
       }
       
-      if (request.provider?.userId === currentUser.id) {
+      // If current user is the provider (check both provider.userId and providerId)
+      if (request.provider?.userId === currentUser.id || (provider && request.providerId === provider.id)) {
         return {
           id: request.requesterId,
           name: request.requester?.fullName || request.requester?.username || "Usuario"
