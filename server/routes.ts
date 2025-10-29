@@ -2358,6 +2358,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/messages/conversation/:otherUserId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const otherUserId = req.params.otherUserId;
+      
+      if (!otherUserId) {
+        return res.status(400).json({ message: "Other user ID is required" });
+      }
+      
+      // Delete the conversation for the current user
+      await storage.deleteConversation(userId, otherUserId);
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+      res.status(500).json({ message: "Failed to delete conversation" });
+    }
+  });
+
   // Admin Messages
   app.post("/api/admin-messages", isAuthenticated, async (req: any, res) => {
     try {
