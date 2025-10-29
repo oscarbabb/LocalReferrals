@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
@@ -70,6 +71,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
 
@@ -84,10 +87,23 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     setOpen(false);
   }, [language]);
 
+  // Update dropdown position when opening
+  useEffect(() => {
+    if (open && cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [open]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+          cardRef.current && !cardRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
@@ -116,8 +132,9 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   return (
-    <div className={`relative ${open ? 'z-50' : 'z-0'}`} ref={dropdownRef}>
+    <>
       <Card 
+        ref={cardRef}
         className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
         onClick={handleCardClick}
         data-testid={`category-card-${category.id}`}
@@ -166,10 +183,16 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
         </CardContent>
       </Card>
 
-      {/* Simple dropdown menu - appears below card */}
-      {showSubcategories && open && subcategories.length > 0 && (
+      {/* Portal-based dropdown - renders at document body level to avoid stacking context issues */}
+      {showSubcategories && open && subcategories.length > 0 && createPortal(
         <div 
-          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+          ref={dropdownRef}
+          className="fixed bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] animate-in fade-in slide-in-from-top-2 duration-200"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+          }}
           data-testid={`subcategory-dropdown-${category.id}`}
         >
           <div className="p-4 border-b border-gray-100">
@@ -200,8 +223,9 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
