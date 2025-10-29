@@ -96,8 +96,8 @@ export async function syncCategoriesToProduction() {
   }
 }
 
-// Run the sync when this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run the sync when this script is executed directly (NOT when imported)
+if (typeof require !== 'undefined' && require.main === module) {
   syncCategoriesToProduction()
     .then((result) => {
       console.log('📋 Sync result:', result);
