@@ -158,7 +158,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
         <div>{cardContent}</div>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" side="bottom" align="center">

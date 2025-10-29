@@ -28,6 +28,10 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
+- **Fixed subcategory translation bug on Services page** - Subcategories now properly translate when switching languages
+  - Added useEffect to close popover when language changes, forcing fresh render with new translations
+  - Prevents stale translations from persisting when user switches between Spanish and English
+  - User must reopen popover after language switch to see translations update
 
 # User Preferences
 
