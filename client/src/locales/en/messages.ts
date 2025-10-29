@@ -56,4 +56,13 @@ export const messages = {
   'messages.delete.successDescription': 'The message has been deleted for you.',
   'messages.delete.error': 'Error deleting',
   'messages.delete.errorDescription': 'Could not delete message. Please try again.',
+  
+  // Delete Conversation
+  'messages.deleteConversation.button': 'Delete Conversation',
+  'messages.deleteConversation.confirm': 'Delete Entire Conversation?',
+  'messages.deleteConversation.description': 'This will delete all messages in this conversation for you. The other person will still have access to their copy. This action cannot be undone.',
+  'messages.deleteConversation.success': 'Conversation deleted',
+  'messages.deleteConversation.successDescription': 'The conversation has been deleted successfully.',
+  'messages.deleteConversation.error': 'Error deleting conversation',
+  'messages.deleteConversation.errorDescription': 'Could not delete conversation. Please try again.',
 };

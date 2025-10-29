@@ -56,4 +56,13 @@ export const messages = {
   'messages.delete.successDescription': 'El mensaje ha sido eliminado para ti.',
   'messages.delete.error': 'Error al eliminar',
   'messages.delete.errorDescription': 'No se pudo eliminar el mensaje. Intenta nuevamente.',
+  
+  // Delete Conversation
+  'messages.deleteConversation.button': 'Eliminar Conversación',
+  'messages.deleteConversation.confirm': '¿Eliminar Conversación Completa?',
+  'messages.deleteConversation.description': 'Esto eliminará todos los mensajes de esta conversación para ti. La otra persona aún tendrá acceso a su copia. Esta acción no se puede deshacer.',
+  'messages.deleteConversation.success': 'Conversación eliminada',
+  'messages.deleteConversation.successDescription': 'La conversación ha sido eliminada exitosamente.',
+  'messages.deleteConversation.error': 'Error al eliminar conversación',
+  'messages.deleteConversation.errorDescription': 'No se pudo eliminar la conversación. Intenta nuevamente.',
 };

@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Send, MessageCircle, Loader2, MoreVertical, Trash2, Forward } from "lucide-react";
+import { Send, MessageCircle, Loader2, MoreVertical, Trash2, Forward, Trash } from "lucide-react";
 import { Message } from "@shared/schema";
 import { format } from "date-fns";
 import { parseSafeDate } from "@/lib/date-utils";
@@ -59,6 +59,7 @@ export default function MessagingModal({
 }: MessagingModalProps) {
   const [messageContent, setMessageContent] = useState("");
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [showDeleteConversationDialog, setShowDeleteConversationDialog] = useState(false);
   const [forwardModalOpen, setForwardModalOpen] = useState(false);
   const [messageToForward, setMessageToForward] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -221,6 +222,42 @@ export default function MessagingModal({
     },
   });
 
+  // Delete conversation mutation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/messages/conversation/${recipientUserId}`, {});
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: t('messages.deleteConversation.success'),
+        description: t('messages.deleteConversation.successDescription'),
+      });
+      
+      // Close the modal
+      onOpenChange(false);
+      
+      // Invalidate user conversations to refresh the list
+      queryClientInstance.invalidateQueries({ 
+        queryKey: [`/api/messages/user/${currentUserId}`] 
+      });
+      
+      // Invalidate conversation query
+      queryClientInstance.invalidateQueries({ 
+        queryKey: ["/api/messages/conversation", currentUserId, recipientUserId] 
+      });
+      
+      setShowDeleteConversationDialog(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('messages.deleteConversation.error'),
+        description: error.message || t('messages.deleteConversation.errorDescription'),
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSendMessage = () => {
     const trimmedContent = messageContent.trim();
     
@@ -313,12 +350,26 @@ export default function MessagingModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col" data-testid="dialog-messaging">
           <DialogHeader>
-            <DialogTitle data-testid="text-messaging-title">
-              Conversación con {recipientName}
-            </DialogTitle>
-            <DialogDescription>
-              Envía un mensaje directo a {recipientName}
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <DialogTitle data-testid="text-messaging-title">
+                  Conversación con {recipientName}
+                </DialogTitle>
+                <DialogDescription>
+                  Envía un mensaje directo a {recipientName}
+                </DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteConversationDialog(true)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                data-testid="button-delete-conversation"
+              >
+                <Trash className="h-4 w-4 mr-2" />
+                {t('messages.deleteConversation.button')}
+              </Button>
+            </div>
           </DialogHeader>
 
           {/* Messages Area */}
@@ -568,6 +619,36 @@ export default function MessagingModal({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Conversation Confirmation Dialog */}
+      <AlertDialog open={showDeleteConversationDialog} onOpenChange={setShowDeleteConversationDialog}>
+        <AlertDialogContent data-testid="dialog-delete-conversation">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('messages.deleteConversation.confirm')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('messages.deleteConversation.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-conversation">
+              {t('messages.actions.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConversationMutation.mutate()}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteConversationMutation.isPending}
+              data-testid="button-confirm-delete-conversation"
+            >
+              {deleteConversationMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Trash className="w-4 h-4 mr-2" />
+              )}
+              {t('messages.deleteConversation.button')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
