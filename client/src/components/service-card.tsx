@@ -2,9 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { ServiceCategory, ServiceSubcategory } from "@shared/schema";
+import { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
 import { getCategoryLabel, getCategoryDescription, getSubcategoryLabel } from "@/lib/serviceTranslations";
 
@@ -78,6 +78,11 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     queryKey: [`/api/categories/${category.id}/subcategories`],
     enabled: showSubcategories,
   });
+
+  // Close popover when language changes to force re-render with new translations
+  useEffect(() => {
+    setOpen(false);
+  }, [language]);
 
   const handleCardClick = () => {
     // Don't do anything while loading
