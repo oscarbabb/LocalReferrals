@@ -34,7 +34,7 @@ const providerSetupSchema = (t: any) => z.object({
       const num = Number(val);
       return isNaN(num) ? undefined : num;
     },
-    z.number().int().min(1, t('providerSetup.validation.radiusMin')).max(100, t('providerSetup.validation.radiusMax')).optional()
+    z.number().int().min(1, t('providerSetup.validation.radiusMin')).max(100, t('providerSetup.validation.radiusMax'))
   ),
   
   // Payment method selection
@@ -186,6 +186,7 @@ export default function ProviderSetup() {
       title: "",
       description: "",
       experience: "",
+      serviceRadiusKm: 10,
       paymentType: "hourly",
       hourlyRate: undefined,
       minimumHours: undefined,

@@ -337,6 +337,8 @@ export const insertProviderSchema = createInsertSchema(providers).omit({
   id: true,
   isVerified: true,
   createdAt: true,
+}).extend({
+  serviceRadiusKm: z.number().int().min(1, "Service radius must be at least 1 km").max(100, "Service radius cannot exceed 100 km"),
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
