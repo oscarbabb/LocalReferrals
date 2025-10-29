@@ -116,7 +116,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${open ? 'z-50' : 'z-0'}`} ref={dropdownRef}>
       <Card 
         className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
         onClick={handleCardClick}
