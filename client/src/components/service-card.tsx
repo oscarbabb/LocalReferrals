@@ -152,42 +152,46 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     </Card>
   );
 
-  if (!showSubcategories || subcategories.length === 0) {
+  // Always render with Popover wrapper when showSubcategories is enabled
+  // This ensures proper popover behavior even during loading
+  if (!showSubcategories) {
     return cardContent;
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
         <div>{cardContent}</div>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" side="bottom" align="center">
-        <div className="p-4 border-b border-gray-100">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <span>{t('components.serviceCard.subcategories')}:</span>
-            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
-              {subcategories.length}
-            </Badge>
-          </h4>
-        </div>
-        <div className="max-h-[300px] overflow-y-auto p-2">
-          <div className="grid grid-cols-1 gap-1">
-            {subcategories.map((subcategory) => (
-              <div 
-                key={subcategory.id}
-                className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
-                data-testid={`subcategory-${subcategory.id}`}
-                onClick={() => handleSubcategoryClick(subcategory.id)}
-              >
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
-                  {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
-                </span>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
-              </div>
-            ))}
+      {subcategories.length > 0 && (
+        <PopoverContent className="w-80 p-0" side="bottom" align="center">
+          <div className="p-4 border-b border-gray-100">
+            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <span>{t('components.serviceCard.subcategories')}:</span>
+              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
+                {subcategories.length}
+              </Badge>
+            </h4>
           </div>
-        </div>
-      </PopoverContent>
+          <div className="max-h-[300px] overflow-y-auto p-2">
+            <div className="grid grid-cols-1 gap-1">
+              {subcategories.map((subcategory) => (
+                <div 
+                  key={subcategory.id}
+                  className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
+                  data-testid={`subcategory-${subcategory.id}`}
+                  onClick={() => handleSubcategoryClick(subcategory.id)}
+                >
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
+                    {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }
