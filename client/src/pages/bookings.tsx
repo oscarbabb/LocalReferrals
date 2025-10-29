@@ -332,6 +332,36 @@ export default function Bookings() {
                 </Button>
               </div>
             )}
+            
+            {request.status === "confirmed" && (
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  className="bg-blue-500 hover:bg-blue-600" 
+                  data-testid={`button-start-service-${request.id}`}
+                  onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "in_progress" })}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  {t('bookings.buttons.startService')}
+                </Button>
+              </div>
+            )}
+            
+            {request.status === "in_progress" && (
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  className="bg-green-500 hover:bg-green-600" 
+                  data-testid={`button-finish-service-${request.id}`}
+                  onClick={() => updateStatusMutation.mutate({ requestId: request.id, status: "completed" })}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {t('bookings.buttons.finishService')}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

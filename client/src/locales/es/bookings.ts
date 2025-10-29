@@ -40,6 +40,8 @@ export const bookings = {
   'bookings.buttons.cancel': 'Cancelar',
   'bookings.buttons.contact': 'Contactar',
   'bookings.buttons.reschedule': 'Reprogramar',
+  'bookings.buttons.startService': 'Iniciar Servicio',
+  'bookings.buttons.finishService': 'Finalizar Servicio',
   
   // Filters
   'bookings.filters.all': 'Todos',
