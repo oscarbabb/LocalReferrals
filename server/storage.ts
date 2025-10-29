@@ -129,6 +129,7 @@ export interface IStorage {
   getUnreadMessageCount(userId: string): Promise<number>;
   deleteMessage(messageId: string, userId: string): Promise<Message | undefined>;
   forwardMessage(messageId: string, newReceiverId: string, senderId: string): Promise<Message>;
+  deleteConversation(forUserId: string, otherUserId: string): Promise<void>;
 
   // Admin Messages
   getAdminMessages(): Promise<AdminMessage[]>;

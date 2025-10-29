@@ -426,6 +426,34 @@ export class DatabaseStorage implements IStorage {
     return forwardedMessage;
   }
 
+  async deleteConversation(forUserId: string, otherUserId: string): Promise<void> {
+    const now = new Date();
+    
+    // Update messages where forUserId is the sender
+    await db
+      .update(messages)
+      .set({ 
+        deletedBySender: true, 
+        deletedAt: now 
+      })
+      .where(and(
+        eq(messages.senderId, forUserId),
+        eq(messages.receiverId, otherUserId)
+      ));
+    
+    // Update messages where forUserId is the receiver
+    await db
+      .update(messages)
+      .set({ 
+        deletedByReceiver: true, 
+        deletedAt: now 
+      })
+      .where(and(
+        eq(messages.senderId, otherUserId),
+        eq(messages.receiverId, forUserId)
+      ));
+  }
+
   // Admin Messages
   async getAdminMessages(): Promise<AdminMessage[]> {
     const results = await db
