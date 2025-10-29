@@ -15,6 +15,12 @@
 - Added status filter system (All/Pending/Completed) to "Received Requests" tab with bilingual support
 - **Fixed "Remember Me" checkbox functionality** - Session cookies now properly persist (1 day default, 30 days when checked)
 - **Fixed "Become a Provider" button** on testimonials page - Now navigates to registration with provider checkbox pre-selected via URL parameters
+- **Fixed geolocation-based provider filtering** - Complete implementation and validation of distance-based provider discovery
+  - Added serviceRadiusKm to provider creation API request (was missing from frontend form submission)
+  - Made serviceRadiusKm required in frontend form schema with default value of 10km
+  - Added backend validation requiring serviceRadiusKm between 1-100km in insertProviderSchema
+  - Verified complete flow: user registration with coordinates, provider setup with service radius, and distance-based filtering at multiple radius levels
+  - All geolocation features now working correctly: users and providers have coordinates, distance calculation via Haversine formula, dual-filter system (provider service radius + user radius filter)
 
 # User Preferences
 
