@@ -48,7 +48,7 @@ export function getCategoryDescription(
 
 /**
  * Get the translated label for a subcategory
- * @param id - The subcategory ID
+ * @param id - The subcategory ID or slug
  * @param language - The language ('en' or 'es')
  * @param fallback - Optional fallback string if translation not found
  * @returns The translated subcategory label
@@ -58,7 +58,22 @@ export function getSubcategoryLabel(
   language: 'en' | 'es', 
   fallback?: string
 ): string {
-  const translation = subcategoryTranslations[id];
+  // Try direct lookup first
+  let translation = subcategoryTranslations[id];
+  
+  // If not found and id contains a category prefix, try without it
+  if (!translation && id.includes('-')) {
+    // Try removing the category prefix (everything before the second-to-last hyphen cluster)
+    const parts = id.split('-');
+    if (parts.length > 2) {
+      // Try progressively shorter versions by removing prefix parts
+      for (let i = 1; i < parts.length; i++) {
+        const shorterId = parts.slice(i).join('-');
+        translation = subcategoryTranslations[shorterId];
+        if (translation) break;
+      }
+    }
+  }
   
   if (!translation) {
     // If no translation found, return fallback or empty string
