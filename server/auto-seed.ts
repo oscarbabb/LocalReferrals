@@ -1,6 +1,6 @@
 import { db } from './db';
 import { serviceCategories, serviceSubcategories } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
 import { generateSlug } from './slug-utils';
@@ -144,16 +144,28 @@ export async function autoSeedFromCSV() {
       for (let j = 1; j < Math.min(row.length, 26); j++) {
         const subcategoryName = row[j]?.trim();
         if (subcategoryName && subcategoryName !== '') {
-          // Generate slug with category prefix for uniqueness
-          const baseSubcategorySlug = generateSlug(subcategoryName);
-          const subcategorySlug = `${categorySlug}-${baseSubcategorySlug}`;
-          await db.insert(serviceSubcategories).values({
-            categoryId: category.id,
-            slug: subcategorySlug,
-            name: subcategoryName,
-            order: j - 1
-          });
-          importedSubcategories++;
+          // Check if subcategory already exists for this category
+          const existingSubcategory = await db
+            .select()
+            .from(serviceSubcategories)
+            .where(and(
+              eq(serviceSubcategories.categoryId, category.id),
+              eq(serviceSubcategories.name, subcategoryName)
+            ))
+            .limit(1);
+          
+          if (existingSubcategory.length === 0) {
+            // Generate slug with category prefix for uniqueness
+            const baseSubcategorySlug = generateSlug(subcategoryName);
+            const subcategorySlug = `${categorySlug}-${baseSubcategorySlug}`;
+            await db.insert(serviceSubcategories).values({
+              categoryId: category.id,
+              slug: subcategorySlug,
+              name: subcategoryName,
+              order: j - 1
+            });
+            importedSubcategories++;
+          }
         }
       }
     }
