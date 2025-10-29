@@ -28,10 +28,12 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
-- **Fixed subcategory translation bug on Services page** - Subcategories now properly translate when switching languages
-  - Added useEffect to close popover when language changes, forcing fresh render with new translations
-  - Prevents stale translations from persisting when user switches between Spanish and English
-  - User must reopen popover after language switch to see translations update
+- **Fixed critical subcategory display bug on Services page** - Categories now properly show subcategories in popover instead of navigating immediately
+  - Removed competing onClick handler from Card component that was preventing popover from opening
+  - Implemented handleOpenChange to intercept popover events and decide between opening popover or navigating
+  - Added language-based remounting (key prop) to force fresh translations when language switches
+  - Subcategories now display correctly in popover; clicking a subcategory then navigates to providers page
+  - Complete fix tested and verified: popover opens/closes correctly, translations update on language switch
 
 # User Preferences
 

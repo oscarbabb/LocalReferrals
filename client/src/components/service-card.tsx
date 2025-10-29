@@ -84,28 +84,31 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     setOpen(false);
   }, [language]);
 
-  const handleCardClick = () => {
-    // Don't do anything while loading
-    if (subcategoriesLoading) return;
-    
-    if (showSubcategories && subcategories.length > 0) {
-      // Open popover to show subcategories
-      setOpen(true);
-    } else {
-      // Navigate to providers page if no subcategories
-      window.location.href = `/providers?category=${category.id}`;
-    }
-  };
-
   const handleSubcategoryClick = (subcategoryId: string) => {
     setOpen(false);
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    // When trying to open
+    if (newOpen) {
+      // Don't open while loading
+      if (subcategoriesLoading) return;
+      
+      // If no subcategories, navigate to providers instead of opening popover
+      if (subcategories.length === 0) {
+        window.location.href = `/providers?category=${category.id}`;
+        return;
+      }
+    }
+    
+    // Otherwise, allow the popover to open/close normally
+    setOpen(newOpen);
+  };
+
   const cardContent = (
     <Card 
       className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
-      onClick={handleCardClick}
     >
       <CardContent className="p-8 text-center relative">
         {/* Enhanced background decorations */}
@@ -159,7 +162,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   }
 
   return (
-    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={setOpen}>
+    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
         <div>{cardContent}</div>
       </PopoverTrigger>
