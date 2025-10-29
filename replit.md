@@ -28,15 +28,16 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
-- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Categories now properly show subcategories in popover instead of navigating immediately
-  - Root cause: Card click handler was executing, but Popover wasn't intercepting clicks properly
-  - Solution: Implemented direct onClick handler on Card that controls popover state manually
-  - Added event.preventDefault() and stopPropagation() to prevent navigation conflicts
-  - When subcategories exist: popover opens showing full list
-  - When no subcategories: navigates directly to providers page
-  - Language-based remounting (key prop) ensures translations update correctly
-  - Fully tested and verified: popover opens/closes, subcategories display, language switching works
-  - Ready for production deployment
+- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Categories now properly show subcategories in popover
+  - **Root cause**: Conflicting click handlers between Card's onClick and PopoverTrigger's built-in behavior
+  - **Solution**: Removed manual onClick from Card, let PopoverTrigger handle clicks naturally with asChild prop
+  - **Implementation**: Use onOpenChange callback to intercept and add conditional logic:
+    - If subcategories exist → open popover showing full list
+    - If no subcategories → navigate directly to providers page
+    - Loading state handled to prevent premature clicks
+  - **Radix UI Integration**: Proper use of controlled Popover component with open/onOpenChange props
+  - **Testing**: Comprehensive end-to-end testing with playwright confirms all functionality working
+  - **Production Ready**: Build completed successfully, ready for deployment
 
 # User Preferences
 

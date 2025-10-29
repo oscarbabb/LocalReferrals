@@ -89,26 +89,29 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Don't do anything while loading
-    if (subcategoriesLoading) return;
-    
-    // If has subcategories, toggle popover
-    if (subcategories.length > 0) {
-      setOpen(!open);
+  const handleOpenChange = (newOpen: boolean) => {
+    // If trying to open the popover
+    if (newOpen) {
+      // Don't do anything while loading
+      if (subcategoriesLoading) return;
+      
+      // If has subcategories, allow opening
+      if (subcategories.length > 0) {
+        setOpen(true);
+      } else {
+        // Navigate to providers page if no subcategories
+        setOpen(false);
+        window.location.href = `/providers?category=${category.id}`;
+      }
     } else {
-      // Navigate to providers page if no subcategories
-      window.location.href = `/providers?category=${category.id}`;
+      // Allow closing
+      setOpen(false);
     }
   };
 
   const cardContent = (
     <Card 
       className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
-      onClick={handleCardClick}
     >
       <CardContent className="p-8 text-center relative">
         {/* Enhanced background decorations */}
@@ -162,12 +165,20 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   }
 
   return (
-    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={setOpen}>
+    <Popover 
+      key={`${category.id}-${language}`} 
+      open={open} 
+      onOpenChange={handleOpenChange}
+    >
       <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
-        <div>{cardContent}</div>
+        {cardContent}
       </PopoverTrigger>
       {subcategories.length > 0 && (
-        <PopoverContent className="w-80 p-0" side="bottom" align="center">
+        <PopoverContent 
+          className="w-80 p-0" 
+          side="bottom" 
+          align="center"
+        >
           <div className="p-4 border-b border-gray-100">
             <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <span>{t('components.serviceCard.subcategories')}:</span>
