@@ -95,16 +95,3 @@ export async function syncCategoriesToProduction() {
     };
   }
 }
-
-// Run the sync when this script is executed directly (NOT when imported)
-if (typeof require !== 'undefined' && require.main === module) {
-  syncCategoriesToProduction()
-    .then((result) => {
-      console.log('📋 Sync result:', result);
-      process.exit(result.success ? 0 : 1);
-    })
-    .catch((error) => {
-      console.error('💥 Fatal error:', error);
-      process.exit(1);
-    });
-}
