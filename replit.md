@@ -28,16 +28,17 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
-- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Categories now properly show subcategories in popover
-  - **Root cause**: Conflicting click handlers between Card's onClick and PopoverTrigger's built-in behavior
-  - **Solution**: Removed manual onClick from Card, let PopoverTrigger handle clicks naturally with asChild prop
-  - **Implementation**: Use onOpenChange callback to intercept and add conditional logic:
-    - If subcategories exist → open popover showing full list
-    - If no subcategories → navigate directly to providers page
-    - Loading state handled to prevent premature clicks
-  - **Radix UI Integration**: Proper use of controlled Popover component with open/onOpenChange props
-  - **Testing**: Comprehensive end-to-end testing with playwright confirms all functionality working
-  - **Production Ready**: Build completed successfully, ready for deployment
+- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Completely rewrote component with simple dropdown approach
+  - **Root cause**: Radix UI Popover component had inconsistent behavior between development and production environments
+  - **Solution**: Replaced Popover entirely with simple React state-based dropdown using basic div element
+  - **Implementation**:
+    - Simple onClick handler on Card component toggles dropdown visibility
+    - Dropdown appears as absolutely positioned div below the card
+    - Click-outside detection using useRef and useEffect to close dropdown
+    - No complex component interactions or asChild patterns
+  - **Benefits**: Works identically in both development and production, simpler code, no framework-specific quirks
+  - **Testing**: All automated playwright tests pass - dropdown opens/closes correctly, navigation works
+  - **Production Ready**: Fresh build completed (hash: BRN2ntYD), ready for deployment
 
 # User Preferences
 

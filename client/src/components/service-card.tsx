@@ -1,8 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
@@ -70,6 +69,7 @@ const getHoverColorForCategory = (categoryId: string): string => {
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
 
@@ -79,105 +79,98 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     enabled: showSubcategories,
   });
 
-  // Close popover when language changes to force re-render with new translations
+  // Close dropdown when language changes
   useEffect(() => {
     setOpen(false);
   }, [language]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [open]);
+
+  const handleCardClick = () => {
+    if (subcategoriesLoading) return;
+    
+    if (subcategories.length > 0) {
+      setOpen(!open);
+    } else {
+      window.location.href = `/providers?category=${category.id}`;
+    }
+  };
 
   const handleSubcategoryClick = (subcategoryId: string) => {
     setOpen(false);
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    // If trying to open the popover
-    if (newOpen) {
-      // Don't do anything while loading
-      if (subcategoriesLoading) return;
-      
-      // If has subcategories, allow opening
-      if (subcategories.length > 0) {
-        setOpen(true);
-      } else {
-        // Navigate to providers page if no subcategories
-        setOpen(false);
-        window.location.href = `/providers?category=${category.id}`;
-      }
-    } else {
-      // Allow closing
-      setOpen(false);
-    }
-  };
-
-  const cardContent = (
-    <Card 
-      className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
-    >
-      <CardContent className="p-8 text-center relative">
-        {/* Enhanced background decorations */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
-        <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-        
-        {/* Icon container with improved design */}
-        <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
-          {/* Shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
-        </div>
-        
-        {/* Content */}
-        <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-          {getCategoryLabel(category.slug || category.id, language, category.name)}
-        </h3>
-        <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
-          {getCategoryDescription(category.slug || category.id, language, category.description || undefined)}
-        </p>
-        
-        {/* Provider count badge and expand button */}
-        <div className="flex items-center justify-center gap-3">
-          <Badge 
-            variant="secondary" 
-            className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
-          >
-            {providerCount} {t('components.serviceCard.providers')}
-          </Badge>
-          {showSubcategories && subcategories.length > 0 ? (
-            <div className="flex items-center gap-2">
-              {open ? (
-                <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
-              ) : (
-                <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
-              )}
-            </div>
-          ) : (
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  // Always render with Popover wrapper when showSubcategories is enabled
-  // This ensures proper popover behavior even during loading
-  if (!showSubcategories) {
-    return cardContent;
-  }
-
   return (
-    <Popover 
-      key={`${category.id}-${language}`} 
-      open={open} 
-      onOpenChange={handleOpenChange}
-    >
-      <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
-        {cardContent}
-      </PopoverTrigger>
-      {subcategories.length > 0 && (
-        <PopoverContent 
-          className="w-80 p-0" 
-          side="bottom" 
-          align="center"
+    <div className="relative" ref={dropdownRef}>
+      <Card 
+        className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
+        onClick={handleCardClick}
+        data-testid={`category-card-${category.id}`}
+      >
+        <CardContent className="p-8 text-center relative">
+          {/* Enhanced background decorations */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-200/40 via-orange-100/30 to-transparent rounded-bl-full"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-200/30 via-blue-100/20 to-transparent rounded-tr-full"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-orange-100/10 to-blue-100/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          
+          {/* Icon container with improved design */}
+          <div className={`w-20 h-20 bg-gradient-to-br ${gradientClass} ${hoverGradientClass} rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-2xl group-hover:shadow-orange-500/25 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative overflow-hidden`}>
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <span className="text-4xl relative z-10 drop-shadow-sm" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{category.icon}</span>
+          </div>
+          
+          {/* Content */}
+          <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
+            {getCategoryLabel(category.slug || category.id, language, category.name)}
+          </h3>
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed min-h-[40px]">
+            {getCategoryDescription(category.slug || category.id, language, category.description || undefined)}
+          </p>
+          
+          {/* Provider count badge and expand button */}
+          <div className="flex items-center justify-center gap-3">
+            <Badge 
+              variant="secondary" 
+              className="text-xs bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200 group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-300 px-3 py-1"
+            >
+              {providerCount} {t('components.serviceCard.providers')}
+            </Badge>
+            {showSubcategories && subcategories.length > 0 ? (
+              <div className="flex items-center gap-2">
+                {open ? (
+                  <ChevronUp className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
+                ) : (
+                  <ChevronDown className="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-all duration-300 drop-shadow-sm" />
+                )}
+              </div>
+            ) : (
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-2 transition-all duration-500" />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Simple dropdown menu - appears below card */}
+      {showSubcategories && open && subcategories.length > 0 && (
+        <div 
+          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+          data-testid={`subcategory-dropdown-${category.id}`}
         >
           <div className="p-4 border-b border-gray-100">
             <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -194,7 +187,10 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
                   key={subcategory.id}
                   className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
                   data-testid={`subcategory-${subcategory.id}`}
-                  onClick={() => handleSubcategoryClick(subcategory.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSubcategoryClick(subcategory.id);
+                  }}
                 >
                   <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
                     {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
@@ -204,8 +200,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
               ))}
             </div>
           </div>
-        </PopoverContent>
+        </div>
       )}
-    </Popover>
+    </div>
   );
 }
