@@ -11,15 +11,17 @@ export async function autoSeedFromCSV() {
   try {
     console.log('🌱 Checking if database needs seeding...');
     
-    // Check current category count
+    // Check current category and subcategory count
     const existingCategories = await db.select().from(serviceCategories);
+    const existingSubcategories = await db.select().from(serviceSubcategories);
     const categoryCount = existingCategories.length;
+    const subcategoryCount = existingSubcategories.length;
     
-    console.log(`📊 Found ${categoryCount} existing categories in database`);
+    console.log(`📊 Found ${categoryCount} existing categories and ${subcategoryCount} existing subcategories in database`);
     
-    // If we already have comprehensive categories (50+), skip seeding
-    if (categoryCount >= 50) {
-      console.log('✅ Database already has comprehensive categories, skipping auto-seed');
+    // If we already have comprehensive categories AND subcategories, skip seeding
+    if (categoryCount >= 50 && subcategoryCount >= 400) {
+      console.log('✅ Database already has comprehensive categories and subcategories, skipping auto-seed');
       return { success: true, skipped: true, reason: 'Already seeded' };
     }
     
@@ -114,27 +116,31 @@ export async function autoSeedFromCSV() {
         .where(eq(serviceCategories.name, categoryName))
         .limit(1);
       
+      let category;
+      let categorySlug;
+      
       if (existing.length > 0) {
-        console.log(`⏭️  Category already exists: ${categoryName}`);
-        continue;
+        console.log(`⏭️  Category already exists: ${categoryName}, adding missing subcategories`);
+        category = existing[0];
+        categorySlug = category.slug || generateSlug(categoryName);
+      } else {
+        // Insert category
+        const categoryIcon = categoryIcons[categoryName] || '🔧';
+        categorySlug = generateSlug(categoryName);
+        const categoryResult = await db.insert(serviceCategories).values({
+          slug: categorySlug,
+          name: categoryName,
+          description: `Servicios profesionales de ${categoryName.toLowerCase()}`,
+          icon: categoryIcon,
+          color: 'blue'
+        }).returning();
+
+        category = categoryResult[0];
+        importedCategories++;
+        console.log(`✅ Imported category: ${categoryName}`);
       }
 
-      // Insert category
-      const categoryIcon = categoryIcons[categoryName] || '🔧';
-      const categorySlug = generateSlug(categoryName);
-      const categoryResult = await db.insert(serviceCategories).values({
-        slug: categorySlug,
-        name: categoryName,
-        description: `Servicios profesionales de ${categoryName.toLowerCase()}`,
-        icon: categoryIcon,
-        color: 'blue'
-      }).returning();
-
-      const category = categoryResult[0];
-      importedCategories++;
-      console.log(`✅ Imported category: ${categoryName}`);
-
-      // Insert subcategories
+      // Insert subcategories (for both new and existing categories)
       for (let j = 1; j < Math.min(row.length, 26); j++) {
         const subcategoryName = row[j]?.trim();
         if (subcategoryName && subcategoryName !== '') {
