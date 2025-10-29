@@ -612,3 +612,97 @@ export async function sendServiceRequestNotificationEmail(
     html
   });
 }
+
+/**
+ * Send service completion feedback request email
+ * Sent to customer when provider marks service as completed
+ */
+export async function sendServiceCompletionFeedbackEmail(
+  customerEmail: string,
+  customerName: string,
+  providerName: string,
+  serviceName: string,
+  serviceRequestId: string
+): Promise<boolean> {
+  const appUrl = process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : 'https://www.referenciaslocales.com.mx';
+    
+  const reviewUrl = `${appUrl}/bookings`;
+  const subject = "✅ Servicio Completado - ¡Tu Opinión es Importante!";
+  
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      ${getEmailHeader()}
+      
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; text-align: center; line-height: 70px;">
+            <span style="font-size: 28px;">✅</span>
+          </div>
+          <h2 style="color: #333; font-size: 26px; margin: 0; font-weight: 600;">¡Servicio Completado!</h2>
+        </div>
+        
+        <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 25px; text-align: center;">
+          ¡Hola <strong>${customerName}</strong>! El proveedor <strong>${providerName}</strong> ha marcado tu servicio como completado.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff7ed 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <h3 style="color: ${BRAND_BLUE}; font-size: 18px; margin: 0 0 20px; text-align: center;">Servicio Completado</h3>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Proveedor</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${providerName}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 5px; color: #999; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Servicio</p>
+              <p style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${serviceName}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid ${BRAND_ORANGE};">
+          <p style="margin: 0 0 10px; color: #92400e; font-size: 16px; line-height: 1.6; font-weight: 600;">
+            ⭐ Tu opinión es muy valiosa
+          </p>
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            Ayúdanos a mantener la calidad de nuestra comunidad compartiendo tu experiencia con este servicio. Tu reseña ayuda a otros usuarios a tomar mejores decisiones.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${reviewUrl}" 
+             style="background: linear-gradient(135deg, ${BRAND_BLUE}, ${BRAND_ORANGE}); 
+                    color: white; 
+                    padding: 16px 40px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    display: inline-block; 
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(244, 114, 46, 0.3);">
+            Dejar Mi Reseña ⭐
+          </a>
+        </div>
+        
+        <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.6;">
+            💡 <strong>Consejo:</strong> Las reseñas honestas y detalladas son las más útiles para la comunidad
+          </p>
+        </div>
+        
+        ${getEmailFooter()}
+      </div>
+    </div>
+  `;
+  
+  const text = `¡Hola ${customerName}! El proveedor ${providerName} ha completado tu servicio: ${serviceName}. Tu opinión es muy importante para nosotros. Por favor, tómate un momento para dejar una reseña y ayudar a otros miembros de la comunidad. Visita ${reviewUrl} para compartir tu experiencia. ¡Gracias!`;
+
+  return await sendEmail({
+    to: customerEmail,
+    from: FROM_EMAIL,
+    subject,
+    text,
+    html
+  });
+}

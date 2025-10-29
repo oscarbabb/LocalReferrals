@@ -27,7 +27,7 @@ import {
   insertMenuItemSchema,
   insertMenuItemVariationSchema
 } from "@shared/schema";
-import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail, sendPasswordResetEmail, sendServiceRequestNotificationEmail, sendReviewNotificationEmail } from "./email.js";
+import { sendProfileConfirmationEmail, sendBookingConfirmationEmail, sendBookingNotificationEmail, sendPasswordResetEmail, sendServiceRequestNotificationEmail, sendReviewNotificationEmail, sendServiceCompletionFeedbackEmail } from "./email.js";
 import { sendWelcomeWhatsApp, sendBookingConfirmationWhatsApp, sendBookingNotificationWhatsApp } from "./whatsapp.js";
 import bcrypt from "bcrypt";
 
@@ -1729,6 +1729,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (emailError) {
           console.error("❌ Failed to send service request confirmation emails:", emailError);
+          // Don't fail service request update if email fails
+        }
+      }
+      
+      // Send feedback request email when status changes to "completed"
+      if (validatedData.status === "completed") {
+        try {
+          // Get user and provider details for feedback email
+          const user = await storage.getUser(updatedRequest.requesterId);
+          const provider = await storage.getProvider(updatedRequest.providerId);
+          
+          if (user && provider) {
+            // Send feedback request to customer
+            await sendServiceCompletionFeedbackEmail(
+              user.email,
+              user.fullName,
+              provider.title,
+              updatedRequest.title || 'Servicio completado',
+              updatedRequest.id
+            );
+            
+            console.log(`✅ Service completion feedback email sent for request ${updatedRequest.id}`);
+          }
+        } catch (emailError) {
+          console.error("❌ Failed to send service completion feedback email:", emailError);
           // Don't fail service request update if email fails
         }
       }
