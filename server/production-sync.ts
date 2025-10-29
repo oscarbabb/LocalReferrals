@@ -95,3 +95,16 @@ export async function syncCategoriesToProduction() {
     };
   }
 }
+
+// Run the sync when this script is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  syncCategoriesToProduction()
+    .then((result) => {
+      console.log('📋 Sync result:', result);
+      process.exit(result.success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('💥 Fatal error:', error);
+      process.exit(1);
+    });
+}
