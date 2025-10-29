@@ -624,11 +624,12 @@ export async function sendServiceCompletionFeedbackEmail(
   serviceName: string,
   serviceRequestId: string
 ): Promise<boolean> {
+  // Construct absolute URL for email links (required by email clients)
   const appUrl = process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN 
     ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
     : 'https://www.referenciaslocales.com.mx';
     
-  const reviewUrl = `${appUrl}/bookings`;
+  const reviewUrl = `${appUrl}/bookings`; // Absolute URL for CTA button
   const subject = "✅ Servicio Completado - ¡Tu Opinión es Importante!";
   
   const html = `
