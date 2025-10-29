@@ -89,26 +89,26 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    // When trying to open
-    if (newOpen) {
-      // Don't open while loading
-      if (subcategoriesLoading) return;
-      
-      // If no subcategories, navigate to providers instead of opening popover
-      if (subcategories.length === 0) {
-        window.location.href = `/providers?category=${category.id}`;
-        return;
-      }
-    }
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-    // Otherwise, allow the popover to open/close normally
-    setOpen(newOpen);
+    // Don't do anything while loading
+    if (subcategoriesLoading) return;
+    
+    // If has subcategories, toggle popover
+    if (subcategories.length > 0) {
+      setOpen(!open);
+    } else {
+      // Navigate to providers page if no subcategories
+      window.location.href = `/providers?category=${category.id}`;
+    }
   };
 
   const cardContent = (
     <Card 
       className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
+      onClick={handleCardClick}
     >
       <CardContent className="p-8 text-center relative">
         {/* Enhanced background decorations */}
@@ -162,9 +162,9 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   }
 
   return (
-    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={handleOpenChange}>
+    <Popover key={`${category.id}-${language}`} open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild data-testid={`popover-trigger-${category.id}`}>
-        <div>{cardContent}</div>
+        <div onClick={(e) => e.stopPropagation()}>{cardContent}</div>
       </PopoverTrigger>
       {subcategories.length > 0 && (
         <PopoverContent className="w-80 p-0" side="bottom" align="center">

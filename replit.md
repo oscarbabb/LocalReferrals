@@ -28,12 +28,15 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
-- **Fixed critical subcategory display bug on Services page** - Categories now properly show subcategories in popover instead of navigating immediately
-  - Removed competing onClick handler from Card component that was preventing popover from opening
-  - Implemented handleOpenChange to intercept popover events and decide between opening popover or navigating
-  - Added language-based remounting (key prop) to force fresh translations when language switches
-  - Subcategories now display correctly in popover; clicking a subcategory then navigates to providers page
-  - Complete fix tested and verified: popover opens/closes correctly, translations update on language switch
+- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Categories now properly show subcategories in popover instead of navigating immediately
+  - Root cause: Card click handler was executing, but Popover wasn't intercepting clicks properly
+  - Solution: Implemented direct onClick handler on Card that controls popover state manually
+  - Added event.preventDefault() and stopPropagation() to prevent navigation conflicts
+  - When subcategories exist: popover opens showing full list
+  - When no subcategories: navigates directly to providers page
+  - Language-based remounting (key prop) ensures translations update correctly
+  - Fully tested and verified: popover opens/closes, subcategories display, language switching works
+  - Ready for production deployment
 
 # User Preferences
 
