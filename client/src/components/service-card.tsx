@@ -182,7 +182,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     <>
       <div className="relative" ref={cardRef}>
         <Card 
-          className={`group h-full cursor-pointer ${!open ? 'card-animate hover-lift hover-shine' : ''} border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm`}
+          className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
           onClick={handleCardClick}
           data-testid={`category-card-${category.id}`}
         >

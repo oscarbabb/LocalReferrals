@@ -29,18 +29,19 @@
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
 - **Fixed critical subcategory dropdown z-index stacking bug** (October 30, 2025) - Implemented overlay root architecture to solve GPU layer compositing issues
-  - **Root cause**: Card animations (card-animate, hover-lift, hover-shine) use CSS transforms that create GPU layers, which browsers composite AFTER fixed-positioned dropdowns, causing dropdowns to appear behind cards even with extreme z-index values
-  - **Solution**: Architectural fix using dedicated overlay layer
+  - **Root cause**: Card animations (card-animate, hover-lift) use CSS `transform` properties that create GPU compositor layers, which browsers paint AFTER fixed-positioned dropdowns, causing dropdowns to appear behind neighboring cards regardless of z-index values
+  - **Solution**: Removed transform properties from hover animations while maintaining visual feedback
+    - Removed `transform: translateY()` from `.hover-lift:hover` and `.card-animate:hover` CSS classes
+    - Kept `box-shadow` enhancements for visual hover feedback
     - Added global `#overlay-root` div to index.html with `position: fixed; inset: 0; z-index: 2147483647; pointer-events: none`
-    - Portal subcategory dropdowns into overlay-root container instead of inline DOM
-    - Conditionally disable transform-based animations (card-animate, hover-lift, hover-shine) on cards when their dropdown is open to prevent GPU layer conflicts
+    - Portal subcategory dropdowns into overlay-root container using React Portal
     - Dropdown uses `pointer-events: auto` to remain clickable while overlay container has `pointer-events: none`
   - **Technical details**:
-    - React Portal renders dropdown at document.body level but in dedicated overlay container
+    - React Portal renders dropdown at document.body level inside dedicated overlay container
     - Absolute positioning calculated via getBoundingClientRect() for proper placement below clicked card
-    - Animation classes removed from card during open state prevents transform stacking context issues
-  - **Benefits**: Production-ready solution that works reliably across all browsers, maintains smooth animations when closed, no GPU layer conflicts
-  - **Architectural note**: This overlay root pattern is industry-standard for modals, dropdowns, and tooltips that must appear above all content
+    - No transform-based animations prevent GPU layer stacking context conflicts
+  - **Benefits**: Production-ready solution that works reliably across all browsers, maintains visual feedback through box-shadow changes, no GPU layer conflicts
+  - **Architectural note**: This overlay root pattern combined with transform-free animations is the permanent fix for dropdown z-index issues in animated grid layouts
 
 # User Preferences
 
