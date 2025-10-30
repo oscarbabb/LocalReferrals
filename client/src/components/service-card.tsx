@@ -116,7 +116,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   };
 
   return (
-    <div className="relative" style={{ isolation: 'isolate' }} ref={dropdownRef}>
+    <div className={`relative ${open ? 'z-[100]' : 'z-0'}`} ref={dropdownRef}>
       <Card 
         className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
         onClick={handleCardClick}
@@ -166,11 +166,10 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
         </CardContent>
       </Card>
 
-      {/* Dropdown menu - using isolation to fix z-index stacking */}
+      {/* Dropdown menu */}
       {showSubcategories && open && subcategories.length > 0 && (
         <div 
-          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
-          style={{ isolation: 'isolate' }}
+          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-[110] animate-in fade-in slide-in-from-top-2 duration-200"
           data-testid={`subcategory-dropdown-${category.id}`}
         >
           <div className="p-4 border-b border-gray-100">
