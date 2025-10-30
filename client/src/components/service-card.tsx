@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ServiceCategory, ServiceSubcategory } from "@shared/schema";
 import { useLanguage } from "@/hooks/use-language";
@@ -70,9 +70,6 @@ const getHoverColorForCategory = (categoryId: string): string => {
 export default function ServiceCard({ category, providerCount = 0, showSubcategories = true }: ServiceCardProps) {
   const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const gradientClass = getColorForCategory(category.id);
   const hoverGradientClass = getHoverColorForCategory(category.id);
 
@@ -82,62 +79,10 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     enabled: showSubcategories,
   });
 
-  // Update dropdown position on scroll and resize
-  const updateDropdownPosition = () => {
-    if (open && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      });
-    }
-  };
-
-  // Update position when opened
-  useEffect(() => {
-    if (open) {
-      updateDropdownPosition();
-    }
-  }, [open]);
-
-  // Update position on scroll and resize
-  useEffect(() => {
-    if (open) {
-      window.addEventListener('scroll', updateDropdownPosition, true);
-      window.addEventListener('resize', updateDropdownPosition);
-      return () => {
-        window.removeEventListener('scroll', updateDropdownPosition, true);
-        window.removeEventListener('resize', updateDropdownPosition);
-      };
-    }
-  }, [open]);
-
-  // Close dropdown when language changes
+  // Close popover when language changes
   useEffect(() => {
     setOpen(false);
   }, [language]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        cardRef.current && 
-        !cardRef.current.contains(event.target as Node) &&
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [open]);
 
   const handleCardClick = () => {
     if (subcategoriesLoading) return;
@@ -154,52 +99,9 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     window.location.href = `/providers?category=${category.id}&subcategory=${subcategoryId}`;
   };
 
-  const dropdown = showSubcategories && open && subcategories.length > 0 && (
-    <div 
-      ref={dropdownRef}
-      className="fixed bg-white rounded-lg shadow-2xl border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200"
-      style={{
-        top: `${dropdownPosition.top}px`,
-        left: `${dropdownPosition.left}px`,
-        width: `${dropdownPosition.width}px`,
-        zIndex: 9999,
-      }}
-      data-testid={`subcategory-dropdown-${category.id}`}
-    >
-      <div className="p-4 border-b border-gray-100">
-        <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-          <span>{t('components.serviceCard.subcategories')}:</span>
-          <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
-            {subcategories.length}
-          </Badge>
-        </h4>
-      </div>
-      <div className="max-h-[300px] overflow-y-auto p-2">
-        <div className="grid grid-cols-1 gap-1">
-          {subcategories.map((subcategory) => (
-            <div 
-              key={subcategory.id}
-              className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
-              data-testid={`subcategory-${subcategory.id}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSubcategoryClick(subcategory.id);
-              }}
-            >
-              <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
-                {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
-              </span>
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <>
-      <div className="relative" ref={cardRef}>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Card 
           className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative"
           onClick={handleCardClick}
@@ -247,9 +149,45 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
           </div>
         </CardContent>
       </Card>
-      </div>
-      
-      {dropdown && createPortal(dropdown, document.body)}
-    </>
+      </PopoverTrigger>
+
+      {showSubcategories && subcategories.length > 0 && (
+        <PopoverContent 
+          className="w-full p-0 bg-white rounded-lg shadow-2xl border border-gray-200"
+          align="start"
+          sideOffset={8}
+          data-testid={`subcategory-dropdown-${category.id}`}
+        >
+          <div className="p-4 border-b border-gray-100">
+            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <span>{t('components.serviceCard.subcategories')}:</span>
+              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
+                {subcategories.length}
+              </Badge>
+            </h4>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto p-2">
+            <div className="grid grid-cols-1 gap-1">
+              {subcategories.map((subcategory) => (
+                <div 
+                  key={subcategory.id}
+                  className="flex items-center justify-between p-3 rounded-md hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-orange-200"
+                  data-testid={`subcategory-${subcategory.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSubcategoryClick(subcategory.id);
+                  }}
+                >
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
+                    {getSubcategoryLabel(subcategory.slug || subcategory.id, language, subcategory.name)}
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      )}
+    </Popover>
   );
 }
