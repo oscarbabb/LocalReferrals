@@ -82,12 +82,22 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     enabled: showSubcategories,
   });
 
-  // Update dropdown position when opened
+  // Update dropdown position when opened with adaptive positioning
   useEffect(() => {
     if (open && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const dropdownEstimatedHeight = 350; // Max height with padding
+      
+      // Calculate available space above and below
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // Decide whether to show above or below
+      const showAbove = spaceBelow < dropdownEstimatedHeight && spaceAbove > spaceBelow;
+      
       setDropdownPosition({
-        top: rect.bottom + 8,
+        top: showAbove ? rect.top - dropdownEstimatedHeight - 8 : rect.bottom + 8,
         left: rect.left,
         width: rect.width
       });
