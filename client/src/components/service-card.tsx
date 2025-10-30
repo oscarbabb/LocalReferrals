@@ -138,11 +138,12 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const dropdown = showSubcategories && open && subcategories.length > 0 && (
     <div 
       ref={dropdownRef}
-      className="fixed bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute bg-white rounded-lg shadow-2xl border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
         width: `${dropdownPosition.width}px`,
+        pointerEvents: 'auto',
       }}
       data-testid={`subcategory-dropdown-${category.id}`}
     >
@@ -181,7 +182,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     <>
       <div className="relative" ref={cardRef}>
         <Card 
-          className="group h-full cursor-pointer card-animate hover-lift hover-shine border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm"
+          className={`group h-full cursor-pointer ${!open ? 'card-animate hover-lift hover-shine' : ''} border-0 shadow-lg bg-gradient-to-br from-white via-orange-50/30 to-blue-50/30 overflow-visible relative backdrop-blur-sm`}
           onClick={handleCardClick}
           data-testid={`category-card-${category.id}`}
         >
@@ -230,7 +231,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
       </Card>
       </div>
       
-      {dropdown && createPortal(dropdown, document.body)}
+      {dropdown && createPortal(dropdown, document.getElementById('overlay-root')!)}
     </>
   );
 }

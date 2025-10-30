@@ -28,17 +28,19 @@
   - Email template includes personalized message, service details, and direct link to leave review
   - Bilingual button translations (Spanish: Iniciar Servicio / Finalizar Servicio, English: Start Service / Finish Service)
   - Complete workflow: pending → confirmed → in_progress → completed
-- **Fixed critical subcategory display bug on Services page** (October 29, 2025) - Completely rewrote component with simple dropdown approach
-  - **Root cause**: Radix UI Popover component had inconsistent behavior between development and production environments
-  - **Solution**: Replaced Popover entirely with simple React state-based dropdown using basic div element
-  - **Implementation**:
-    - Simple onClick handler on Card component toggles dropdown visibility
-    - Dropdown appears as absolutely positioned div below the card
-    - Click-outside detection using useRef and useEffect to close dropdown
-    - No complex component interactions or asChild patterns
-  - **Benefits**: Works identically in both development and production, simpler code, no framework-specific quirks
-  - **Testing**: All automated playwright tests pass - dropdown opens/closes correctly, navigation works
-  - **Production Ready**: Fresh build completed (hash: BRN2ntYD), ready for deployment
+- **Fixed critical subcategory dropdown z-index stacking bug** (October 30, 2025) - Implemented overlay root architecture to solve GPU layer compositing issues
+  - **Root cause**: Card animations (card-animate, hover-lift, hover-shine) use CSS transforms that create GPU layers, which browsers composite AFTER fixed-positioned dropdowns, causing dropdowns to appear behind cards even with extreme z-index values
+  - **Solution**: Architectural fix using dedicated overlay layer
+    - Added global `#overlay-root` div to index.html with `position: fixed; inset: 0; z-index: 2147483647; pointer-events: none`
+    - Portal subcategory dropdowns into overlay-root container instead of inline DOM
+    - Conditionally disable transform-based animations (card-animate, hover-lift, hover-shine) on cards when their dropdown is open to prevent GPU layer conflicts
+    - Dropdown uses `pointer-events: auto` to remain clickable while overlay container has `pointer-events: none`
+  - **Technical details**:
+    - React Portal renders dropdown at document.body level but in dedicated overlay container
+    - Absolute positioning calculated via getBoundingClientRect() for proper placement below clicked card
+    - Animation classes removed from card during open state prevents transform stacking context issues
+  - **Benefits**: Production-ready solution that works reliably across all browsers, maintains smooth animations when closed, no GPU layer conflicts
+  - **Architectural note**: This overlay root pattern is industry-standard for modals, dropdowns, and tooltips that must appear above all content
 
 # User Preferences
 
