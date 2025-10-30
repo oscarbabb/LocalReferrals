@@ -87,8 +87,8 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
     if (open && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 8,
+        left: rect.left,
         width: rect.width
       });
     }
@@ -138,7 +138,7 @@ export default function ServiceCard({ category, providerCount = 0, showSubcatego
   const dropdown = showSubcategories && open && subcategories.length > 0 && (
     <div 
       ref={dropdownRef}
-      className="absolute bg-white rounded-lg shadow-2xl border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200"
+      className="fixed bg-white rounded-lg shadow-2xl border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
